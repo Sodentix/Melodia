@@ -3,6 +3,7 @@ const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
 const connectDB = require('./config/database');
+const authRoutes = require('./routes/authRoutes');
 
 // Connect to MongoDB
 connectDB();
@@ -26,6 +27,9 @@ app.use(
 	})
 );
 app.use(express.json());
+
+// Routes
+app.use('/auth', authRoutes);
 
 
 const PORT = Number(process.env.PORT) || 3000;
