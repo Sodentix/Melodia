@@ -23,6 +23,24 @@ const router = createRouter({
       component: () => import('@/views/ProfileView.vue'),
     }
   ],
+
+  scrollBehavior(to, from, savedPosition) {
+    // Wenn es eine gespeicherte Position gibt (z. B. beim "Zurück"-Button)
+    if (savedPosition) {
+      return savedPosition
+    }
+
+    // Wenn ein Hash wie #features in der URL ist
+    if (to.hash) {
+      return {
+        el: to.hash,        // scrollt zum Element mit dieser ID
+        behavior: 'smooth', 
+      }
+    }
+
+    // Standard: immer nach oben scrollen
+    return { top: 0, behavior: 'smooth' }
+  },
 })
 
 export default router
