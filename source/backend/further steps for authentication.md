@@ -18,12 +18,12 @@ This document outlines the remaining tasks to complete a robust authentication s
 
 Create comprehensive user management endpoints:
 
-- **GET** `/api/users/profile` - Get current user profile
-- **PUT** `/api/users/profile` - Update user profile
-- **PUT** `/api/users/change-password` - Change password
-- **PUT** `/api/users/change-email` - Change email (with verification)
-- **DELETE** `/api/users/account` - Delete user account
-- **GET** `/api/users/stats` - Get user statistics (games played, scores, etc.)
+- **GET** `/users/profile` - Get current user profile
+- **PUT** `/users/profile` - Update user profile
+- **PUT** `/users/change-password` - Change password
+- **PUT** `/users/change-email` - Change email (with verification)
+- **DELETE** `/users/account` - Delete user account
+- **GET** `/users/stats` - Get user statistics (games played, scores, etc.)
 
 **Implementation Notes:**
 - Add proper validation for profile updates
