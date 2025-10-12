@@ -5,6 +5,7 @@ const crypto = require('crypto');
 const User = require('../models/User');
 const { generateVerificationToken, sendVerificationEmail } = require('../services/emailService');
 const auth = require('../middleware/auth');
+const loginSecurity = require('../services/loginSecurity');
 
 const router = express.Router();
 
@@ -171,17 +172,34 @@ router.post('/login', async (req, res) => {
     const email = sanitizeEmail(req.body.email);
     const password = typeof req.body.password === 'string' ? req.body.password : '';
 
+    const identifier = email || req.ip;
+
+    if (loginSecurity.isBlocked(identifier)) {
+      const blockedUntil = loginSecurity.getBlockExpiresAt(identifier);
+      const retryAfterSeconds = blockedUntil
+        ? Math.ceil((blockedUntil - Date.now()) / 1000)
+        : undefined;
+
+      res.set('Retry-After', retryAfterSeconds || '60');
+      return res.status(429).json({
+        message: 'Too many login attempts. Please try again later.',
+      });
+    }
+
     if (!email || !password) {
+      loginSecurity.recordFailedAttempt(identifier);
       return res.status(400).json({ message: 'Email and password are required.' });
     }
 
     const user = await User.findOne({ email });
     if (!user) {
+      loginSecurity.recordFailedAttempt(identifier);
       return res.status(401).json({ message: 'Invalid credentials.' });
     }
 
     const validPassword = await verifyPasswordWithSalt(password, user.salt, user.passwordHash);
     if (!validPassword) {
+      loginSecurity.recordFailedAttempt(identifier);
       return res.status(401).json({ message: 'Invalid credentials.' });
     }
 
@@ -193,6 +211,7 @@ router.post('/login', async (req, res) => {
     }
 
     const token = createToken(user);
+    loginSecurity.resetAttempts(identifier);
     return res.json({
       token,
       user: formatUser(user),
