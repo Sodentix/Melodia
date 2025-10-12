@@ -137,6 +137,8 @@ const handleRegister = async () => {
     password: registerForm.password,
   }
 
+  console.log('Register payload:', payload)
+
   const missing = Object.entries(payload)
     .filter(([_, value]) => !value)
     .map(([key]) => key)

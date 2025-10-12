@@ -25,6 +25,17 @@ const userSchema = new mongoose.Schema(
       match: /^[a-z0-9_.-]+$/,
       index: true,
     },
+    usernameLower: {
+      type: String,
+      required: true,
+      unique: true,
+      lowercase: true,
+      trim: true,
+      minlength: 3,
+      maxlength: 30,
+      match: /^[a-z0-9_.-]+$/,
+      index: true,
+    },
     email: {
       type: String,
       required: true,
@@ -65,6 +76,15 @@ const userSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
+
+userSchema.pre('validate', function ensureUsernameLower(next) {
+  if (typeof this.username === 'string' && this.username.trim()) {
+    const normalized = this.username.trim().toLowerCase();
+    this.username = normalized;
+    this.usernameLower = normalized;
+  }
+  next();
+});
 
 module.exports = mongoose.model('User', userSchema);
 

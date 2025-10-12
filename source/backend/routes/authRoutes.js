@@ -145,6 +145,7 @@ router.post('/signup', async (req, res) => {
       firstName,
       lastName,
       username: usernameInput,
+      usernameLower: usernameInput,
       email,
       passwordHash,
       salt,
