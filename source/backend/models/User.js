@@ -40,6 +40,16 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    passwordHistory: {
+      type: [
+        {
+          passwordHash: { type: String, required: true },
+          salt: { type: String, required: true },
+          changedAt: { type: Date, default: Date.now },
+        },
+      ],
+      default: [],
+    },
     emailVerified: {
       type: Boolean,
       default: false,

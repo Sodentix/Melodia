@@ -4,10 +4,15 @@ const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
 const User = require('../models/User');
 const { generateVerificationToken, sendVerificationEmail } = require('../services/emailService');
+const auth = require('../middleware/auth');
 
 const router = express.Router();
 
 const USERNAME_PATTERN = /^[a-z0-9_.-]+$/;
+const PASSWORD_HISTORY_LIMIT = Math.max(
+  Number(process.env.PASSWORD_HISTORY_LIMIT || 5),
+  0
+);
 
 function sanitizeName(value) {
   if (typeof value !== 'string') {
@@ -195,6 +200,92 @@ router.post('/login', async (req, res) => {
   } catch (error) {
     console.error('Login error:', error);
     return res.status(500).json({ message: 'Login failed.' });
+  }
+});
+
+router.put('/change-password', auth(true, true), async (req, res) => {
+  try {
+    const currentPassword = typeof req.body.currentPassword === 'string' ? req.body.currentPassword : '';
+    const newPassword = typeof req.body.newPassword === 'string' ? req.body.newPassword : '';
+
+    if (!currentPassword || !newPassword) {
+      return res
+        .status(400)
+        .json({ message: 'Current password and new password are required.' });
+    }
+
+    if (currentPassword === newPassword) {
+      return res
+        .status(400)
+        .json({ message: 'New password must be different from the current password.' });
+    }
+
+    const user = await User.findById(req.user.id);
+    if (!user) {
+      return res.status(404).json({ message: 'User not found.' });
+    }
+
+    const currentPasswordValid = await verifyPasswordWithSalt(
+      currentPassword,
+      user.salt,
+      user.passwordHash
+    );
+    if (!currentPasswordValid) {
+      return res.status(401).json({ message: 'Current password is incorrect.' });
+    }
+
+    const passwordValidation = validatePassword(newPassword);
+    if (!passwordValidation.isValid) {
+      return res.status(400).json({
+        message: 'Password does not meet the security requirements.',
+        errors: passwordValidation.errors,
+      });
+    }
+
+    const reusesCurrentPassword = await verifyPasswordWithSalt(
+      newPassword,
+      user.salt,
+      user.passwordHash
+    );
+    if (reusesCurrentPassword) {
+      return res.status(400).json({ message: 'You cannot reuse a recent password.' });
+    }
+
+    for (const entry of user.passwordHistory) {
+      const matchesHistoricalPassword = await verifyPasswordWithSalt(
+        newPassword,
+        entry.salt,
+        entry.passwordHash
+      );
+      if (matchesHistoricalPassword) {
+        return res.status(400).json({ message: 'You cannot reuse a recent password.' });
+      }
+    }
+
+    if (PASSWORD_HISTORY_LIMIT > 0) {
+      user.passwordHistory.unshift({
+        passwordHash: user.passwordHash,
+        salt: user.salt,
+        changedAt: new Date(),
+      });
+
+      if (user.passwordHistory.length > PASSWORD_HISTORY_LIMIT) {
+        user.passwordHistory = user.passwordHistory.slice(0, PASSWORD_HISTORY_LIMIT);
+      }
+    }
+
+    const newSalt = generateSalt();
+    const newHash = await hashPasswordWithSalt(newPassword, newSalt);
+
+    user.salt = newSalt;
+    user.passwordHash = newHash;
+
+    await user.save();
+
+    return res.json({ message: 'Password updated successfully.' });
+  } catch (error) {
+    console.error('Change password error:', error);
+    return res.status(500).json({ message: 'Failed to change password.' });
   }
 });
 
