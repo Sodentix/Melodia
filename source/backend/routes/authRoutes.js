@@ -10,39 +10,61 @@ const loginSecurity = require('../services/loginSecurity');
 const router = express.Router();
 
 const USERNAME_PATTERN = /^[a-z0-9_.-]+$/;
-const PASSWORD_HISTORY_LIMIT = Math.max(
-  Number(process.env.PASSWORD_HISTORY_LIMIT || 5),
-  0
-);
 
-function sanitizeName(value) {
+const CONTROL_CHAR_REGEX = /[\u0000-\u001F\u007F]/g;
+const INVISIBLE_CHAR_REGEX = /[\u200B-\u200D\uFEFF]/g;
+const SCRIPT_CONTENT_REGEX = /<\s*script[^>]*>[\s\S]*?<\s*\/\s*script\s*>/gi;
+const HTML_TAG_REGEX = /<[^>]+>/g;
+const MALICIOUS_PROTOCOL_REGEX =
+  /\b(?:javascript|vbscript|data:(?:text|application)\/(?:html|javascript))[^\s]*/gi;
+
+function sanitizeText(value, { toLowerCase = false } = {}) {
   if (typeof value !== 'string') {
     return '';
   }
-  return value.trim();
+
+  let sanitized = value;
+  try {
+    sanitized = sanitized.normalize('NFKC');
+  } catch (error) {
+    // Fallback to original string if normalization fails.
+  }
+  sanitized = sanitized.replace(CONTROL_CHAR_REGEX, '');
+  sanitized = sanitized.replace(INVISIBLE_CHAR_REGEX, '');
+  sanitized = sanitized.replace(SCRIPT_CONTENT_REGEX, '');
+  sanitized = sanitized.replace(HTML_TAG_REGEX, '');
+  sanitized = sanitized.replace(MALICIOUS_PROTOCOL_REGEX, '');
+  sanitized = sanitized.trim();
+
+  return toLowerCase ? sanitized.toLowerCase() : sanitized;
+}
+
+function sanitizeName(value) {
+  return sanitizeText(value);
 }
 
 function sanitizeEmail(value) {
-  if (typeof value !== 'string') {
-    return '';
-  }
-  return value.trim().toLowerCase();
+  return sanitizeText(value, { toLowerCase: true });
 }
 
 function sanitizeUsername(value) {
+  return sanitizeText(value, { toLowerCase: true });
+}
+
+function sanitizeForOutput(value) {
   if (typeof value !== 'string') {
-    return '';
+    return value;
   }
-  return value.trim().toLowerCase();
+  return sanitizeText(value);
 }
 
 function formatUser(user) {
   return {
     id: user.id,
-    email: user.email,
-    username: user.username,
-    firstName: user.firstName,
-    lastName: user.lastName,
+    email: sanitizeForOutput(user.email),
+    username: sanitizeForOutput(user.username),
+    firstName: sanitizeForOutput(user.firstName),
+    lastName: sanitizeForOutput(user.lastName),
     emailVerified: user.emailVerified,
     createdAt: user.createdAt,
     updatedAt: user.updatedAt,
@@ -282,17 +304,14 @@ router.put('/change-password', auth(true, true), async (req, res) => {
       }
     }
 
-    if (PASSWORD_HISTORY_LIMIT > 0) {
-      user.passwordHistory.unshift({
-        passwordHash: user.passwordHash,
-        salt: user.salt,
-        changedAt: new Date(),
-      });
-
-      if (user.passwordHistory.length > PASSWORD_HISTORY_LIMIT) {
-        user.passwordHistory = user.passwordHistory.slice(0, PASSWORD_HISTORY_LIMIT);
-      }
+    if (!Array.isArray(user.passwordHistory)) {
+      user.passwordHistory = [];
     }
+    user.passwordHistory.unshift({
+      passwordHash: user.passwordHash,
+      salt: user.salt,
+      changedAt: new Date(),
+    });
 
     const newSalt = generateSalt();
     const newHash = await hashPasswordWithSalt(newPassword, newSalt);
@@ -311,7 +330,9 @@ router.put('/change-password', auth(true, true), async (req, res) => {
 
 router.get('/verify-email', async (req, res) => {
   try {
-    const token = typeof req.query.token === 'string' ? req.query.token.trim() : '';
+    const token = sanitizeText(
+      typeof req.query.token === 'string' ? req.query.token : ''
+    );
 
     if (!token) {
       return res.status(400).json({ message: 'Verification token is required.' });
