@@ -1,5 +1,74 @@
+<script setup>
+import { onMounted, onBeforeUnmount, ref } from 'vue';
+const canvasRef = ref(null);
+
+onMounted(() => {
+  const canvas = canvasRef.value;
+  const ctx = canvas.getContext('2d');
+
+  canvas.width = 800;
+  canvas.height = 300;
+
+    const colors = [
+    'rgba(255,0,200,0.6)',
+    'rgba(0,236,255,0.5)',
+    'rgba(61,255,140,0.45)',
+    'rgba(255,255,255,0.35)'
+    ];
+
+  const lineWidths = [3.1, 2.8, 2.5, 2.3];
+  let time = 0;
+  let animationId;
+
+  function mapWave(value, min, max) {
+    return min + ((value + 1) / 2) * (max - min);
+  }
+
+  function draw() {
+    time += 0.018;
+    const width = canvas.width;
+    const height = canvas.height;
+    ctx.clearRect(0, 0, width, height);
+
+    const topLimit = 20;
+    const bottomLimit = height - 20;
+
+    for (let i = 0; i < colors.length; i++) {
+      ctx.beginPath();
+      for (let x = 0; x <= width; x += 6) {
+        const primary = Math.sin((x * 0.018) + time * (1 + i * 0.6));
+        const secondary = Math.sin(time * (0.6 + i * 0.18));
+        const combined = primary * secondary * (1.1 - i * 0.12);
+        const y = mapWave(combined, topLimit, bottomLimit);
+        if (x === 0) {
+          ctx.moveTo(x, y);
+        } else {
+          ctx.lineTo(x, y);
+        }
+      }
+      ctx.strokeStyle = colors[i];
+      ctx.lineWidth = lineWidths[i];
+      ctx.stroke();
+    }
+
+    animationId = requestAnimationFrame(draw);
+  }
+
+  // Start Animation
+  animationId = requestAnimationFrame(draw);
+
+  // Cleanup bei Unmount
+  onBeforeUnmount(() => {
+    cancelAnimationFrame(animationId);
+  });
+});
+</script>
+
 <template>
     <div id="navbar">
+        <div class="wave-layer">
+        <canvas ref="canvasRef" />
+        </div>
         <div id="logo">Melodia - Feel The Rythm.</div>
         <nav id="primary-nav">
             <ul class="nav-list">
@@ -16,9 +85,11 @@
 <style scoped>
 #navbar {
     display: flex;
+    position: relative;
     flex-direction: row;
     background-color: black;
     height: 5rem;
+    z-index: 999;
 }
 
 #primary-nav {
@@ -39,7 +110,7 @@
     font-weight: 700;
     letter-spacing: 0.08em;
     text-transform: uppercase;
-    background: var(--gradient-accent);
+    background: linear-gradient(120deg, var(--accent-pink), var(--accent-cyan), var(--accent-green));
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
@@ -62,8 +133,25 @@
     font-size: 1.1rem;
 }
 
+canvas {
+  position: absolute;
+  inset: 0;
+  height: 100%;
+  width: 100%;
+  opacity: 0.5;
+  filter: blur(0.2px) brightness(1.2);
+}
+
+.wave-layer {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+}
+
 .nav-actions {
     padding-left: 5rem;
+    padding-right: 2.5rem;
 }
 
 /*:deep(.router-link-exact-active[href="/home"]) {
