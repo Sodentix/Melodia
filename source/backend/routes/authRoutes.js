@@ -58,6 +58,23 @@ function sanitizeForOutput(value) {
   return sanitizeText(value);
 }
 
+function getClientIp(req) {
+  const xForwardedFor = req.headers['x-forwarded-for'];
+
+  if (typeof xForwardedFor === 'string' && xForwardedFor.length > 0) {
+    return xForwardedFor.split(',')[0].trim();
+  }
+
+  if (Array.isArray(xForwardedFor) && xForwardedFor.length > 0) {
+    const candidate = xForwardedFor[0];
+    if (typeof candidate === 'string') {
+      return candidate.trim();
+    }
+  }
+
+  return req.ip;
+}
+
 function formatUser(user) {
   return {
     id: user.id,
@@ -195,7 +212,9 @@ router.post('/login', async (req, res) => {
     const email = sanitizeEmail(req.body.email);
     const password = typeof req.body.password === 'string' ? req.body.password : '';
 
-    const identifier = email || req.ip;
+    const rawClientIp = getClientIp(req);
+    const clientIp = sanitizeText(rawClientIp) || rawClientIp;
+    const identifier = email ? `${email}|${clientIp}` : clientIp;
 
     if (loginSecurity.isBlocked(identifier)) {
       const blockedUntil = loginSecurity.getBlockExpiresAt(identifier);
