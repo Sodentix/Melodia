@@ -76,7 +76,7 @@ onMounted(() => {
             <li><router-link class="nav-link" :to="{ path: '/home', hash: '#howtoplay' }">How to play</router-link></li>
             </ul>
             <div class="nav-actions">
-            <router-link class="btn primary" :to="{ name: 'profile' }">Sign Up</router-link>
+            <router-link class="btn primary" :to="{ name: 'auth' }">Sign Up</router-link>
             </div>
         </nav>
     </div>
