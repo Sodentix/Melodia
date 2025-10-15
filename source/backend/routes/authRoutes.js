@@ -2,6 +2,7 @@ const express = require('express');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
+const https = require('https');
 const User = require('../models/User');
 const { generateVerificationToken, sendVerificationEmail } = require('../services/emailService');
 const auth = require('../middleware/auth');
@@ -73,6 +74,148 @@ function getClientIp(req) {
   }
 
   return req.ip;
+}
+
+function getUserAgent(req) {
+  const userAgentHeader = req.headers['user-agent'];
+  if (Array.isArray(userAgentHeader)) {
+    return userAgentHeader[0] || '';
+  }
+  return typeof userAgentHeader === 'string' ? userAgentHeader : '';
+}
+
+const USER_DEVICE_USER_AGENT_MAX_LENGTH = 500;
+const USER_DEVICE_STATUS_MAX_LENGTH = 60;
+const USER_DEVICE_COUNTRY_CODE_MAX_LENGTH = 3;
+const USER_DEVICE_MAX_ENTRIES = 20;
+
+function fetchCountryCode(ipAddress) {
+  return new Promise((resolve) => {
+    let settled = false;
+    const settle = (value) => {
+      if (!settled) {
+        settled = true;
+        resolve(value);
+      }
+    };
+
+    if (!ipAddress) {
+      settle(null);
+      return;
+    }
+
+    try {
+      const encodedIp = encodeURIComponent(ipAddress);
+      const url = `https://api.country.is/${encodedIp}`;
+
+      const request = https.get(url, (res) => {
+        if (res.statusCode !== 200) {
+          res.resume();
+          settle(null);
+          return;
+        }
+
+        let body = '';
+        res.setEncoding('utf8');
+        res.on('data', (chunk) => {
+          body += chunk;
+        });
+        res.on('end', () => {
+          try {
+            const parsed = JSON.parse(body);
+            const country = typeof parsed.country === 'string' ? parsed.country.trim() : '';
+            settle(country || null);
+          } catch (error) {
+            console.error('Country lookup parse error:', error);
+            settle(null);
+          }
+        });
+      });
+
+      request.on('error', (error) => {
+        console.error('Country lookup request error:', error);
+        settle(null);
+      });
+
+      request.setTimeout(3000, () => {
+        console.warn('Country lookup timeout');
+        request.destroy();
+        settle(null);
+      });
+    } catch (error) {
+      console.error('Country lookup failed:', error);
+      settle(null);
+    }
+  });
+}
+
+async function recordUserLoginDevice(user, { clientIp, userAgent, success, blocked, status, countryCode }) {
+  if (!user) {
+    return;
+  }
+
+  try {
+    const sanitizedIp = clientIp ? sanitizeText(clientIp) : '';
+    const sanitizedAgent = userAgent ? sanitizeText(userAgent) : '';
+    const sanitizedStatus = status ? sanitizeText(status) : '';
+    const sanitizedCountryCode = countryCode ? sanitizeText(countryCode) : '';
+
+    if (!Array.isArray(user.loginDevices)) {
+      user.loginDevices = [];
+    }
+
+    const ipValue = sanitizedIp ? sanitizedIp.slice(0, 100) : '';
+    const userAgentValue = sanitizedAgent
+      ? sanitizedAgent.slice(0, USER_DEVICE_USER_AGENT_MAX_LENGTH)
+      : '';
+    const statusValue = sanitizedStatus
+      ? sanitizedStatus.slice(0, USER_DEVICE_STATUS_MAX_LENGTH)
+      : undefined;
+    const countryValue = sanitizedCountryCode
+      ? sanitizedCountryCode.toUpperCase().slice(0, USER_DEVICE_COUNTRY_CODE_MAX_LENGTH)
+      : undefined;
+
+    const now = new Date();
+
+    let deviceEntry = user.loginDevices.find(
+      (entry) =>
+        (entry.ip || '') === ipValue &&
+        (entry.userAgent || '') === userAgentValue
+    );
+
+    if (!deviceEntry) {
+      deviceEntry = {
+        ip: ipValue || undefined,
+        userAgent: userAgentValue || undefined,
+        countryCode: countryValue || undefined,
+        lastAttemptAt: now,
+        lastSuccessAt: success ? now : undefined,
+        lastStatus: statusValue,
+        attemptCount: 1,
+        blocked: Boolean(blocked) && !success,
+      };
+      user.loginDevices.unshift(deviceEntry);
+      if (user.loginDevices.length > USER_DEVICE_MAX_ENTRIES) {
+        user.loginDevices.length = USER_DEVICE_MAX_ENTRIES;
+      }
+    } else {
+      deviceEntry.lastAttemptAt = now;
+      deviceEntry.lastStatus = statusValue;
+      deviceEntry.attemptCount = (deviceEntry.attemptCount || 0) + 1;
+      deviceEntry.blocked = Boolean(blocked) && !success;
+      if (countryValue) {
+        deviceEntry.countryCode = countryValue;
+      }
+      if (success) {
+        deviceEntry.lastSuccessAt = now;
+        deviceEntry.blocked = false;
+      }
+    }
+
+    await user.save();
+  } catch (error) {
+    console.error('Failed to record user login device:', error);
+  }
 }
 
 function formatUser(user) {
@@ -214,13 +357,32 @@ router.post('/login', async (req, res) => {
 
     const rawClientIp = getClientIp(req);
     const clientIp = sanitizeText(rawClientIp) || rawClientIp;
+    const userAgent = getUserAgent(req);
     const identifier = email ? `${email}|${clientIp}` : clientIp;
+    const countryCodePromise = clientIp ? fetchCountryCode(clientIp) : Promise.resolve(null);
 
     if (loginSecurity.isBlocked(identifier)) {
       const blockedUntil = loginSecurity.getBlockExpiresAt(identifier);
       const retryAfterSeconds = blockedUntil
         ? Math.ceil((blockedUntil - Date.now()) / 1000)
         : undefined;
+
+      const countryCode = await countryCodePromise;
+      if (email) {
+        try {
+          const blockedUser = await User.findOne({ email });
+          await recordUserLoginDevice(blockedUser, {
+            clientIp,
+            userAgent,
+            success: false,
+            blocked: true,
+            status: 'blocked',
+            countryCode,
+          });
+        } catch (error) {
+          console.error('Failed to record blocked login device:', error);
+        }
+      }
 
       res.set('Retry-After', retryAfterSeconds || '60');
       return res.status(429).json({
@@ -242,10 +404,26 @@ router.post('/login', async (req, res) => {
     const validPassword = await verifyPasswordWithSalt(password, user.salt, user.passwordHash);
     if (!validPassword) {
       loginSecurity.recordFailedAttempt(identifier);
+      await recordUserLoginDevice(user, {
+        clientIp,
+        userAgent,
+        success: false,
+        blocked: false,
+        status: 'invalid_credentials',
+        countryCode: await countryCodePromise,
+      });
       return res.status(401).json({ message: 'Invalid credentials.' });
     }
 
     if (!user.emailVerified) {
+      await recordUserLoginDevice(user, {
+        clientIp,
+        userAgent,
+        success: false,
+        blocked: false,
+        status: 'email_not_verified',
+        countryCode: await countryCodePromise,
+      });
       return res.status(403).json({
         message: 'Please verify your email address before logging in.',
         emailVerified: false,
@@ -254,6 +432,14 @@ router.post('/login', async (req, res) => {
 
     const token = createToken(user);
     loginSecurity.resetAttempts(identifier);
+    await recordUserLoginDevice(user, {
+      clientIp,
+      userAgent,
+      success: true,
+      blocked: false,
+      status: 'success',
+      countryCode: await countryCodePromise,
+    });
     return res.json({
       token,
       user: formatUser(user),
