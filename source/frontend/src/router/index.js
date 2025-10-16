@@ -24,6 +24,11 @@ const router = createRouter({
       alias: ['/login', '/register'],
     },
     {
+      path: '/auth2',
+      name: 'auth-animation',
+      component: () => import('@/views/AuthAnimationView.vue'),
+    },
+    {
       path: '/profile',
       name: 'profile',
       component: () => import('@/views/ProfileView.vue'),
