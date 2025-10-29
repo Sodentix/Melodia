@@ -29,12 +29,22 @@ const props = defineProps({
     type: String,
     required: false,
     default: '7rem' // bisherige Höhe
+  },
+  cardWidth: {
+    type: String,
+    required: false,
+    default: '15rem'
+  },
+  cardHeight: {
+    type: String,
+    required: false,
+    default: '14rem'
   }
 });
 </script>
 
 <template>
-  <div class="card">
+  <div class="card" :style="{ width: cardWidth, height: cardHeight }">
     <div class="imageContent">
       <Icon
         :icon="icon"
@@ -53,15 +63,11 @@ const props = defineProps({
 <style scoped>
 .card {
   display: flex;
-  flex-direction: row;
   justify-content: center;
   background-color: var(--card);
-  height: 14rem;
-  width: 15rem;
   padding: 1rem;
   border-radius: 1rem;
   gap: 0.5rem;
-
   transition: transform 0.28s ease, box-shadow 0.28s ease;
 }
 
