@@ -5,7 +5,8 @@
   "scripts": {
     "dev": "nodemon server.js",
     "start": "NODE_ENV=production node server.js",
-    "test": "jest --runInBand"
+    "test": "jest --runInBand",
+    "seed:clips": "node scripts/generate_test_clips.js"
   },
   "author": "",
   "license": "ISC",
@@ -19,6 +20,7 @@
     "helmet": "^7.2.0",
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.19.1",
+    "node-fetch": "^3.3.2",
     "nodemailer": "^7.0.9",
     "nodemon": "^3.1.10"
   },

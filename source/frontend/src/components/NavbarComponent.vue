@@ -7,7 +7,7 @@
             <li><router-link class="nav-link" :to="{ path: '/home', hash: '#howtoplay' }">How to play</router-link></li>
             </ul>
             <div class="nav-actions">
-            <router-link class="btn primary" :to="{ name: 'profile' }">Sign Up</router-link>
+            <router-link class="btn primary" :to="{ name: 'auth' }">Sign Up</router-link>
             </div>
         </nav>
     </div>
@@ -16,9 +16,11 @@
 <style scoped>
 #navbar {
     display: flex;
+    position: relative;
     flex-direction: row;
     background-color: black;
     height: 5rem;
+    z-index: 999;
 }
 
 #primary-nav {
@@ -39,7 +41,7 @@
     font-weight: 700;
     letter-spacing: 0.08em;
     text-transform: uppercase;
-    background: var(--gradient-accent);
+    background: linear-gradient(120deg, var(--accent-pink), var(--accent-cyan), var(--accent-green));
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
@@ -62,8 +64,25 @@
     font-size: 1.1rem;
 }
 
+canvas {
+  position: absolute;
+  inset: 0;
+  height: 100%;
+  width: 100%;
+  opacity: 0.5;
+  filter: blur(0.2px) brightness(1.2);
+}
+
+.wave-layer {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+}
+
 .nav-actions {
     padding-left: 5rem;
+    padding-right: 2.5rem;
 }
 
 /*:deep(.router-link-exact-active[href="/home"]) {
