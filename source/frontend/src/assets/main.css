@@ -1,1 +1,13 @@
 @import './base.css';
+
+:root {
+    --accent-pink: #ff00c8;
+    --accent-cyan: #00ecff;
+    --accent-green: #3dff8c;
+    --gradient-accent: linear-gradient(90deg, var(--accent-pink), var(--accent-cyan));
+    --bg: #050505;
+    --glass: rgba(255,255,255,0.04);
+    --stroke: rgba(255,255,255,0.08);
+    --text: rgba(255,255,255,0.78);
+    --card: rgba(255,255,255,0.03);
+}
