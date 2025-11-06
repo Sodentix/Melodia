@@ -1,0 +1,284 @@
+{
+  "_type": "export",
+  "__export_format": 4,
+  "__export_date": "2025-11-05T00:00:00.000Z",
+  "__export_source": "melodia/insomnia",
+  "resources": [
+    {
+      "_id": "wrk_melodia",
+      "_type": "workspace",
+      "name": "Melodia API",
+      "scope": "collection"
+    },
+    {
+      "_id": "env_base",
+      "_type": "environment",
+      "parentId": "wrk_melodia",
+      "name": "Base Environment",
+      "data": {
+        "base_url": "http://localhost:3000",
+        "token": "",
+        "email": "test@example.com",
+        "password": "P@ssw0rdP@ssw0rd!!",
+        "username": "testuser",
+        "firstName": "Test",
+        "lastName": "User",
+        "verificationToken": ""
+      }
+    },
+    {
+      "_id": "fld_auth",
+      "_type": "request_group",
+      "parentId": "wrk_melodia",
+      "name": "Auth",
+      "environment": {},
+      "metaSortKey": -1000000000001
+    },
+    {
+      "_id": "fld_stats",
+      "_type": "request_group",
+      "parentId": "wrk_melodia",
+      "name": "Stats",
+      "environment": {},
+      "metaSortKey": -999999999500
+    },
+    {
+      "_id": "fld_game",
+      "_type": "request_group",
+      "parentId": "wrk_melodia",
+      "name": "Game",
+      "environment": {},
+      "metaSortKey": -999999999000
+    },
+    {
+      "_id": "fld_library",
+      "_type": "request_group",
+      "parentId": "wrk_melodia",
+      "name": "Library (Local Clips)",
+      "environment": {},
+      "metaSortKey": -999999998000
+    },
+    {
+      "_id": "req_game_start",
+      "_type": "request",
+      "parentId": "fld_game",
+      "name": "Start round",
+      "method": "POST",
+      "url": "{{ _.base_url }}/game/start",
+      "parameters": [],
+      "headers": [
+        { "name": "Accept", "value": "application/json" },
+        { "name": "Content-Type", "value": "application/json" },
+        { "name": "Authorization", "value": "Bearer {{ _.token }}" }
+      ],
+      "body": { "mimeType": "application/json", "text": "{}" }
+    },
+    {
+      "_id": "req_game_guess",
+      "_type": "request",
+      "parentId": "fld_game",
+      "name": "Submit guess",
+      "method": "POST",
+      "url": "{{ _.base_url }}/game/guess",
+      "parameters": [],
+      "headers": [
+        { "name": "Accept", "value": "application/json" },
+        { "name": "Content-Type", "value": "application/json" },
+        { "name": "Authorization", "value": "Bearer {{ _.token }}" }
+      ],
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"roundId\": \"<paste-from-start-response>\",\n  \"guess\": \"your guess here\"\n}"
+      }
+    },
+    {
+      "_id": "req_game_clip_test",
+      "_type": "request",
+      "parentId": "fld_game",
+      "name": "Static clip test (direct)",
+      "method": "GET",
+      "url": "{{ _.base_url }}/clips/test_001.mp3",
+      "parameters": [],
+      "headers": [],
+      "body": {}
+    },
+    {
+      "_id": "req_game_record",
+      "_type": "request",
+      "parentId": "fld_game",
+      "name": "Record game (auth)",
+      "method": "POST",
+      "url": "{{ _.base_url }}/game/record",
+      "parameters": [],
+      "headers": [
+        { "name": "Accept", "value": "application/json" },
+        { "name": "Content-Type", "value": "application/json" },
+        { "name": "Authorization", "value": "Bearer {{ _.token }}" }
+      ],
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"win\": true,\n  \"correctGuesses\": 3,\n  \"wrongGuesses\": 1,\n  \"timeMs\": 1200,\n  \"mode\": \"classic\"\n}"
+      }
+    },
+    {
+      "_id": "req_auth_signup",
+      "_type": "request",
+      "parentId": "fld_auth",
+      "name": "Signup",
+      "method": "POST",
+      "url": "{{ _.base_url }}/auth/signup",
+      "parameters": [],
+      "headers": [
+        { "name": "Accept", "value": "application/json" },
+        { "name": "Content-Type", "value": "application/json" }
+      ],
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"firstName\": \"{{ _.firstName }}\",\n  \"lastName\": \"{{ _.lastName }}\",\n  \"username\": \"{{ _.username }}\",\n  \"email\": \"{{ _.email }}\",\n  \"password\": \"{{ _.password }}\"\n}"
+      }
+    },
+    {
+      "_id": "req_auth_login",
+      "_type": "request",
+      "parentId": "fld_auth",
+      "name": "Login",
+      "method": "POST",
+      "url": "{{ _.base_url }}/auth/login",
+      "parameters": [],
+      "headers": [
+        { "name": "Accept", "value": "application/json" },
+        { "name": "Content-Type", "value": "application/json" }
+      ],
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"email\": \"{{ _.email }}\",\n  \"password\": \"{{ _.password }}\"\n}"
+      }
+    },
+    {
+      "_id": "req_auth_verify",
+      "_type": "request",
+      "parentId": "fld_auth",
+      "name": "Verify Email",
+      "method": "GET",
+      "url": "{{ _.base_url }}/auth/verify-email",
+      "parameters": [
+        { "name": "token", "value": "{{ _.verificationToken }}" }
+      ],
+      "headers": [
+        { "name": "Accept", "value": "application/json" }
+      ],
+      "body": {}
+    },
+    {
+      "_id": "req_auth_resend",
+      "_type": "request",
+      "parentId": "fld_auth",
+      "name": "Resend Verification",
+      "method": "POST",
+      "url": "{{ _.base_url }}/auth/resend-verification",
+      "parameters": [],
+      "headers": [
+        { "name": "Accept", "value": "application/json" },
+        { "name": "Content-Type", "value": "application/json" }
+      ],
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"email\": \"{{ _.email }}\"\n}"
+      }
+    },
+    {
+      "_id": "req_auth_change_password",
+      "_type": "request",
+      "parentId": "fld_auth",
+      "name": "Change Password (auth)",
+      "method": "PUT",
+      "url": "{{ _.base_url }}/auth/change-password",
+      "parameters": [],
+      "headers": [
+        { "name": "Accept", "value": "application/json" },
+        { "name": "Content-Type", "value": "application/json" },
+        { "name": "Authorization", "value": "Bearer {{ _.token }}" }
+      ],
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"currentPassword\": \"{{ _.password }}\",\n  \"newPassword\": \"{{ _.password }}X\"\n}"
+      }
+    },
+    {
+      "_id": "req_stats_me",
+      "_type": "request",
+      "parentId": "fld_stats",
+      "name": "My Stats (auth)",
+      "method": "GET",
+      "url": "{{ _.base_url }}/stats/me",
+      "parameters": [],
+      "headers": [
+        { "name": "Accept", "value": "application/json" },
+        { "name": "Authorization", "value": "Bearer {{ _.token }}" }
+      ],
+      "body": {}
+    },
+    {
+      "_id": "req_stats_leaderboard",
+      "_type": "request",
+      "parentId": "fld_stats",
+      "name": "Leaderboard",
+      "method": "GET",
+      "url": "{{ _.base_url }}/stats/leaderboard",
+      "parameters": [
+        { "name": "limit", "value": "10" },
+        { "name": "skip", "value": "0" }
+      ],
+      "headers": [
+        { "name": "Accept", "value": "application/json" }
+      ],
+      "body": {}
+    },
+    {
+      "_id": "req_game_local_clips_debug",
+      "_type": "request",
+      "parentId": "fld_game",
+      "name": "Local clips debug (auth, DEBUG_GAME)",
+      "method": "GET",
+      "url": "{{ _.base_url }}/game/local-clips",
+      "parameters": [],
+      "headers": [
+        { "name": "Accept", "value": "application/json" },
+        { "name": "Authorization", "value": "Bearer {{ _.token }}" }
+      ],
+      "body": {}
+    },
+    {
+      "_id": "req_library_all",
+      "_type": "request",
+      "parentId": "fld_library",
+      "name": "All local clips (auth)",
+      "method": "GET",
+      "url": "{{ _.base_url }}/library/all",
+      "parameters": [],
+      "headers": [
+        { "name": "Accept", "value": "application/json" },
+        { "name": "Authorization", "value": "Bearer {{ _.token }}" }
+      ],
+      "body": {}
+    },
+    {
+      "_id": "req_library_search",
+      "_type": "request",
+      "parentId": "fld_library",
+      "name": "Search local clips (auth)",
+      "method": "GET",
+      "url": "{{ _.base_url }}/library/search",
+      "parameters": [
+        { "name": "q", "value": "neon" }
+      ],
+      "headers": [
+        { "name": "Accept", "value": "application/json" },
+        { "name": "Authorization", "value": "Bearer {{ _.token }}" }
+      ],
+      "body": {}
+    }
+  ]
+}
+
+

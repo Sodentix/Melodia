@@ -1,0 +1,101 @@
+  {
+    "id": "local-001",
+    "name": "Neon Skyline",
+    "artists": [
+      "Test Artist"
+    ],
+    "file": "test_001.mp3",
+    "image": null,
+    "duration_ms": 8000
+  },
+  {
+    "id": "local-002",
+    "name": "Midnight Run",
+    "artists": [
+      "Test Artist"
+    ],
+    "file": "test_002.mp3",
+    "image": null,
+    "duration_ms": 8000
+  },
+  {
+    "id": "local-003",
+    "name": "Crimson Wave",
+    "artists": [
+      "Test Artist"
+    ],
+    "file": "test_003.mp3",
+    "image": null,
+    "duration_ms": 8000
+  },
+  {
+    "id": "local-004",
+    "name": "Echo City",
+    "artists": [
+      "Test Artist"
+    ],
+    "file": "test_004.mp3",
+    "image": null,
+    "duration_ms": 8000
+  },
+  {
+    "id": "local-005",
+    "name": "Starlight Drive",
+    "artists": [
+      "Test Artist"
+    ],
+    "file": "test_005.mp3",
+    "image": null,
+    "duration_ms": 8000
+  },
+  {
+    "id": "local-006",
+    "name": "Quantum Drift",
+    "artists": [
+      "Test Artist"
+    ],
+    "file": "test_006.mp3",
+    "image": null,
+    "duration_ms": 8000
+  },
+  {
+    "id": "local-007",
+    "name": "Hollow Sun",
+    "artists": [
+      "Test Artist"
+    ],
+    "file": "test_007.mp3",
+    "image": null,
+    "duration_ms": 8000
+  },
+  {
+    "id": "local-008",
+    "name": "Lunar Bloom",
+    "artists": [
+      "Test Artist"
+    ],
+    "file": "test_008.mp3",
+    "image": null,
+    "duration_ms": 8000
+  },
+  {
+    "id": "local-009",
+    "name": "Aurora Fields",
+    "artists": [
+      "Test Artist"
+    ],
+    "file": "test_009.mp3",
+    "image": null,
+    "duration_ms": 8000
+  },
+  {
+    "id": "local-010",
+    "name": "Violet Horizon",
+    "artists": [
+      "Test Artist"
+    ],
+    "file": "test_010.mp3",
+    "image": null,
+    "duration_ms": 8000
+  }
+]
