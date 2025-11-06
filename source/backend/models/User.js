@@ -73,6 +73,7 @@ const userSchema = new mongoose.Schema(
       type: Date,
       required: false,
     },
+    stats: { type: mongoose.Schema.Types.ObjectId, ref: 'Stats', index: true },
   },
   { timestamps: true }
 );
@@ -85,6 +86,19 @@ userSchema.pre('validate', function ensureUsernameLower(next) {
   }
   next();
 });
+
+userSchema.methods.ensureStats = async function () {
+    const Stats = this.model('Stats');
+    if (this.stats) return this.stats;
+    const doc = await Stats.findOneAndUpdate(
+        { user: this._id },
+        { $setOnInsert: { user: this._id } },
+        { new: true, upsert: true }
+    );
+    this.stats = doc._id;
+    await this.save();
+    return this.stats;
+};
 
 module.exports = mongoose.model('User', userSchema);
 
