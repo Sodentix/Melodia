@@ -243,31 +243,33 @@ const handleRegister = async () => {
                 <p>Logge dich ein und starte die nächste Session.</p>
               </header>
               <form class="form" autocomplete="on" @submit.prevent="handleLogin">
-                <div class="field">
-                  <label for="login-email">E-Mail-Adresse</label>
-                  <input
-                    id="login-email"
-                    v-model.trim="loginForm.email"
-                    type="email"
-                    name="email"
-                    autocomplete="email"
-                    placeholder="name@email.com"
-                    :disabled="loading"
-                    required
-                  >
-                </div>
-                <div class="field">
-                  <label for="login-password">Passwort</label>
-                  <input
-                    id="login-password"
-                    v-model="loginForm.password"
-                    type="password"
-                    name="password"
-                    autocomplete="current-password"
-                    placeholder="********"
-                    :disabled="loading"
-                    required
-                  >
+                <div class="split-fields">
+                  <div class="field">
+                    <label for="login-email">E-Mail-Adresse</label>
+                    <input
+                      id="login-email"
+                      v-model.trim="loginForm.email"
+                      type="email"
+                      name="email"
+                      autocomplete="email"
+                      placeholder="name@email.com"
+                      :disabled="loading"
+                      required
+                    >
+                  </div>
+                  <div class="field">
+                    <label for="login-password">Passwort</label>
+                    <input
+                      id="login-password"
+                      v-model="loginForm.password"
+                      type="password"
+                      name="password"
+                      autocomplete="current-password"
+                      placeholder="********"
+                      :disabled="loading"
+                      required
+                    >
+                  </div>
                 </div>
                 <div class="form-footer">
                   <a href="#" class="ghost-link">Passwort vergessen?</a>
@@ -328,31 +330,33 @@ const handleRegister = async () => {
                     Kleinschreibung, Zahlen und _.- sind erlaubt.
                   </small>
                 </div>
-                <div class="field">
-                  <label for="register-email">E-Mail-Adresse</label>
-                  <input
-                    id="register-email"
-                    v-model.trim="registerForm.email"
-                    type="email"
-                    name="email"
-                    autocomplete="email"
-                    placeholder="name@email.com"
-                    :disabled="loading"
-                    required
-                  >
-                </div>
-                <div class="field">
-                  <label for="register-password">Passwort</label>
-                  <input
-                    id="register-password"
-                    v-model="registerForm.password"
-                    type="password"
-                    name="password"
-                    autocomplete="new-password"
-                    placeholder="Mindestens 12 Zeichen"
-                    :disabled="loading"
-                    required
-                  >
+                <div class="split-fields">
+                  <div class="field">
+                    <label for="register-email">E-Mail-Adresse</label>
+                    <input
+                      id="register-email"
+                      v-model.trim="registerForm.email"
+                      type="email"
+                      name="email"
+                      autocomplete="email"
+                      placeholder="name@email.com"
+                      :disabled="loading"
+                      required
+                    >
+                  </div>
+                  <div class="field">
+                    <label for="register-password">Passwort</label>
+                    <input
+                      id="register-password"
+                      v-model="registerForm.password"
+                      type="password"
+                      name="password"
+                      autocomplete="new-password"
+                      placeholder="Mindestens 12 Zeichen"
+                      :disabled="loading"
+                      required
+                    >
+                  </div>
                 </div>
                 <ul v-if="passwordErrors.length" class="password-errors">
                   <li v-for="error in passwordErrors" :key="error">
@@ -387,7 +391,10 @@ const handleRegister = async () => {
 <style scoped>
 .auth-page {
   position: relative;
-  min-height: 100vh;
+  margin: 2.5rem 0;
+  height: calc(100vh - 5rem - 5rem);
+  min-height: calc(100vh - 5rem - 5rem);
+  box-sizing: border-box;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -500,7 +507,7 @@ const handleRegister = async () => {
 
 .card-body {
   display: grid;
-  grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr);
+  grid-template-columns: minmax(0, 1fr) auto;
   gap: 2rem;
   align-items: stretch;
 }
@@ -583,7 +590,7 @@ const handleRegister = async () => {
 
 .split-fields {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
   gap: 1rem;
 }
 
@@ -649,6 +656,7 @@ const handleRegister = async () => {
 
 .primary-action {
   align-self: flex-start;
+  margin-top: 15px;
   border: none;
   border-radius: 999px;
   padding: 0.9rem 2.4rem;
@@ -676,8 +684,10 @@ const handleRegister = async () => {
 .form-footer {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
+  justify-content: left;
+  flex-direction: column;
+  align-content: flex-start;
+  flex-wrap: wrap;
 }
 
 .ghost-link {
@@ -695,6 +705,7 @@ const handleRegister = async () => {
   position: relative;
   border-radius: 24px;
   padding: clamp(2rem, 4vw, 3rem);
+  width: 320px;
   background:
     linear-gradient(135deg, rgba(207, 45, 255, 0.28), rgba(5, 217, 255, 0.32));
   box-shadow:
@@ -712,6 +723,7 @@ const handleRegister = async () => {
   font-size: clamp(1.4rem, 2.8vw, 1.8rem);
   font-weight: 700;
   letter-spacing: 0.05em;
+  font-size: 1.5rem;
 }
 
 .cta-panel p {
@@ -736,7 +748,7 @@ const handleRegister = async () => {
 
 .ghost-action:hover:not(:disabled) {
   transform: translateY(-2px);
-  background: rgba(7, 17, 30, 0.12);
+  background: rgba(7, 17, 30, 1);
   box-shadow: 0 12px 28px rgba(7, 17, 30, 0.18);
 }
 
@@ -744,5 +756,11 @@ const handleRegister = async () => {
   cursor: not-allowed;
   opacity: 0.65;
   box-shadow: none;
+}
+
+@media (max-width: 1150px) {
+  .cta-panel {
+    display: none;
+  }
 }
 </style>
