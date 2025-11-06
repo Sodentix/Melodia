@@ -32,13 +32,13 @@ const authBase = apiRoot.endsWith('/auth') ? apiRoot : `${apiRoot}/auth`
 const isRegister = computed(() => mode.value === 'register')
 
 const panelHeading = computed(() =>
-  isRegister.value ? 'Schon zurueck?' : 'Neu bei Melodia?'
+  isRegister.value ? 'Schon zurück?' : 'Neu bei Melodia?'
 )
 
 const panelCopy = computed(() =>
   isRegister.value
-    ? 'Melde dich an und knuepfe an deine letzten Chart-Erfolge an.'
-    : 'Erstelle dein Konto und stuerze dich in die Beat Battles.'
+    ? 'Melde dich an und knüpfe an deine letzten Chart-Erfolge an.'
+    : 'Erstelle dein Konto und stürze dich in die Beat-Battles.'
 )
 
 const panelCta = computed(() =>
@@ -196,8 +196,6 @@ const handleRegister = async () => {
 
 <template>
   <div class="auth-page">
-    <div class="glow glow-one" />
-    <div class="glow glow-two" />
     <div class="auth-card" :class="{ 'show-register': isRegister, loading: loading }">
       <header class="card-header">
         <p class="brand">
@@ -241,8 +239,8 @@ const handleRegister = async () => {
           <div class="form-wrapper">
             <section class="form-container login" aria-live="polite">
               <header class="form-headline">
-                <h2>Willkommen zurueck</h2>
-                <p>Logge dich ein und starte die naechste Session.</p>
+                <h2>Willkommen zurück</h2>
+                <p>Logge dich ein und starte die nächste Session.</p>
               </header>
               <form class="form" autocomplete="on" @submit.prevent="handleLogin">
                 <div class="field">
@@ -394,39 +392,26 @@ const handleRegister = async () => {
   align-items: center;
   justify-content: center;
   padding: 2.5rem 1.5rem;
-  background: radial-gradient(circle at 15% 20%, rgba(123, 47, 247, 0.18), transparent 55%),
-    radial-gradient(circle at 80% 30%, rgba(5, 217, 255, 0.15), transparent 50%),
-    #050510;
+  background-color: rgb(10, 6, 33);
   overflow: hidden;
   color: #f4f6ff;
 }
 
-.glow {
+.auth-page::before {
+  content: '';
   position: absolute;
-  width: 520px;
-  height: 520px;
-  border-radius: 50%;
-  filter: blur(120px);
-  opacity: 0.55;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
   pointer-events: none;
 }
 
-.glow-one {
-  left: -180px;
-  top: -120px;
-  background: radial-gradient(circle, rgba(123, 47, 247, 0.7), transparent 70%);
-}
-
-.glow-two {
-  right: -220px;
-  bottom: -120px;
-  background: radial-gradient(circle, rgba(5, 217, 255, 0.65), transparent 70%);
-}
 
 .auth-card {
   position: relative;
-  width: min(1000px, 100%);
-  background: rgba(9, 10, 22, 0.82);
+  width: 100%;
+  background: rgba(0, 0, 0, 0.82);
   border-radius: 32px;
   padding: 2.4rem 2.8rem 2.8rem;
   border: 1px solid rgba(255, 255, 255, 0.06);
@@ -470,7 +455,7 @@ const handleRegister = async () => {
   align-items: center;
   padding: 0.25rem;
   border-radius: 999px;
-  background: rgba(4, 5, 16, 0.85);
+  background: rgb(10, 6, 33);
   border: 1px solid rgba(255, 255, 255, 0.08);
   box-shadow: inset 0 1px 6px rgba(255, 255, 255, 0.05), 0 8px 26px rgba(0, 0, 0, 0.35);
 }
@@ -570,6 +555,7 @@ const handleRegister = async () => {
 
 .form-container {
   padding: 3rem clamp(1.4rem, 3vw, 3rem);
+  background-color: rgb(10, 6, 33);
   display: flex;
   flex-direction: column;
   gap: 1.4rem;
@@ -719,7 +705,7 @@ const handleRegister = async () => {
   flex-direction: column;
   justify-content: center;
   gap: 1.1rem;
-  color: #07111e;
+  color: #ffffff;
 }
 
 .cta-panel h3 {
@@ -729,17 +715,17 @@ const handleRegister = async () => {
 }
 
 .cta-panel p {
-  color: rgba(7, 17, 30, 0.8);
+  color: rgba(252, 253, 253, 0.8);
   font-size: 0.98rem;
   line-height: 1.5;
 }
 
 .ghost-action {
   align-self: flex-start;
-  border: 1px solid rgba(7, 17, 30, 0.35);
+  background-color:rgb(7, 17, 30);
+  border: none;
   border-radius: 999px;
-  background: rgba(7, 17, 30, 0.08);
-  color: #07111e;
+  color: #ffffff;
   padding: 0.75rem 1.9rem;
   font-weight: 600;
   letter-spacing: 0.12em;
@@ -758,88 +744,5 @@ const handleRegister = async () => {
   cursor: not-allowed;
   opacity: 0.65;
   box-shadow: none;
-}
-
-@media (max-width: 1024px) {
-  .auth-card {
-    padding: 2rem 2.2rem 2.4rem;
-  }
-
-  .card-body {
-    grid-template-columns: 1fr;
-  }
-
-  .cta-panel {
-    order: -1;
-    align-items: center;
-    text-align: center;
-    color: #06101c;
-  }
-
-  .ghost-action {
-    align-self: center;
-  }
-}
-
-@media (max-width: 720px) {
-  .card-header {
-    flex-direction: column;
-    align-items: stretch;
-  }
-
-  .mode-toggle {
-    width: 100%;
-  }
-
-  .form-container {
-    padding: 2.2rem 1.5rem 2.4rem;
-  }
-
-  .split-fields {
-    grid-template-columns: 1fr;
-  }
-
-  .form-footer {
-    flex-direction: column;
-    align-items: stretch;
-  }
-
-  .primary-action {
-    width: 100%;
-    text-align: center;
-  }
-
-  .ghost-link {
-    text-align: center;
-  }
-
-  .ghost-action {
-    width: 100%;
-  }
-}
-
-@media (max-width: 520px) {
-  .auth-card {
-    padding: 1.6rem 1.4rem 2rem;
-    border-radius: 26px;
-  }
-
-  .mode-toggle {
-    padding: 0.2rem;
-  }
-
-  .mode-toggle button {
-    font-size: 0.88rem;
-    padding: 0.5rem 0.9rem;
-  }
-
-  .mode-indicator {
-    inset: 2px;
-    width: calc(50% - 4px);
-  }
-
-  .cta-panel {
-    border-radius: 20px;
-  }
 }
 </style>
