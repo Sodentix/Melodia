@@ -22,6 +22,7 @@ const StatsSchema = new mongoose.Schema(
         totalWins: { type: Number, default: 0, min: 0 },
         correctGuesses: { type: Number, default: 0, min: 0 },
         wrongGuesses: { type: Number, default: 0, min: 0 },
+        totalPoints: { type: Number, default: 0, min: 0, index: true },
         bestTimeMs: { type: Number, default: null, min: 0 },
         averageTimeMs: { type: Number, default: null, min: 0 },
         currentStreak: { type: Number, default: 0, min: 0 },
@@ -34,7 +35,7 @@ const StatsSchema = new mongoose.Schema(
 
 // Atomic recorder
 StatsSchema.statics.recordGame = async function ({
-                                                     userId, win, correctGuesses = 0, wrongGuesses = 0, timeMs = null, mode = null, playedAt = new Date(),
+                                                     userId, win, correctGuesses = 0, wrongGuesses = 0, points = 0, timeMs = null, mode = null, playedAt = new Date(),
                                                  }) {
     const base = mode ? `modes.${mode}` : null;
 
@@ -50,6 +51,7 @@ StatsSchema.statics.recordGame = async function ({
         totalPlayed: 1,
         correctGuesses: correctGuesses,
         wrongGuesses: wrongGuesses,
+        totalPoints: points,
     };
     if (win) inc.totalWins = 1;
     if (base) {
