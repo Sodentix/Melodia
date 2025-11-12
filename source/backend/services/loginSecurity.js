@@ -15,30 +15,72 @@ function getConfig() {
 
 function getEntry(identifier) {
   if (!attemptsStore.has(identifier)) {
-    attemptsStore.set(identifier, { attempts: 0, expiresAt: 0, blockedUntil: 0 });
+    attemptsStore.set(identifier, {
+      attempts: 0,
+      expiresAt: 0,
+      blockedUntil: 0,
+      manuallyBlocked: false,
+      manualBlockedAt: null,
+      manualBlockedBy: null,
+      manualBlockReason: null,
+    });
   }
   return attemptsStore.get(identifier);
 }
 
-function isBlocked(identifier) {
+function getBlockState(identifier) {
   const now = Date.now();
   const entry = attemptsStore.get(identifier);
-  if (!entry) return false;
+
+  if (!entry) {
+    return {
+      isBlocked: false,
+      blockedUntil: null,
+      manuallyBlocked: false,
+      manualBlockedAt: null,
+      manualBlockedBy: null,
+      manualBlockReason: null,
+    };
+  }
+
+  if (entry.manuallyBlocked) {
+    return {
+      isBlocked: true,
+      blockedUntil: null,
+      manuallyBlocked: true,
+      manualBlockedAt: entry.manualBlockedAt,
+      manualBlockedBy: entry.manualBlockedBy,
+      manualBlockReason: entry.manualBlockReason,
+    };
+  }
 
   if (entry.blockedUntil && entry.blockedUntil > now) {
-    return true;
+    return {
+      isBlocked: true,
+      blockedUntil: entry.blockedUntil,
+      manuallyBlocked: false,
+      manualBlockedAt: null,
+      manualBlockedBy: null,
+      manualBlockReason: null,
+    };
   }
 
-  if (entry.blockedUntil && entry.blockedUntil <= now) {
+  if ((entry.blockedUntil && entry.blockedUntil <= now) || (entry.expiresAt && entry.expiresAt <= now)) {
     attemptsStore.delete(identifier);
-    return false;
   }
 
-  if (entry.expiresAt && entry.expiresAt <= now) {
-    attemptsStore.delete(identifier);
-  }
+  return {
+    isBlocked: false,
+    blockedUntil: null,
+    manuallyBlocked: false,
+    manualBlockedAt: null,
+    manualBlockedBy: null,
+    manualBlockReason: null,
+  };
+}
 
-  return false;
+function isBlocked(identifier) {
+  return getBlockState(identifier).isBlocked;
 }
 
 function recordFailedAttempt(identifier) {
@@ -67,13 +109,36 @@ function resetAttempts(identifier) {
 }
 
 function getBlockExpiresAt(identifier) {
-  const entry = attemptsStore.get(identifier);
-  if (!entry || !entry.blockedUntil) return null;
-  if (entry.blockedUntil <= Date.now()) {
-    attemptsStore.delete(identifier);
+  const state = getBlockState(identifier);
+  if (state.manuallyBlocked) {
     return null;
   }
-  return entry.blockedUntil;
+  return state.blockedUntil;
+}
+
+function setManualBlock(identifier, { blocked, blockedBy = null, reason = null } = {}) {
+  const entry = getEntry(identifier);
+
+  if (blocked) {
+    entry.manuallyBlocked = true;
+    entry.manualBlockedAt = Date.now();
+    entry.manualBlockedBy = blockedBy;
+    entry.manualBlockReason = reason || null;
+    entry.blockedUntil = Number.MAX_SAFE_INTEGER;
+    entry.attempts = 0;
+    entry.expiresAt = 0;
+  } else {
+    entry.manuallyBlocked = false;
+    entry.manualBlockedAt = null;
+    entry.manualBlockedBy = null;
+    entry.manualBlockReason = null;
+    entry.blockedUntil = 0;
+    entry.attempts = 0;
+    entry.expiresAt = 0;
+  }
+
+  attemptsStore.set(identifier, entry);
+  return getBlockState(identifier);
 }
 
 module.exports = {
@@ -81,6 +146,8 @@ module.exports = {
   recordFailedAttempt,
   resetAttempts,
   getBlockExpiresAt,
+  getBlockState,
+  setManualBlock,
   __testing: {
     resetAll: () => attemptsStore.clear(),
   },
