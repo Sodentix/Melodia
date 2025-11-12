@@ -14,26 +14,31 @@ const PASSWORD_HISTORY_LIMIT = Math.max(
   Number(process.env.PASSWORD_HISTORY_LIMIT || 5),
   0
 );
+const SCRIPT_TAG_REGEX = /<script\b[^>]*>([\s\S]*?)<\/script>/gi;
+
+function removeScriptTags(value) {
+  return value.replace(SCRIPT_TAG_REGEX, '');
+}
 
 function sanitizeName(value) {
   if (typeof value !== 'string') {
     return '';
   }
-  return value.trim();
+  return removeScriptTags(value).trim();
 }
 
 function sanitizeEmail(value) {
   if (typeof value !== 'string') {
     return '';
   }
-  return value.trim().toLowerCase();
+  return removeScriptTags(value).trim().toLowerCase();
 }
 
 function sanitizeUsername(value) {
   if (typeof value !== 'string') {
     return '';
   }
-  return value.trim().toLowerCase();
+  return removeScriptTags(value).trim().toLowerCase();
 }
 
 function formatUser(user) {
@@ -308,6 +313,7 @@ router.put('/change-password', auth(true, true), async (req, res) => {
     return res.status(500).json({ message: 'Failed to change password.' });
   }
 });
+
 
 router.get('/verify-email', async (req, res) => {
   try {
