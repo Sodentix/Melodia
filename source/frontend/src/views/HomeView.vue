@@ -22,7 +22,7 @@ export default defineComponent({
           <!-- Parameter sind title, description, icon, iconColor, iconWidth, iconHeight, cardWidth, cardHeight-->
           <!-- Icons werden je nach Icon-Collection unterschiedlich angegeben - in der Doku nachlesen!-->
           <BaseCard title="Free Play" description="Teste dein Können ohne Zeitdruck" icon="mdi:music" iconColor="purple"/>
-          <BaseCard title="Challenge Mode" description="Spiele gegen die Uhr und erklimme das Leaderboard" icon="mdi:trophy-outline" iconColor="yellow"/>
+          <BaseCard title="Challenge Mode" description="Spiele gegen die Uhr und erklimme das Leaderboard" icon="mdi:trophy-outline" iconColor="#b3b300"/>
         </div>
       </div>
       <div class="leaderboardDiv">
@@ -33,9 +33,9 @@ export default defineComponent({
       <h1 id="howtoplay">How to play</h1>
       <h2>Drei einfache Schritte zwischen dir und dem Sieg. Höre, erkenne, und dominiere die Charts.</h2>
       <div class="explanationDiv">
-        <BaseCard class="explanationCard" title="1. Listen" description="Ein kurzer Song-Ausschnitt startet. Lausche genau auf Melodie und Rhythmus." icon="fa6-solid:headphones" iconColor="yellow" cardWidth="20rem" cardHeight="16rem"/>
-        <BaseCard class="explanationCard" title="2. Guess" description="Tippe den Titel oder Künstler ein - je schneller du rätst, desto mehr Punkte gibt's!" icon="mdi:lightbulb-on-outline" iconColor="yellow" cardWidth="20rem" cardHeight="16rem"/>
-        <BaseCard class="explanationCard" title="3. Score" description="Verdiene Punkte, steige im Ranking auf und werde der ultimative Beat-Master." icon="mdi:star-shooting-outline" iconColor="yellow" cardWidth="20rem" cardHeight="16rem"/>
+        <BaseCard class="explanationCard" title="1. Listen" description="Ein kurzer Song-Ausschnitt startet. Lausche genau auf Melodie und Rhythmus." icon="fa6-solid:headphones" iconColor="#b3b300" cardWidth="23rem" cardHeight="16rem"/>
+        <BaseCard class="explanationCard" title="2. Guess" description="Tippe den Titel oder Künstler ein - je schneller du rätst, desto mehr Punkte gibt's!" icon="mdi:lightbulb-on-outline" iconColor="#b3b300" cardWidth="23rem" cardHeight="16rem"/>
+        <BaseCard class="explanationCard" title="3. Score" description="Verdiene Punkte, steige im Ranking auf und werde der ultimative Beat-Master." icon="mdi:star-shooting-outline" iconColor="#b3b300" cardWidth="23rem" cardHeight="16rem"/>
       </div>
     </div>
   </div>
