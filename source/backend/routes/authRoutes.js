@@ -2,6 +2,7 @@ const express = require('express');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
+const https = require('https');
 const User = require('../models/User');
 const { generateVerificationToken, sendVerificationEmail } = require('../services/emailService');
 const auth = require('../middleware/auth');
@@ -10,39 +11,220 @@ const loginSecurity = require('../services/loginSecurity');
 const router = express.Router();
 
 const USERNAME_PATTERN = /^[a-z0-9_.-]+$/;
-const PASSWORD_HISTORY_LIMIT = Math.max(
-  Number(process.env.PASSWORD_HISTORY_LIMIT || 5),
-  0
-);
 
-function sanitizeName(value) {
+const CONTROL_CHAR_REGEX = /[\u0000-\u001F\u007F]/g;
+const INVISIBLE_CHAR_REGEX = /[\u200B-\u200D\uFEFF]/g;
+const SCRIPT_CONTENT_REGEX = /<\s*script[^>]*>[\s\S]*?<\s*\/\s*script\s*>/gi;
+const HTML_TAG_REGEX = /<[^>]+>/g;
+const MALICIOUS_PROTOCOL_REGEX =
+  /\b(?:javascript|vbscript|data:(?:text|application)\/(?:html|javascript))[^\s]*/gi;
+
+function sanitizeText(value, { toLowerCase = false } = {}) {
   if (typeof value !== 'string') {
     return '';
   }
-  return value.trim();
+
+  let sanitized = value;
+  try {
+    sanitized = sanitized.normalize('NFKC');
+  } catch (error) {
+    // Fallback to original string if normalization fails.
+  }
+  sanitized = sanitized.replace(CONTROL_CHAR_REGEX, '');
+  sanitized = sanitized.replace(INVISIBLE_CHAR_REGEX, '');
+  sanitized = sanitized.replace(SCRIPT_CONTENT_REGEX, '');
+  sanitized = sanitized.replace(HTML_TAG_REGEX, '');
+  sanitized = sanitized.replace(MALICIOUS_PROTOCOL_REGEX, '');
+  sanitized = sanitized.trim();
+
+  return toLowerCase ? sanitized.toLowerCase() : sanitized;
+}
+
+function sanitizeName(value) {
+  return sanitizeText(value);
 }
 
 function sanitizeEmail(value) {
-  if (typeof value !== 'string') {
-    return '';
-  }
-  return value.trim().toLowerCase();
+  return sanitizeText(value, { toLowerCase: true });
 }
 
 function sanitizeUsername(value) {
+  return sanitizeText(value, { toLowerCase: true });
+}
+
+function sanitizeForOutput(value) {
   if (typeof value !== 'string') {
-    return '';
+    return value;
   }
-  return value.trim().toLowerCase();
+  return sanitizeText(value);
+}
+
+function getClientIp(req) {
+  const xForwardedFor = req.headers['x-forwarded-for'];
+
+  if (typeof xForwardedFor === 'string' && xForwardedFor.length > 0) {
+    return xForwardedFor.split(',')[0].trim();
+  }
+
+  if (Array.isArray(xForwardedFor) && xForwardedFor.length > 0) {
+    const candidate = xForwardedFor[0];
+    if (typeof candidate === 'string') {
+      return candidate.trim();
+    }
+  }
+
+  return req.ip;
+}
+
+function getUserAgent(req) {
+  const userAgentHeader = req.headers['user-agent'];
+  if (Array.isArray(userAgentHeader)) {
+    return userAgentHeader[0] || '';
+  }
+  return typeof userAgentHeader === 'string' ? userAgentHeader : '';
+}
+
+const USER_DEVICE_USER_AGENT_MAX_LENGTH = 500;
+const USER_DEVICE_STATUS_MAX_LENGTH = 60;
+const USER_DEVICE_COUNTRY_CODE_MAX_LENGTH = 3;
+const USER_DEVICE_MAX_ENTRIES = 20;
+
+function fetchCountryCode(ipAddress) {
+  return new Promise((resolve) => {
+    let settled = false;
+    const settle = (value) => {
+      if (!settled) {
+        settled = true;
+        resolve(value);
+      }
+    };
+
+    if (!ipAddress) {
+      settle(null);
+      return;
+    }
+
+    try {
+      const encodedIp = encodeURIComponent(ipAddress);
+      const url = `https://api.country.is/${encodedIp}`;
+
+      const request = https.get(url, (res) => {
+        if (res.statusCode !== 200) {
+          res.resume();
+          settle(null);
+          return;
+        }
+
+        let body = '';
+        res.setEncoding('utf8');
+        res.on('data', (chunk) => {
+          body += chunk;
+        });
+        res.on('end', () => {
+          try {
+            const parsed = JSON.parse(body);
+            const country = typeof parsed.country === 'string' ? parsed.country.trim() : '';
+            settle(country || null);
+          } catch (error) {
+            console.error('Country lookup parse error:', error);
+            settle(null);
+          }
+        });
+      });
+
+      request.on('error', (error) => {
+        console.error('Country lookup request error:', error);
+        settle(null);
+      });
+
+      request.setTimeout(3000, () => {
+        console.warn('Country lookup timeout');
+        request.destroy();
+        settle(null);
+      });
+    } catch (error) {
+      console.error('Country lookup failed:', error);
+      settle(null);
+    }
+  });
+}
+
+async function recordUserLoginDevice(user, { clientIp, userAgent, success, blocked, status, countryCode }) {
+  if (!user) {
+    return;
+  }
+
+  try {
+    const sanitizedIp = clientIp ? sanitizeText(clientIp) : '';
+    const sanitizedAgent = userAgent ? sanitizeText(userAgent) : '';
+    const sanitizedStatus = status ? sanitizeText(status) : '';
+    const sanitizedCountryCode = countryCode ? sanitizeText(countryCode) : '';
+
+    if (!Array.isArray(user.loginDevices)) {
+      user.loginDevices = [];
+    }
+
+    const ipValue = sanitizedIp ? sanitizedIp.slice(0, 100) : '';
+    const userAgentValue = sanitizedAgent
+      ? sanitizedAgent.slice(0, USER_DEVICE_USER_AGENT_MAX_LENGTH)
+      : '';
+    const statusValue = sanitizedStatus
+      ? sanitizedStatus.slice(0, USER_DEVICE_STATUS_MAX_LENGTH)
+      : undefined;
+    const countryValue = sanitizedCountryCode
+      ? sanitizedCountryCode.toUpperCase().slice(0, USER_DEVICE_COUNTRY_CODE_MAX_LENGTH)
+      : undefined;
+
+    const now = new Date();
+
+    let deviceEntry = user.loginDevices.find(
+      (entry) =>
+        (entry.ip || '') === ipValue &&
+        (entry.userAgent || '') === userAgentValue
+    );
+
+    if (!deviceEntry) {
+      deviceEntry = {
+        ip: ipValue || undefined,
+        userAgent: userAgentValue || undefined,
+        countryCode: countryValue || undefined,
+        lastAttemptAt: now,
+        lastSuccessAt: success ? now : undefined,
+        lastStatus: statusValue,
+        attemptCount: 1,
+        blocked: Boolean(blocked) && !success,
+      };
+      user.loginDevices.unshift(deviceEntry);
+      if (user.loginDevices.length > USER_DEVICE_MAX_ENTRIES) {
+        user.loginDevices.length = USER_DEVICE_MAX_ENTRIES;
+      }
+    } else {
+      deviceEntry.lastAttemptAt = now;
+      deviceEntry.lastStatus = statusValue;
+      deviceEntry.attemptCount = (deviceEntry.attemptCount || 0) + 1;
+      deviceEntry.blocked = Boolean(blocked) && !success;
+      if (countryValue) {
+        deviceEntry.countryCode = countryValue;
+      }
+      if (success) {
+        deviceEntry.lastSuccessAt = now;
+        deviceEntry.blocked = false;
+      }
+    }
+
+    await user.save();
+  } catch (error) {
+    console.error('Failed to record user login device:', error);
+  }
 }
 
 function formatUser(user) {
   return {
     id: user.id,
-    email: user.email,
-    username: user.username,
-    firstName: user.firstName,
-    lastName: user.lastName,
+    email: sanitizeForOutput(user.email),
+    username: sanitizeForOutput(user.username),
+    firstName: sanitizeForOutput(user.firstName),
+    lastName: sanitizeForOutput(user.lastName),
     emailVerified: user.emailVerified,
     createdAt: user.createdAt,
     updatedAt: user.updatedAt,
@@ -173,13 +355,34 @@ router.post('/login', async (req, res) => {
     const email = sanitizeEmail(req.body.email);
     const password = typeof req.body.password === 'string' ? req.body.password : '';
 
-    const identifier = email || req.ip;
+    const rawClientIp = getClientIp(req);
+    const clientIp = sanitizeText(rawClientIp) || rawClientIp;
+    const userAgent = getUserAgent(req);
+    const identifier = email ? `${email}|${clientIp}` : clientIp;
+    const countryCodePromise = clientIp ? fetchCountryCode(clientIp) : Promise.resolve(null);
 
     if (loginSecurity.isBlocked(identifier)) {
       const blockedUntil = loginSecurity.getBlockExpiresAt(identifier);
       const retryAfterSeconds = blockedUntil
         ? Math.ceil((blockedUntil - Date.now()) / 1000)
         : undefined;
+
+      const countryCode = await countryCodePromise;
+      if (email) {
+        try {
+          const blockedUser = await User.findOne({ email });
+          await recordUserLoginDevice(blockedUser, {
+            clientIp,
+            userAgent,
+            success: false,
+            blocked: true,
+            status: 'blocked',
+            countryCode,
+          });
+        } catch (error) {
+          console.error('Failed to record blocked login device:', error);
+        }
+      }
 
       res.set('Retry-After', retryAfterSeconds || '60');
       return res.status(429).json({
@@ -201,10 +404,26 @@ router.post('/login', async (req, res) => {
     const validPassword = await verifyPasswordWithSalt(password, user.salt, user.passwordHash);
     if (!validPassword) {
       loginSecurity.recordFailedAttempt(identifier);
+      await recordUserLoginDevice(user, {
+        clientIp,
+        userAgent,
+        success: false,
+        blocked: false,
+        status: 'invalid_credentials',
+        countryCode: await countryCodePromise,
+      });
       return res.status(401).json({ message: 'Invalid credentials.' });
     }
 
     if (!user.emailVerified) {
+      await recordUserLoginDevice(user, {
+        clientIp,
+        userAgent,
+        success: false,
+        blocked: false,
+        status: 'email_not_verified',
+        countryCode: await countryCodePromise,
+      });
       return res.status(403).json({
         message: 'Please verify your email address before logging in.',
         emailVerified: false,
@@ -213,6 +432,14 @@ router.post('/login', async (req, res) => {
 
     const token = createToken(user);
     loginSecurity.resetAttempts(identifier);
+    await recordUserLoginDevice(user, {
+      clientIp,
+      userAgent,
+      success: true,
+      blocked: false,
+      status: 'success',
+      countryCode: await countryCodePromise,
+    });
     return res.json({
       token,
       user: formatUser(user),
@@ -282,17 +509,14 @@ router.put('/change-password', auth(true, true), async (req, res) => {
       }
     }
 
-    if (PASSWORD_HISTORY_LIMIT > 0) {
-      user.passwordHistory.unshift({
-        passwordHash: user.passwordHash,
-        salt: user.salt,
-        changedAt: new Date(),
-      });
-
-      if (user.passwordHistory.length > PASSWORD_HISTORY_LIMIT) {
-        user.passwordHistory = user.passwordHistory.slice(0, PASSWORD_HISTORY_LIMIT);
-      }
+    if (!Array.isArray(user.passwordHistory)) {
+      user.passwordHistory = [];
     }
+    user.passwordHistory.unshift({
+      passwordHash: user.passwordHash,
+      salt: user.salt,
+      changedAt: new Date(),
+    });
 
     const newSalt = generateSalt();
     const newHash = await hashPasswordWithSalt(newPassword, newSalt);
@@ -311,7 +535,9 @@ router.put('/change-password', auth(true, true), async (req, res) => {
 
 router.get('/verify-email', async (req, res) => {
   try {
-    const token = typeof req.query.token === 'string' ? req.query.token.trim() : '';
+    const token = sanitizeText(
+      typeof req.query.token === 'string' ? req.query.token : ''
+    );
 
     if (!token) {
       return res.status(400).json({ message: 'Verification token is required.' });

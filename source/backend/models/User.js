@@ -73,6 +73,21 @@ const userSchema = new mongoose.Schema(
       type: Date,
       required: false,
     },
+    loginDevices: {
+      type: [
+        {
+          ip: { type: String, trim: true, maxlength: 100 },
+          userAgent: { type: String, trim: true, maxlength: 500 },
+          countryCode: { type: String, uppercase: true, trim: true, maxlength: 3 },
+          lastAttemptAt: { type: Date, default: Date.now },
+          lastSuccessAt: { type: Date },
+          lastStatus: { type: String, trim: true, maxlength: 60 },
+          attemptCount: { type: Number, default: 1, min: 1 },
+          blocked: { type: Boolean, default: false },
+        },
+      ],
+      default: [],
+    },
     stats: { type: mongoose.Schema.Types.ObjectId, ref: 'Stats', index: true },
   },
   { timestamps: true }
