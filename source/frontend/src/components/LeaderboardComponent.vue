@@ -14,24 +14,28 @@
                 </div>
                 <div class="ranking">
                     <div class="podium">
-                        <div class="podiumItem">
+                        <div class="podiumItem second">
                             <p class="textType1">2</p>
-                            <p class="textType2">MasterLini</p>
-                            <p class="textType2">10,000</p>
-                        </div>
-
-                        <div class="podiumItem">
-                            <p class="textType1">1</p>
-                            <p class="textType2 username" title="DarkLord--86">
-                                DarkLord--85
+                            <p class="textType2 username" :title="leaderboard[1]?.username">
+                            {{ leaderboard[1]?.username || "–" }}
                             </p>
-                            <p class="textType2">12,345</p>
+                            <p class="textType2">{{ leaderboard[1]?.totalPoints.toLocaleString() }}</p>
                         </div>
 
-                        <div class="podiumItem">
+                        <div class="podiumItem first">
+                            <p class="textType1">1</p>
+                            <p class="textType2 username" :title="leaderboard[0]?.username">
+                                {{ leaderboard[0]?.username || "–" }}
+                            </p>
+                            <p class="textType2">{{ leaderboard[0]?.totalPoints.toLocaleString() }}</p>
+                        </div>
+
+                        <div class="podiumItem third">
                             <p class="textType1">3</p>
-                            <p class="textType2">Kooproo</p>
-                            <p class="textType2">8,000</p>
+                            <p class="textType2 username" :title="leaderboard[2]?.username">
+                                {{ leaderboard[2]?.username || "–" }}
+                            </p>
+                            <p class="textType2">{{ leaderboard[2]?.totalPoints.toLocaleString() }}</p>
                         </div>
                     </div>
 
@@ -67,14 +71,15 @@ const leaderboard = ref([]);
 
 onMounted(async () => {
   try {
-  const { data } = await axios.get("http://localhost:5000/stats/leaderboard");
-  console.log(data);
-  leaderboard.value = data.leaderboard;
-} catch (err) {
-  console.error("Fehler:", err);
-}
-  })
+    const { data } = await axios.get("http://localhost:5000/stats/leaderboard");
+    console.log(data);
+    leaderboard.value = data.leaderboard || [];
+  } catch (err) {
+    console.error("Fehler:", err);
+  }
+})
 </script>
+
 
 <style scoped>
 .leaderboard {
@@ -98,15 +103,17 @@ onMounted(async () => {
 
 .ranking {
     margin: 2.5rem;
-    height: 24rem;
+    height: 26rem;
     border: 1px solid rgba(255,255,255,0.03);
     border-radius: 16px;
 }
 
 .podium {
     display: flex;
-    justify-content: space-between;
-    margin: 1rem;
+    justify-content: center;
+    align-items: flex-end;
+    gap: 1rem;
+    margin: 2rem;
 }
 
 .podiumItem {
@@ -114,8 +121,22 @@ onMounted(async () => {
     text-align: center;
     width: 9rem;
     border-radius: 16px;
-    height: 6.5rem;
+    padding-top: 0.4rem;
+    padding-bottom: 0.4rem;
 }
+
+.podiumItem.first {
+    transform: translateY(-1.5rem);
+}
+
+.podiumItem.second {
+    transform: translateY(-0.7rem);
+}
+
+.podiumItem.third {
+    transform: translateY(0);
+}
+
 
 table {
   width: 100%;
