@@ -1,7 +1,11 @@
 <script setup>
 import { onMounted, onBeforeUnmount, ref } from 'vue';
-const canvasRef = ref(null);
+import { Icon } from '@iconify/vue';
 
+const canvasRef = ref(null);
+let isAuthenticated = true;
+
+// Code für die Wellenanimation
 onMounted(() => {
   const canvas = canvasRef.value;
   const ctx = canvas.getContext('2d');
@@ -76,13 +80,19 @@ onMounted(() => {
             <li><router-link class="nav-link" :to="{ path: '/home', hash: '#howtoplay' }">How to play</router-link></li>
             </ul>
             <div class="nav-actions">
-            <router-link class="btn primary" :to="{ name: 'auth' }">Sign Up</router-link>
+            <router-link class="btn primary" v-if="!isAuthenticated" :to="{ name: 'auth' }">Sign Up</router-link>
+            <router-link v-if="isAuthenticated" :to="{ name: 'profile' }">
+              <div class="profile-orb">
+                <Icon icon="solar:user-bold-duotone" class="userIcon"/>
+              </div>
+            </router-link>
             </div>
         </nav>
     </div>
 </template>
 
 <style scoped>
+/* Allgemeine Navbar-Eigenschaften */
 #navbar {
     display: flex;
     position: relative;
@@ -117,6 +127,10 @@ onMounted(() => {
     text-shadow: 0 0 22px rgba(0, 236, 255, 0.2);
     padding-left: 2.5rem;
 }
+
+
+
+/* Navbar-Items */
 .nav-list {
     display: flex;
     gap: 2rem;
@@ -133,31 +147,10 @@ onMounted(() => {
     font-size: 1.1rem;
 }
 
-canvas {
-  position: absolute;
-  inset: 0;
-  height: 100%;
-  width: 100%;
-  opacity: 0.5;
-  filter: blur(0.2px) brightness(1.2);
-}
-
-.wave-layer {
-  position: absolute;
-  inset: 0;
-  z-index: -1;
-  pointer-events: none;
-}
-
 .nav-actions {
     padding-left: 5rem;
     padding-right: 2.5rem;
 }
-
-/*:deep(.router-link-exact-active[href="/home"]) {
-  text-decoration: underline;
-  color: var(--accent-cyan);
-} */
 
 :deep(.router-link-exact-active[href="/home"])::after {
   transform: scaleX(1);
@@ -185,6 +178,28 @@ canvas {
     color: #ffffff;
 }
 
+
+
+/* Wellenanimation / Canvas */
+canvas {
+  position: absolute;
+  inset: 0;
+  height: 100%;
+  width: 100%;
+  opacity: 0.5;
+  filter: blur(0.2px) brightness(1.2);
+}
+
+.wave-layer {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+}
+
+
+
+/* Allgemeine Styles */
 .btn {
     display: inline-flex;
     align-items: center;
@@ -211,4 +226,53 @@ canvas {
     border-color: rgba(255,255,255,0.24);
     background: rgba(255,255,255,0.08);
 }
+
+
+/* Account */
+.profile-orb {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+
+    /* Neon-Gradient passend zu deinem Wave-Design */
+    background: radial-gradient(
+        circle at 30% 30%,
+        rgba(255, 0, 200, 0.55),
+        rgba(0, 236, 255, 0.50),
+        rgba(61, 255, 140, 0.45)
+    );
+
+    /* Outer Glow */
+    box-shadow:
+        0 0 14px rgba(255, 0, 200, 0.55),
+        0 0 28px rgba(0, 236, 255, 0.45),
+        0 0 42px rgba(61, 255, 140, 0.35);
+
+    backdrop-filter: blur(4px);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+
+    transition: 
+        transform 0.22s ease, 
+        box-shadow 0.24s ease;
+}
+
+.profile-orb:hover {
+    transform: translateY(-2px);
+    box-shadow:
+        0 0 20px rgba(255, 0, 200, 0.75),
+        0 0 32px rgba(0, 236, 255, 0.60),
+        0 0 50px rgba(61, 255, 140, 0.50);
+}
+
+/* Iconify-Icon */
+.profile-orb :deep(.userIcon) {
+    font-size: 22px;
+    color: white;
+    filter: drop-shadow(0 0 4px rgba(255, 255, 255, 0.7));
+}
+
 </style>
