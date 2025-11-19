@@ -194,6 +194,19 @@ router.post('/signup', async (req, res) => {
   }
 });
 
+router.get('/me', auth(true, true), async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id);
+    if (!user) {
+      return res.status(404).json({ message: 'User not found.' });
+    }
+    return res.json({ user: formatUser(user) });
+  } catch (error) {
+    console.error('Fetch current user error:', error);
+    return res.status(500).json({ message: 'Failed to fetch current user.' });
+  }
+});
+
 router.post('/login', async (req, res) => {
   try {
     const email = sanitizeEmail(req.body.email);
