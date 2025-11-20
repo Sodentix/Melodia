@@ -89,7 +89,7 @@ describe('Auth routes', () => {
     await request(app).post('/auth/signup').send({
       ...baseUserPayload,
       email: 'unverified@example.com',
-      username: 'unverifieduser',
+      username: 'unverified',
     });
 
     const response = await request(app).post('/auth/login').send({
@@ -128,7 +128,7 @@ describe('Auth routes', () => {
   test('login fails with invalid password', async () => {
     const verifiedPayload = await signUpAndVerify({
       email: 'wrongpass@example.com',
-      username: 'wrongpassuser',
+      username: 'wrongpass1',
     });
 
     const response = await request(app).post('/auth/login').send({
@@ -157,7 +157,7 @@ describe('Auth routes', () => {
   test('login succeeds when correct password is provided before rate limit is exceeded', async () => {
     const verifiedPayload = await signUpAndVerify({
       email: 'prelimit@example.com',
-      username: 'prelimituser',
+      username: 'prelimit12',
     });
 
     const maxAttempts = Number(process.env.LOGIN_RATE_LIMIT_MAX_ATTEMPTS || 5);
@@ -182,7 +182,7 @@ describe('Auth routes', () => {
   test('login rate limiter blocks after repeated failed attempts', async () => {
     const verifiedPayload = await signUpAndVerify({
       email: 'ratelimit@example.com',
-      username: 'ratelimituser',
+      username: 'ratelimit1',
     });
 
     const maxAttempts = Number(process.env.LOGIN_RATE_LIMIT_MAX_ATTEMPTS || 5);
@@ -248,7 +248,7 @@ describe('Auth routes', () => {
   test('change-password updates the password and enforces requirements', async () => {
     const verifiedPayload = await signUpAndVerify({
       email: 'changer@example.com',
-      username: 'changepassuser',
+      username: 'changepass',
     });
 
     const loginResponse = await request(app).post('/auth/login').send({
@@ -289,7 +289,7 @@ describe('Auth routes', () => {
     const response = await request(app).post('/auth/signup').send({
       ...baseUserPayload,
       email: 'weakpass@example.com',
-      username: 'weakpassuser',
+      username: 'weakpass1',
       password: 'weak',
     });
 
@@ -302,13 +302,13 @@ describe('Auth routes', () => {
   test('signup rejects duplicate emails', async () => {
     await signUpUser({
       email: 'duplicate@example.com',
-      username: 'duplicateuser',
+      username: 'dupeuser1',
     });
 
     const response = await request(app).post('/auth/signup').send({
       ...baseUserPayload,
       email: 'duplicate@example.com',
-      username: 'anotherduplicate',
+      username: 'dupeuser2',
     });
 
     expect(response.status).toBe(409);

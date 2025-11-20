@@ -2,6 +2,18 @@
   <div class="game-view">
     <h1>Guess The Song</h1>
 
+    <div class="mode-banner">
+      <span class="chip" :class="{ free: isFreeplay }">
+        {{ isFreeplay ? 'Freeplay' : 'Competitive' }}
+      </span>
+      <span class="chip category">
+        {{ categoryLabel }}
+      </span>
+      <button type="button" class="chip link" @click="$router.push('/game')">
+        Modus wechseln
+      </button>
+    </div>
+
     <!-- Audio Player -->
     <div v-if="currentRound" class="audio-section">
       <p class="game-instruction">Listen to the preview and guess the song!</p>
@@ -75,7 +87,7 @@
     </div>
 
     <!-- Points Display -->
-    <div v-if="lastPoints > 0" class="points-display">
+    <div v-if="!isFreeplay && lastPoints > 0" class="points-display">
       <p>🎉 Correct! You earned {{ lastPoints }} points!</p>
     </div>
 
@@ -101,18 +113,90 @@ export default {
       messageType: 'info', // 'info', 'success', 'error'
       lastPoints: 0,
       searchDebounceTimer: null,
+      gameMode: localStorage.getItem('melodia_game_mode') || 'competitive',
+      selectedCategory: null,
+      categoryTracks: [],
+      authToken: null,
     };
   },
   mounted() {
+    this.loadGameContext();
     this.verifySession();
   },
+  watch: {
+    '$route.query': {
+      deep: false,
+      handler() {
+        this.loadGameContext();
+        if (this.authToken) {
+          this.loadCategoryTracks();
+        }
+      },
+    },
+  },
+  computed: {
+    isFreeplay() {
+      return this.gameMode === 'freeplay';
+    },
+    categoryLabel() {
+      return this.selectedCategory?.name || this.selectedCategory?.categoryName || 'Hit Mix';
+    },
+  },
   methods: {
+    loadGameContext() {
+      const routeMode = this.$route.query.mode;
+      if (routeMode === 'freeplay' || routeMode === 'competitive') {
+        this.gameMode = routeMode;
+        localStorage.setItem('melodia_game_mode', routeMode);
+      } else {
+        const storedMode = localStorage.getItem('melodia_game_mode');
+        this.gameMode = storedMode === 'freeplay' ? 'freeplay' : 'competitive';
+      }
+
+      const routeCategory = this.$route.query.category;
+      let parsedCategory = null;
+      const categoryRaw = localStorage.getItem('melodia_game_category');
+      if (categoryRaw) {
+        try {
+          parsedCategory = JSON.parse(categoryRaw);
+        } catch (_) {
+          parsedCategory = null;
+        }
+      }
+
+      if (routeCategory) {
+        const normalized = {
+          id: routeCategory,
+          categoryId: routeCategory,
+          name: parsedCategory?.name || parsedCategory?.categoryName || 'Hit Mix',
+          categoryName: parsedCategory?.name || parsedCategory?.categoryName || 'Hit Mix',
+          accent: parsedCategory?.accent,
+        };
+        this.selectedCategory = normalized;
+        localStorage.setItem('melodia_game_category', JSON.stringify(normalized));
+      } else if (parsedCategory && (parsedCategory.id || parsedCategory.categoryId)) {
+        this.selectedCategory = {
+          id: parsedCategory.id || parsedCategory.categoryId,
+          categoryId: parsedCategory.id || parsedCategory.categoryId,
+          name: parsedCategory.name || parsedCategory.categoryName || 'Hit Mix',
+          categoryName: parsedCategory.name || parsedCategory.categoryName || 'Hit Mix',
+          accent: parsedCategory.accent,
+        };
+      } else {
+        this.selectedCategory = null;
+      }
+
+      if (!this.selectedCategory) {
+        this.$router.push('/game');
+      }
+    },
     async verifySession() {
       const token = localStorage.getItem('melodia_token') || localStorage.getItem('token');
       if (!token) {
         this.handleInvalidSession('Bitte melde dich an, um zu spielen.');
         return;
       }
+      this.authToken = token;
 
       const base = import.meta.env.VITE_API_URL || '';
       if (!base) {
@@ -144,9 +228,46 @@ export default {
         if (data.user) {
           localStorage.setItem('melodia_user', JSON.stringify(data.user));
         }
+        await this.loadCategoryTracks();
       } catch (error) {
         console.error('Session validation failed:', error);
         this.handleInvalidSession('Bitte melde dich erneut an.');
+      }
+    },
+
+    async loadCategoryTracks() {
+      if (!this.selectedCategory) {
+        this.categoryTracks = [];
+        return;
+      }
+
+      const base = import.meta.env.VITE_API_URL || '';
+      if (!base) {
+        return;
+      }
+
+      const token = this.authToken || localStorage.getItem('melodia_token') || localStorage.getItem('token');
+      if (!token) {
+        return;
+      }
+
+      const categoryId = this.selectedCategory.id || this.selectedCategory.categoryId || 'all';
+
+      try {
+        const res = await fetch(`${base}/game/category/${encodeURIComponent(categoryId)}/tracks`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            Accept: 'application/json',
+          },
+        });
+        if (!res.ok) {
+          throw new Error('Failed to load category tracks');
+        }
+        const data = await res.json();
+        this.categoryTracks = Array.isArray(data.tracks) ? data.tracks : [];
+      } catch (error) {
+        console.error('Load category tracks failed:', error);
+        this.categoryTracks = [];
       }
     },
 
@@ -188,6 +309,31 @@ export default {
       if (!query.trim()) {
         this.suggestions = [];
         this.showSuggestions = false;
+        return;
+      }
+
+      const lowerQuery = query.toLowerCase();
+      if (this.categoryTracks.length > 0) {
+        const filtered = this.categoryTracks
+          .filter((track) => {
+            const haystack = [
+              track.name,
+              ...(track.artists || []).map((artist) => artist.name || ''),
+            ]
+              .join(' ')
+              .toLowerCase();
+            return haystack.includes(lowerQuery);
+          })
+          .slice(0, 8)
+          .map((track) => ({
+            id: track.id,
+            name: track.name,
+            artists: track.artists || [],
+            image: track.image || null,
+          }));
+        this.suggestions = filtered;
+        this.showSuggestions = filtered.length > 0;
+        this.selectedIndex = -1;
         return;
       }
 
@@ -291,6 +437,12 @@ export default {
         return;
       }
 
+      if (!this.selectedCategory) {
+        this.showMessage('error', 'Bitte wähle zuerst eine Kategorie.');
+        this.$router.push('/game');
+        return;
+      }
+
       const token = localStorage.getItem('melodia_token') || localStorage.getItem('token');
       if (!token) {
         this.handleInvalidSession('Bitte melde dich an, um zu spielen.');
@@ -311,7 +463,13 @@ export default {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${token}`,
           },
-          body: JSON.stringify({}),
+          body: JSON.stringify({
+            mode: this.gameMode,
+            categoryId:
+              this.selectedCategory?.id ||
+              this.selectedCategory?.categoryId ||
+              'all',
+          }),
         });
 
         if (!res.ok) {
@@ -384,10 +542,13 @@ export default {
         
         if (data.correct) {
           // Correct guess!
-          this.lastPoints = data.points || 0;
+          this.lastPoints = this.isFreeplay ? 0 : (data.points || 0);
           this.currentRound.completed = true;
           this.currentRound.guessCount = data.totalGuesses || 0;
-          this.showMessage('success', `Correct! You earned ${data.points} points!`);
+          const successMessage = this.isFreeplay
+            ? 'Correct! Freeplay run abgeschlossen.'
+            : `Correct! You earned ${data.points} points!`;
+          this.showMessage('success', successMessage);
           this.guessInput = '';
           
           // Stop audio
@@ -451,6 +612,50 @@ export default {
   max-width: 800px;
   margin: 0 auto;
   padding: 2rem;
+}
+
+.mode-banner {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+  align-items: center;
+}
+
+.chip {
+  border-radius: 999px;
+  padding: 0.4rem 1rem;
+  font-size: 0.85rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.08);
+  color: #0b0c14;
+  font-weight: 600;
+}
+
+.chip.free {
+  background: #fcd34d;
+  color: #1b1c30;
+  border-color: rgba(252, 211, 77, 0.4);
+}
+
+.chip.category {
+  background: #38bdf8;
+  color: #04121f;
+  border-color: rgba(56, 189, 248, 0.4);
+}
+
+.chip.link {
+  background: transparent;
+  color: #ffffff;
+  border-color: rgba(255, 255, 255, 0.35);
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.chip.link:hover {
+  background: rgba(255, 255, 255, 0.1);
 }
 
 h1 {
