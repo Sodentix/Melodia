@@ -104,13 +104,60 @@ export default {
     };
   },
   mounted() {
-    // Check if user is authenticated
-    const token = localStorage.getItem('melodia_token') || localStorage.getItem('token');
-    if (!token) {
-      this.$router.push('/auth');
-    }
+    this.verifySession();
   },
   methods: {
+    async verifySession() {
+      const token = localStorage.getItem('melodia_token') || localStorage.getItem('token');
+      if (!token) {
+        this.handleInvalidSession('Bitte melde dich an, um zu spielen.');
+        return;
+      }
+
+      const base = import.meta.env.VITE_API_URL || '';
+      if (!base) {
+        this.showMessage('error', 'API base URL not configured');
+        return;
+      }
+
+      const authBase = base.endsWith('/auth') ? base : `${base}/auth`;
+
+      try {
+        const res = await fetch(`${authBase}/isAuthed`, {
+          method: 'GET',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            Accept: 'application/json',
+          },
+        });
+
+        if (!res.ok) {
+          throw new Error('Session invalid');
+        }
+
+        const data = await res.json();
+        if (!data.loggedIn) {
+          this.handleInvalidSession('Bitte melde dich erneut an.');
+          return;
+        }
+
+        if (data.user) {
+          localStorage.setItem('melodia_user', JSON.stringify(data.user));
+        }
+      } catch (error) {
+        console.error('Session validation failed:', error);
+        this.handleInvalidSession('Bitte melde dich erneut an.');
+      }
+    },
+
+    handleInvalidSession(message = 'Session expired. Please log in again.') {
+      localStorage.removeItem('melodia_token');
+      localStorage.removeItem('token');
+      localStorage.removeItem('melodia_user');
+      this.showMessage('error', message);
+      this.$router.push('/auth');
+    },
+
     async onGuessInput() {
       const query = this.guessInput.trim();
       
@@ -152,7 +199,7 @@ export default {
 
       const token = localStorage.getItem('melodia_token') || localStorage.getItem('token');
       if (!token) {
-        this.showMessage('error', 'Please log in to play');
+        this.handleInvalidSession('Bitte melde dich an, um zu spielen.');
         return;
       }
 
@@ -246,8 +293,7 @@ export default {
 
       const token = localStorage.getItem('melodia_token') || localStorage.getItem('token');
       if (!token) {
-        this.showMessage('error', 'Please log in to play');
-        this.$router.push('/auth');
+        this.handleInvalidSession('Bitte melde dich an, um zu spielen.');
         return;
       }
 
@@ -308,7 +354,7 @@ export default {
       const token = localStorage.getItem('melodia_token') || localStorage.getItem('token');
       
       if (!token) {
-        this.showMessage('error', 'Please log in to play');
+        this.handleInvalidSession('Bitte melde dich an, um zu spielen.');
         return;
       }
 
