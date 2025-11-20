@@ -235,8 +235,7 @@ router.get('/isAuthed', auth(true, true), async (req, res) => {
     }
 
     return res.json({
-      loggedIn: true,
-      user: formatUser(user),
+      loggedIn: true
     });
   } catch (error) {
     console.error('Session validation error:', error);
