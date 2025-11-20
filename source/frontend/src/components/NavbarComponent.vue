@@ -132,7 +132,7 @@ onBeforeUnmount(() => {
               <div class="profile-orb">
                 <Icon icon="solar:user-bold-duotone" class="userIcon"/>
               </div>
-            </router-link>x
+            </router-link>
             </div>
         </nav>
     </div>
