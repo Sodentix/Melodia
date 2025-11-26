@@ -21,8 +21,8 @@ export default defineComponent({
         <div class="gamemodeDiv">
           <!-- Parameter sind title, description, icon, iconColor, iconWidth, iconHeight, cardWidth, cardHeight-->
           <!-- Icons werden je nach Icon-Collection unterschiedlich angegeben - in der Doku nachlesen!-->
-          <BaseCard title="Free Play" description="Teste dein Können ohne Zeitdruck" icon="mdi:music" iconColor="purple"/>
-          <BaseCard title="Challenge Mode" description="Spiele gegen die Uhr und erklimme das Leaderboard" icon="mdi:trophy-outline" iconColor="#b3b300"/>
+          <BaseCard style="width: 20rem; height: 10rem;" title="Free Play" description="Teste dein Können ohne Zeitdruck" icon="mdi:music" iconColor="purple"/>
+          <BaseCard style="width: 20rem; height: 10rem;" title="Challenge Mode" description="Spiele gegen die Uhr und erklimme das Leaderboard" icon="mdi:trophy-outline" iconColor="#b3b300"/>
         </div>
       </div>
       <div class="leaderboardDiv">
@@ -64,12 +64,13 @@ p, h2 {
 .gamemodeDiv {
   display: flex;
   flex-direction: row;
-  gap: 1rem;
+  justify-content: space-between;
   padding-top: 2rem;
+  margin-right: 3rem;
 }
 
 .leaderboardDiv {
-  padding-right: 5rem;
+  padding-right: 2rem;
 }
 
 .explanationCard {
@@ -97,6 +98,7 @@ p, h2 {
 .topSection {
   display: flex;
   flex-direction: row;
+  justify-content: space-between;
 }
 
 .topLeft {
