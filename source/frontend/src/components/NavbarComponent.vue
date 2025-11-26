@@ -1,12 +1,56 @@
 <script setup>
 import { onMounted, onBeforeUnmount, ref } from 'vue';
 import { Icon } from '@iconify/vue';
+import axios from 'axios';
 
 const canvasRef = ref(null);
-let isAuthenticated = true;
+const isAuthenticated = ref(false);
+let animationId;
+
+const apiRoot = import.meta.env.VITE_API_URL
+  ? import.meta.env.VITE_API_URL.replace(/\/$/, '')
+  : '';
+const authBase = apiRoot.endsWith('/auth') ? apiRoot : `${apiRoot}/auth`;
+
+async function validateSession() {
+  const token = localStorage.getItem('melodia_token') || localStorage.getItem('token');
+
+  if (!token || !authBase) {
+    isAuthenticated.value = false;
+    return;
+  }
+
+  try {
+    const { data } = await axios.get(`${authBase}/isAuthed`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        Accept: 'application/json',
+      },
+    });
+
+    isAuthenticated.value = Boolean(data?.loggedIn);
+
+    if (data?.loggedIn && data.user) {
+      localStorage.setItem('melodia_user', JSON.stringify(data.user));
+    }
+  } catch (error) {
+    console.warn('Navbar auth check failed:', error.response?.data || error.message);
+    isAuthenticated.value = false;
+    localStorage.removeItem('melodia_token');
+    localStorage.removeItem('token');
+    localStorage.removeItem('melodia_user');
+  }
+}
+
+function handleAuthChange() {
+  validateSession();
+}
 
 // Code für die Wellenanimation
 onMounted(() => {
+  validateSession();
+  window.addEventListener('melodia-auth-changed', handleAuthChange);
+
   const canvas = canvasRef.value;
   const ctx = canvas.getContext('2d');
 
@@ -14,7 +58,7 @@ onMounted(() => {
   canvas.height = 300;
 
     const colors = [
-    'rgba(255,0,200,0.6)',
+    'rgba(255,0,200,0.6)',  
     'rgba(0,236,255,0.5)',
     'rgba(61,255,140,0.45)',
     'rgba(255,255,255,0.35)'
@@ -22,7 +66,6 @@ onMounted(() => {
 
   const lineWidths = [3.1, 2.8, 2.5, 2.3];
   let time = 0;
-  let animationId;
 
   function mapWave(value, min, max) {
     return min + ((value + 1) / 2) * (max - min);
@@ -62,9 +105,13 @@ onMounted(() => {
   animationId = requestAnimationFrame(draw);
 
   // Cleanup bei Unmount
-  onBeforeUnmount(() => {
+});
+
+onBeforeUnmount(() => {
+  window.removeEventListener('melodia-auth-changed', handleAuthChange);
+  if (animationId) {
     cancelAnimationFrame(animationId);
-  });
+  }
 });
 </script>
 

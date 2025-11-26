@@ -2,16 +2,17 @@ const crypto = require('crypto');
 
 class GameRoundStore {
   constructor() {
-    this.rounds = new Map(); // roundId -> { track, createdAt, userId, guesses: [{guess, correct, timestamp}] }
+    this.rounds = new Map(); // roundId -> { track, createdAt, userId, mode, categoryId, guesses: [{guess, correct, timestamp}] }
     const ttlMs = Number(process.env.GAME_ROUND_TTL_MS || 5 * 60 * 1000);
     const sweepMs = Math.min(ttlMs, 60 * 1000);
     setInterval(() => this.sweep(ttlMs), sweepMs).unref?.();
   }
 
-  create(track, userId) {
+  create(track, userId, options = {}) {
     const roundId = crypto.randomUUID ? crypto.randomUUID() : crypto.randomBytes(16).toString('hex');
     const createdAt = Date.now();
-    this.rounds.set(roundId, { track, createdAt, userId, guesses: [] });
+    const { mode = 'competitive', categoryId = 'all' } = options;
+    this.rounds.set(roundId, { track, createdAt, userId, guesses: [], mode, categoryId });
     return { roundId, track };
   }
 

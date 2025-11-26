@@ -1,8 +1,9 @@
 const express = require('express');
 const auth = require('../middleware/auth');
 const Stats = require('../models/Stats');
-const { fetchRandomClip, getLocalClipsStatus } = require('../services/clipService');
+const { fetchRandomClip, getLocalClipsStatus, listTracksByCategory } = require('../services/clipService');
 const { GameRoundStore, isGuessCorrect, calculatePoints } = require('../services/gameService');
+const { listCategories, findCategoryById } = require('../services/categoryService');
 
 const router = express.Router();
 const rounds = new GameRoundStore();
@@ -13,6 +14,8 @@ function logDebug(message, extra) {
   if (extra && typeof extra === 'object') Object.assign(payload, extra);
   try { console.log(JSON.stringify(payload)); } catch (_) { /* noop */ }
 }
+
+const ALLOWED_MODES = new Set(['competitive', 'freeplay']);
 
 // Record the result of a game for the authenticated (and email-verified) user
 router.post('/record', auth(true, true), async (req, res) => {
@@ -52,22 +55,52 @@ router.post('/record', auth(true, true), async (req, res) => {
   }
 });
 
+router.get('/categories', (_req, res) => {
+  try {
+    const categories = listCategories();
+    return res.json({ categories });
+  } catch (err) {
+    console.error('List categories error:', err);
+    return res.status(500).json({ message: 'Failed to load categories' });
+  }
+});
+
+router.get('/category/:categoryId/tracks', auth(true, true), (req, res) => {
+  try {
+    const categoryId = req.params.categoryId || 'all';
+    const base = `${req.protocol}://${req.get('host')}`;
+    const tracks = listTracksByCategory(base, categoryId);
+    return res.json({ tracks });
+  } catch (err) {
+    console.error('List category tracks error:', err);
+    const message = process.env.NODE_ENV === 'production' ? 'Failed to load category tracks' : String(err.message || err);
+    return res.status(500).json({ message });
+  }
+});
+
 // Start a new round: returns roundId and preview URL (no answer)
 router.post('/start', auth(true, true), async (req, res) => {
   try {
+    const requestedMode = typeof req.body.mode === 'string' ? req.body.mode.toLowerCase() : 'competitive';
+    const mode = ALLOWED_MODES.has(requestedMode) ? requestedMode : 'competitive';
+
+    const rawCategory = typeof req.body.categoryId === 'string' ? req.body.categoryId.trim() : 'all';
+    const category = findCategoryById(rawCategory) ? rawCategory : 'all';
+
     const base = `${req.protocol}://${req.get('host')}`;
-    const track = await fetchRandomClip(base);
+    const track = await fetchRandomClip(base, { categoryId: category });
     if (!track?.preview_url) {
       logDebug('start_no_preview', {});
       return res.status(503).json({ message: 'No preview available, try again' });
     }
-    const { roundId } = rounds.create(track, req.user.id);
-    logDebug('round_started', { roundId, trackId: track.id, source: 'local', userId: req.user.id });
-    return res.json({ roundId, preview_url: track.preview_url });
+    const { roundId } = rounds.create(track, req.user.id, { mode, categoryId: category });
+    logDebug('round_started', { roundId, trackId: track.id, source: 'local', userId: req.user.id, mode, category });
+    return res.json({ roundId, preview_url: track.preview_url, mode, categoryId: category });
   } catch (err) {
     console.error('Start round error:', err);
+    const status = /No clips available/i.test(String(err.message || '')) ? 503 : 500;
     const message = process.env.NODE_ENV === 'production' ? 'Failed to start round' : String(err.message || err);
-    return res.status(500).json({ message });
+    return res.status(status).json({ message });
   }
 });
 
@@ -104,27 +137,31 @@ router.post('/guess', auth(true, true), async (req, res) => {
     });
     
     let points = 0;
+    const mode = round.mode || 'competitive';
+    let completionTimeMs = null;
     if (correct) {
       // Calculate points based on attempts and time
       const correctIndex = updatedRound.guesses.findIndex(g => g.correct);
-      points = calculatePoints(updatedRound, correctIndex);
+      points = mode === 'competitive' ? calculatePoints(updatedRound, correctIndex) : 0;
+      completionTimeMs = updatedRound.guesses[correctIndex].timestamp - updatedRound.createdAt;
       
-      // Record game stats immediately when correct
-      const timeMs = updatedRound.guesses[correctIndex].timestamp - updatedRound.createdAt;
-      await Stats.recordGame({
-        userId: req.user.id,
-        win: true,
-        correctGuesses: correctGuesses,
-        wrongGuesses: wrongGuesses,
-        points,
-        timeMs,
-        mode: 'classic',
-        playedAt: new Date(),
-      });
+      if (mode === 'competitive') {
+        // Record game stats immediately when correct
+        await Stats.recordGame({
+          userId: req.user.id,
+          win: true,
+          correctGuesses: correctGuesses,
+          wrongGuesses: wrongGuesses,
+          points,
+          timeMs: completionTimeMs,
+          mode,
+          playedAt: new Date(),
+        });
+      }
       
       // end the round when guessed correctly
       rounds.delete(roundId);
-      logDebug('round_completed', { roundId, trackId: round.track?.id, points, timeMs });
+      logDebug('round_completed', { roundId, trackId: round.track?.id, points, timeMs: completionTimeMs });
     }
     
     // Return result with points if correct
@@ -132,7 +169,9 @@ router.post('/guess', auth(true, true), async (req, res) => {
       correct, 
       points: correct ? points : 0,
       totalGuesses: updatedRound.guesses.length,
-      track: correct ? { id: round.track.id, name: round.track.name, artists: round.track.artists } : null 
+      track: correct ? { id: round.track.id, name: round.track.name, artists: round.track.artists } : null,
+      mode,
+      categoryId: round.categoryId || 'all',
     });
   } catch (err) {
     console.error('Guess error:', err);

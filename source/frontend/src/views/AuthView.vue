@@ -111,6 +111,7 @@ const handleLogin = async () => {
     if (data.user) {
       localStorage.setItem('melodia_user', JSON.stringify(data.user))
     }
+    window.dispatchEvent(new CustomEvent('melodia-auth-changed'))
 
     setFeedback('success', 'Login erfolgreich. Weiterleitung...')
     await router.push('/home')

@@ -14,52 +14,26 @@ const PASSWORD_HISTORY_LIMIT = Math.max(
   Number(process.env.PASSWORD_HISTORY_LIMIT || 5),
   0
 );
-const SCRIPT_TAG_REGEX = /<script\b[^>]*>([\s\S]*?)<\/script>/gi;
-
-function removeScriptTags(value) {
-  return value.replace(SCRIPT_TAG_REGEX, '');
-}
 
 function sanitizeName(value) {
   if (typeof value !== 'string') {
     return '';
   }
-  return removeScriptTags(value).trim();
+  return value.trim();
 }
 
 function sanitizeEmail(value) {
   if (typeof value !== 'string') {
     return '';
   }
-  return removeScriptTags(value).trim().toLowerCase();
+  return value.trim().toLowerCase();
 }
 
 function sanitizeUsername(value) {
   if (typeof value !== 'string') {
     return '';
   }
-  return removeScriptTags(value).trim().toLowerCase();
-}
-
-async function findUserByEmailOrUsername({ email, username }) {
-  if (email) {
-    return User.findOne({ email });
-  }
-  if (username) {
-    return User.findOne({ usernameLower: username });
-  }
-  return null;
-}
-
-function formatBlockStateResponse(state) {
-  return {
-    isBlocked: state.isBlocked,
-    blockedUntil: state.blockedUntil ? new Date(state.blockedUntil).toISOString() : null,
-    manuallyBlocked: state.manuallyBlocked,
-    manualBlockedAt: state.manualBlockedAt ? new Date(state.manualBlockedAt).toISOString() : null,
-    manualBlockedBy: state.manualBlockedBy || null,
-    manualBlockReason: state.manualBlockReason || null,
-  };
+  return value.trim().toLowerCase();
 }
 
 function formatUser(user) {
@@ -194,19 +168,6 @@ router.post('/signup', async (req, res) => {
   }
 });
 
-router.get('/me', auth(true, true), async (req, res) => {
-  try {
-    const user = await User.findById(req.user.id);
-    if (!user) {
-      return res.status(404).json({ message: 'User not found.' });
-    }
-    return res.json({ user: formatUser(user) });
-  } catch (error) {
-    console.error('Fetch current user error:', error);
-    return res.status(500).json({ message: 'Failed to fetch current user.' });
-  }
-});
-
 router.post('/login', async (req, res) => {
   try {
     const email = sanitizeEmail(req.body.email);
@@ -214,24 +175,13 @@ router.post('/login', async (req, res) => {
 
     const identifier = email || req.ip;
 
-    const blockState = loginSecurity.getBlockState(identifier);
-    if (blockState.isBlocked) {
-      if (blockState.manuallyBlocked) {
-        return res.status(403).json({
-          message: 'This account is blocked by an administrator.',
-          blocked: true,
-          reason: blockState.manualBlockReason || null,
-        });
-      }
-
-      const retryAfterSeconds = blockState.blockedUntil
-        ? Math.ceil((blockState.blockedUntil - Date.now()) / 1000)
+    if (loginSecurity.isBlocked(identifier)) {
+      const blockedUntil = loginSecurity.getBlockExpiresAt(identifier);
+      const retryAfterSeconds = blockedUntil
+        ? Math.ceil((blockedUntil - Date.now()) / 1000)
         : undefined;
 
-      if (retryAfterSeconds) {
-        res.set('Retry-After', String(retryAfterSeconds));
-      }
-
+      res.set('Retry-After', retryAfterSeconds || '60');
       return res.status(429).json({
         message: 'Too many login attempts. Please try again later.',
       });
@@ -270,6 +220,29 @@ router.post('/login', async (req, res) => {
   } catch (error) {
     console.error('Login error:', error);
     return res.status(500).json({ message: 'Login failed.' });
+  }
+});
+
+router.get('/isAuthed', auth(true, true), async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id);
+
+    if (!user) {
+      return res.status(404).json({
+        loggedIn: false,
+        message: 'User not found.',
+      });
+    }
+
+    return res.json({
+      loggedIn: true,
+      user: formatUser(user),
+    });
+  } catch (error) {
+    console.error('Session validation error:', error);
+    return res.status(500).json({
+      message: 'Failed to validate session.',
+    });
   }
 });
 
@@ -359,7 +332,6 @@ router.put('/change-password', auth(true, true), async (req, res) => {
   }
 });
 
-
 router.get('/verify-email', async (req, res) => {
   try {
     const token = typeof req.query.token === 'string' ? req.query.token.trim() : '';
@@ -422,97 +394,6 @@ router.post('/resend-verification', async (req, res) => {
   } catch (error) {
     console.error('Resend verification error:', error);
     return res.status(500).json({ message: 'Failed to resend verification email.' });
-  }
-});
-
-router.get('/block-status', auth(true, true), async (req, res) => {
-  try {
-    const actingUser = await User.findById(req.user.id);
-    if (!actingUser) {
-      return res.status(404).json({ message: 'Acting user not found.' });
-    }
-    if (actingUser.userRole !== 'admin') {
-      return res.status(403).json({ message: 'Admin privileges are required.' });
-    }
-
-    const email = typeof req.query.email === 'string' ? sanitizeEmail(req.query.email) : '';
-    const username = typeof req.query.username === 'string' ? sanitizeUsername(req.query.username) : '';
-
-    if (!email && !username) {
-      return res.status(400).json({ message: 'Email or username is required.' });
-    }
-
-    const targetUser = await findUserByEmailOrUsername({ email, username });
-    if (!targetUser) {
-      return res.status(404).json({ message: 'User not found.' });
-    }
-
-    const identifier = targetUser.email;
-    const blockState = loginSecurity.getBlockState(identifier);
-
-    return res.json({
-      username: targetUser.username,
-      email: targetUser.email,
-      identifier,
-      blockStatus: formatBlockStateResponse(blockState),
-    });
-  } catch (error) {
-    console.error('Fetch block status error:', error);
-    return res.status(500).json({ message: 'Failed to fetch block status.' });
-  }
-});
-
-router.put('/block-status', auth(true, true), async (req, res) => {
-  try {
-    const actingUser = await User.findById(req.user.id);
-    if (!actingUser) {
-      return res.status(404).json({ message: 'Acting user not found.' });
-    }
-    if (actingUser.userRole !== 'admin') {
-      return res.status(403).json({ message: 'Admin privileges are required.' });
-    }
-
-    const email = typeof req.body.email === 'string' ? sanitizeEmail(req.body.email) : '';
-    const username = typeof req.body.username === 'string' ? sanitizeUsername(req.body.username) : '';
-    const reasonRaw = typeof req.body.reason === 'string' ? req.body.reason : '';
-    const reason = reasonRaw ? removeScriptTags(reasonRaw).trim().slice(0, 240) : '';
-    const shouldBlock = typeof req.body.blocked === 'boolean' ? req.body.blocked : null;
-
-    if (!email && !username) {
-      return res.status(400).json({ message: 'Email or username is required.' });
-    }
-
-    if (shouldBlock === null) {
-      return res.status(400).json({ message: '`blocked` must be provided as a boolean.' });
-    }
-
-    const targetUser = await findUserByEmailOrUsername({ email, username });
-    if (!targetUser) {
-      return res.status(404).json({ message: 'User not found.' });
-    }
-
-    if (String(targetUser._id) === String(actingUser._id)) {
-      return res.status(400).json({ message: 'You cannot change your own block status.' });
-    }
-
-    const identifier = targetUser.email;
-    const finalState = loginSecurity.setManualBlock(identifier, {
-      blocked: shouldBlock,
-      blockedBy: String(actingUser._id),
-      reason: reason || null,
-    });
-
-    if (!shouldBlock) {
-      loginSecurity.resetAttempts(identifier);
-    }
-
-    return res.json({
-      message: shouldBlock ? 'User blocked successfully.' : 'User unblocked successfully.',
-      blockStatus: formatBlockStateResponse(finalState),
-    });
-  } catch (error) {
-    console.error('Update block status error:', error);
-    return res.status(500).json({ message: 'Failed to update block status.' });
   }
 });
 
