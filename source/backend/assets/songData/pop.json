@@ -1,0 +1,578 @@
+[
+  {
+    "id": 3579685431,
+    "artist": "Taylor Swift",
+    "title": "The Fate of Ophelia",
+    "url": "https://cdnt-preview.dzcdn.net/api/1/1/0/4/9/0/049e295c37bff556879080a0ec19adb3.mp3?hdnea=exp=1764226502~acl=/api/1/1/0/4/9/0/049e295c37bff556879080a0ec19adb3.mp3*~data=user_id=0,application_id=42~hmac=7456c8fa70f3805c36841dc6ca74f6eb3fe2a9aa695c4005ce1804f178227ac7"
+  },
+  {
+    "id": 3537990861,
+    "artist": "Lady Gaga",
+    "title": "The Dead Dance",
+    "url": "https://cdnt-preview.dzcdn.net/api/1/1/9/a/8/0/9a815a95b75ee9f22f07a53f7d7ec032.mp3?hdnea=exp=1764226502~acl=/api/1/1/9/a/8/0/9a815a95b75ee9f22f07a53f7d7ec032.mp3*~data=user_id=0,application_id=42~hmac=fbb6098efe20ff40b618afd873a5044535be2d836d3d198e714649cafb016fa7"
+  },
+  {
+    "id": 3303979891,
+    "artist": "Ed Sheeran",
+    "title": "Azizam",
+    "url": "https://cdnt-preview.dzcdn.net/api/1/1/0/7/a/0/07aeeadf52842c6ce507717dfc37a3d0.mp3?hdnea=exp=1764226502~acl=/api/1/1/0/7/a/0/07aeeadf52842c6ce507717dfc37a3d0.mp3*~data=user_id=0,application_id=42~hmac=fc2d5eb1d1d0db48466ae30f1b4d4d738677295a08ea3629f869e36639132fbf"
+  },
+  {
+    "id": 3529873491,
+    "artist": "Sabrina Carpenter",
+    "title": "Tears",
+    "url": "https://cdnt-preview.dzcdn.net/api/1/1/a/b/9/0/ab99fe9b3efc633ecebbda2c639a59d8.mp3?hdnea=exp=1764226502~acl=/api/1/1/a/b/9/0/ab99fe9b3efc633ecebbda2c639a59d8.mp3*~data=user_id=0,application_id=42~hmac=fec99d6b2bb604d08cc5c7aff6eeafe7f5d6b2bbdb77c6266f4dd222735f99f3"
+  },
+  {
+    "id": 3640140952,
+    "artist": "ROSALÍA",
+    "title": "La Perla",
+    "url": "https://cdnt-preview.dzcdn.net/api/1/1/f/8/0/0/f806ada1454bf1444cb1c663ba5dbc90.mp3?hdnea=exp=1764226502~acl=/api/1/1/f/8/0/0/f806ada1454bf1444cb1c663ba5dbc90.mp3*~data=user_id=0,application_id=42~hmac=da3abdba3d320b56a86b150b13e3eed667830cf5091aae756fced262951f08d7"
+  },
+  {
+    "id": 3454558661,
+    "artist": "Justin Bieber",
+    "title": "DAISIES",
+    "url": "https://cdnt-preview.dzcdn.net/api/1/1/5/c/8/0/5c8b19ee997114e357b892f062635d60.mp3?hdnea=exp=1764226502~acl=/api/1/1/5/c/8/0/5c8b19ee997114e357b892f062635d60.mp3*~data=user_id=0,application_id=42~hmac=0b24591d47cc7ae787ab9e85041f166281c67b2d0db40bef2f8655cd79d6b886"
+  },
+  {
+    "id": 2658723742,
+    "artist": "Beyoncé",
+    "title": "TEXAS HOLD 'EM",
+    "url": "https://cdnt-preview.dzcdn.net/api/1/1/0/8/8/0/0885b31006caf52814a00ddfa612e998.mp3?hdnea=exp=1764226502~acl=/api/1/1/0/8/8/0/0885b31006caf52814a00ddfa612e998.mp3*~data=user_id=0,application_id=42~hmac=0dd8374b6fe847bf8d8f774d0c4701124c5441975c9847a8e5456321eea22b05"
+  },
+  {
+    "id": 3630430982,
+    "artist": "Katy Perry",
+    "title": "bandaids",
+    "url": "https://cdnt-preview.dzcdn.net/api/1/1/2/e/c/0/2ecc99ba88c988f5a1e737b2c7ff1ea8.mp3?hdnea=exp=1764226502~acl=/api/1/1/2/e/c/0/2ecc99ba88c988f5a1e737b2c7ff1ea8.mp3*~data=user_id=0,application_id=42~hmac=d990ac606e4907d47ffcfce48feb1e198e8411eaa6eaa086aadf52c11f1696d1"
+  },
+  {
+    "id": 3630391182,
+    "artist": "DJ Snake",
+    "title": "In The Dark",
+    "url": "https://cdnt-preview.dzcdn.net/api/1/1/6/6/5/0/66537a64224ac24fc11c98cc72277ef1.mp3?hdnea=exp=1764226502~acl=/api/1/1/6/6/5/0/66537a64224ac24fc11c98cc72277ef1.mp3*~data=user_id=0,application_id=42~hmac=554ae025eddbd9ca4499812bf9f240214e9baad047daeb2fbb2ef6a66315b106"
+  },
+  {
+    "id": 3171003131,
+    "artist": "Bad Bunny",
+    "title": "DtMF",
+    "url": "https://cdnt-preview.dzcdn.net/api/1/1/6/0/5/0/605d346aea540cd83f25a4459f12d9f0.mp3?hdnea=exp=1764226502~acl=/api/1/1/6/0/5/0/605d346aea540cd83f25a4459f12d9f0.mp3*~data=user_id=0,application_id=42~hmac=9ead70a0cfd7e6307ea84ceae8e07954fa47e1cec6f4bafe717d6ffe1af3ec24"
+  },
+  {
+    "id": 3254673641,
+    "artist": "Damiano David",
+    "title": "Next Summer",
+    "url": "https://cdnt-preview.dzcdn.net/api/1/1/4/b/b/0/4bb1e687884cbd79fc7038d4374da743.mp3?hdnea=exp=1764226502~acl=/api/1/1/4/b/b/0/4bb1e687884cbd79fc7038d4374da743.mp3*~data=user_id=0,application_id=42~hmac=985339d6a6e1630a9640f07b08b3253f6cb5fc132383ab38b4e1ef35cf201b2d"
+  },
+  {
+    "id": 3579685451,
+    "artist": "Taylor Swift",
+    "title": "Opalite",
+    "url": "https://cdnt-preview.dzcdn.net/api/1/1/d/4/8/0/d485bbe305d9cff77bdd9307e423c8b5.mp3?hdnea=exp=1764226502~acl=/api/1/1/d/4/8/0/d485bbe305d9cff77bdd9307e423c8b5.mp3*~data=user_id=0,application_id=42~hmac=b4650509a2cb2640be87a365be1a159c9460b8a248ff1b0aa19f2ba342a75e5b"
+  },
+  {
+    "id": 2801558052,
+    "artist": "Billie Eilish",
+    "title": "BIRDS OF A FEATHER",
+    "url": "https://cdnt-preview.dzcdn.net/api/1/1/5/e/0/0/5e0fb99f6f1e0f18ab70a4c0d18efa5c.mp3?hdnea=exp=1764226502~acl=/api/1/1/5/e/0/0/5e0fb99f6f1e0f18ab70a4c0d18efa5c.mp3*~data=user_id=0,application_id=42~hmac=a5eba6d89be759e1a184fe708ab0d40b7f51624decb13b95904182ae62700ac2"
+  },
+  {
+    "id": 3569857331,
+    "artist": "Tate McRae",
+    "title": "TIT FOR TAT",
+    "url": "https://cdnt-preview.dzcdn.net/api/1/1/2/9/0/0/290d504e13b7d8bd4e4f5627391c732f.mp3?hdnea=exp=1764226502~acl=/api/1/1/2/9/0/0/290d504e13b7d8bd4e4f5627391c732f.mp3*~data=user_id=0,application_id=42~hmac=8a38015e032934b4ed63b07740f3dc9001aa5fc601633caa02d66b3b21407d9e"
+  },
+  {
+    "id": 3400077541,
+    "artist": "Sabrina Carpenter",
+    "title": "Manchild",
+    "url": "https://cdnt-preview.dzcdn.net/api/1/1/e/3/0/0/e3063c37cd19926e08b09828b5eae595.mp3?hdnea=exp=1764226502~acl=/api/1/1/e/3/0/0/e3063c37cd19926e08b09828b5eae595.mp3*~data=user_id=0,application_id=42~hmac=2ce8b20cc58b3d7caec9d304dc8aa95460494c75cbfc25926e12c320acaa770a"
+  },
+  {
+    "id": 3304567421,
+    "artist": "Miley Cyrus",
+    "title": "End of the World",
+    "url": "https://cdnt-preview.dzcdn.net/api/1/1/0/7/0/0/07023d6b2237917fc4feef9ee09e9188.mp3?hdnea=exp=1764226502~acl=/api/1/1/0/7/0/0/07023d6b2237917fc4feef9ee09e9188.mp3*~data=user_id=0,application_id=42~hmac=153dc2ea58d1ad78b1799f5d684de33ca910ee8be8c0dbe9a2c56b4534923bde"
+  },
+  {
+    "id": 3050380851,
+    "artist": "Rosé",
+    "title": "APT.",
+    "url": "https://cdnt-preview.dzcdn.net/api/1/1/0/e/0/0/0e093da717796aa9d2dbe0d189cfba66.mp3?hdnea=exp=1764226502~acl=/api/1/1/0/e/0/0/0e093da717796aa9d2dbe0d189cfba66.mp3*~data=user_id=0,application_id=42~hmac=a5e20d5e3d0cc00236d159acd999f71f3237f5ab2dbb8c26593036c93116a7f8"
+  },
+  {
+    "id": 3333720471,
+    "artist": "Benson Boone",
+    "title": "Mystical Magical",
+    "url": "https://cdnt-preview.dzcdn.net/api/1/1/8/9/0/0/890157d6c16e64b26f872716117ea857.mp3?hdnea=exp=1764226502~acl=/api/1/1/8/9/0/0/890157d6c16e64b26f872716117ea857.mp3*~data=user_id=0,application_id=42~hmac=f20191d4e458c67523655fda00743ad4420ba0f78e9d709280c3b93984b3f1d4"
+  },
+  {
+    "id": 3376766301,
+    "artist": "KAROL G",
+    "title": "LATINA FOREVA",
+    "url": "https://cdnt-preview.dzcdn.net/api/1/1/5/2/4/0/5248c0d4033b64bb5b77cd86dccc14f3.mp3?hdnea=exp=1764226502~acl=/api/1/1/5/2/4/0/5248c0d4033b64bb5b77cd86dccc14f3.mp3*~data=user_id=0,application_id=42~hmac=a15d9fed3f5ee11b57697f413f51b34b950ec3427fe980b3c23fcb41d13adab6"
+  },
+  {
+    "id": 3214169391,
+    "artist": "Lady Gaga",
+    "title": "Abracadabra",
+    "url": "https://cdnt-preview.dzcdn.net/api/1/1/7/e/1/0/7e1ec7a5c8d5f0217df16f6697661c3d.mp3?hdnea=exp=1764226502~acl=/api/1/1/7/e/1/0/7e1ec7a5c8d5f0217df16f6697661c3d.mp3*~data=user_id=0,application_id=42~hmac=0e9ec10b3b357915218a3cbae4f630c0cb082063266c88b0a2b008537fbfde06"
+  },
+  {
+    "id": 2934610901,
+    "artist": "Katy Perry",
+    "title": "LIFETIMES",
+    "url": "https://cdnt-preview.dzcdn.net/api/1/1/d/d/7/0/dd7abb61cd042c89ce1b85b5a87eef2f.mp3?hdnea=exp=1764226502~acl=/api/1/1/d/d/7/0/dd7abb61cd042c89ce1b85b5a87eef2f.mp3*~data=user_id=0,application_id=42~hmac=c30d02bf5cc5c35374246b5d331dff542b79fab6166df96d59c229087b1d258e"
+  },
+  {
+    "id": 2955461951,
+    "artist": "Coldplay",
+    "title": "WE PRAY (Single Version)",
+    "url": "https://cdnt-preview.dzcdn.net/api/1/1/f/8/6/0/f86aeda815883196d33e0b1488201f2f.mp3?hdnea=exp=1764226502~acl=/api/1/1/f/8/6/0/f86aeda815883196d33e0b1488201f2f.mp3*~data=user_id=0,application_id=42~hmac=f6af473907af668e3e420aa6149ba638d16c12e06b5d47fb99a14d6119cf97b5"
+  },
+  {
+    "id": 2988053201,
+    "artist": "The Weeknd",
+    "title": "Dancing In The Flames",
+    "url": "https://cdnt-preview.dzcdn.net/api/1/1/c/9/f/0/c9f714fc62111fc77c58e190a5a4bc5c.mp3?hdnea=exp=1764226502~acl=/api/1/1/c/9/f/0/c9f714fc62111fc77c58e190a5a4bc5c.mp3*~data=user_id=0,application_id=42~hmac=684305a3408620636ffcb35931e9b3bbd0930d773138c6368de7167f16fd0de9"
+  },
+  {
+    "id": 3395410481,
+    "artist": "Ed Sheeran",
+    "title": "Sapphire",
+    "url": "https://cdnt-preview.dzcdn.net/api/1/1/8/9/5/0/895ad50a63101bf9d3cfef44ec2b8766.mp3?hdnea=exp=1764226502~acl=/api/1/1/8/9/5/0/895ad50a63101bf9d3cfef44ec2b8766.mp3*~data=user_id=0,application_id=42~hmac=8053a4947770fc669d8b314c59e2fe70ffe9e40a05da0025d442d6954fef051a"
+  },
+  {
+    "id": 2775851711,
+    "artist": "Sia",
+    "title": "Immortal Queen (feat. Chaka Khan)",
+    "url": "https://cdnt-preview.dzcdn.net/api/1/1/b/f/8/0/bf86a5cd3abe3dc2e772eb2e77b0f0c9.mp3?hdnea=exp=1764226502~acl=/api/1/1/b/f/8/0/bf86a5cd3abe3dc2e772eb2e77b0f0c9.mp3*~data=user_id=0,application_id=42~hmac=d5976df75cc136892b2fc656ec652e2b04044f3bc4c449457567fc566e389855"
+  },
+  {
+    "id": 2710730362,
+    "artist": "Shakira",
+    "title": "Puntería",
+    "url": "https://cdnt-preview.dzcdn.net/api/1/1/2/4/5/0/245d7a6850e67b7c4353c1d194de425e.mp3?hdnea=exp=1764226502~acl=/api/1/1/2/4/5/0/245d7a6850e67b7c4353c1d194de425e.mp3*~data=user_id=0,application_id=42~hmac=fb72360d98fa6635493d62409e5e7d2e55d6761a8fff667e069b294e1a7b82df"
+  },
+  {
+    "id": 2610711672,
+    "artist": "Benson Boone",
+    "title": "Beautiful Things",
+    "url": "https://cdnt-preview.dzcdn.net/api/1/1/1/4/7/0/1473eec25d81e5a9eaa41c63bf9242b1.mp3?hdnea=exp=1764226502~acl=/api/1/1/1/4/7/0/1473eec25d81e5a9eaa41c63bf9242b1.mp3*~data=user_id=0,application_id=42~hmac=54bf1e6c13d2c725661c89c34e519086be3c064c5a809c92df57cc6767f12714"
+  },
+  {
+    "id": 2743578151,
+    "artist": "Sabrina Carpenter",
+    "title": "Espresso",
+    "url": "https://cdnt-preview.dzcdn.net/api/1/1/1/7/a/0/17a21c40ce4af3ac9514aac756403188.mp3?hdnea=exp=1764226502~acl=/api/1/1/1/7/a/0/17a21c40ce4af3ac9514aac756403188.mp3*~data=user_id=0,application_id=42~hmac=e31e69a44066da432718b09380e583bcdce2959efe792b8da6a82e0391b34c26"
+  },
+  {
+    "id": 3087379861,
+    "artist": "Shawn Mendes",
+    "title": "The Mountain",
+    "url": "https://cdnt-preview.dzcdn.net/api/1/1/b/8/d/0/b8d10d184008adb2a2c12e876698c716.mp3?hdnea=exp=1764226502~acl=/api/1/1/b/8/d/0/b8d10d184008adb2a2c12e876698c716.mp3*~data=user_id=0,application_id=42~hmac=93dd20901e5f71539a3014a6aec4450f34c9e78cff4d8f6c9bee8339bff08712"
+  },
+  {
+    "id": 2800047712,
+    "artist": "ZAYN",
+    "title": "Stardust",
+    "url": "https://cdnt-preview.dzcdn.net/api/1/1/c/9/f/0/c9f7b746bea588e2d00a7f0994156e2c.mp3?hdnea=exp=1764226502~acl=/api/1/1/c/9/f/0/c9f7b746bea588e2d00a7f0994156e2c.mp3*~data=user_id=0,application_id=42~hmac=f5cf7e358600d4d361116fbaeb6f11e8a77dbd983467be2a88d019c705bbef59"
+  },
+  {
+    "id": 3366990241,
+    "artist": "Rihanna",
+    "title": "Friend Of Mine (from the Smurfs Movie Soundtrack)",
+    "url": "https://cdnt-preview.dzcdn.net/api/1/1/f/e/f/0/fefa3c23b7539ec0c26a47fe8580c0f6.mp3?hdnea=exp=1764226502~acl=/api/1/1/f/e/f/0/fefa3c23b7539ec0c26a47fe8580c0f6.mp3*~data=user_id=0,application_id=42~hmac=41e239388467c55331d47d8d7e7a5bf8c34ffd5ee95527532e20ecb865071625"
+  },
+  {
+    "id": 2661514912,
+    "artist": "Dua Lipa",
+    "title": "Training Season",
+    "url": "https://cdnt-preview.dzcdn.net/api/1/1/c/5/e/0/c5ec7e82b1818a888cb3061ebb31db1b.mp3?hdnea=exp=1764226502~acl=/api/1/1/c/5/e/0/c5ec7e82b1818a888cb3061ebb31db1b.mp3*~data=user_id=0,application_id=42~hmac=cc38d230df55a8489f9c735a676ddc563140014b206da99603a9fb5ad7528ac3"
+  },
+  {
+    "id": 2738170781,
+    "artist": "OneRepublic",
+    "title": "Nobody (from Kaiju No. 8)",
+    "url": "https://cdnt-preview.dzcdn.net/api/1/1/b/4/e/0/b4e2171a59e6f439939d86f91e8f286f.mp3?hdnea=exp=1764226502~acl=/api/1/1/b/4/e/0/b4e2171a59e6f439939d86f91e8f286f.mp3*~data=user_id=0,application_id=42~hmac=03b11ad7a28681eab023c0fb1d29792a4c2582d096e34b1331a7efd0bda5dea4"
+  },
+  {
+    "id": 2947516331,
+    "artist": "Lady Gaga",
+    "title": "Die With A Smile",
+    "url": "https://cdnt-preview.dzcdn.net/api/1/1/4/5/9/0/459c235b39ef8badd04c5ef181f58c24.mp3?hdnea=exp=1764226502~acl=/api/1/1/4/5/9/0/459c235b39ef8badd04c5ef181f58c24.mp3*~data=user_id=0,application_id=42~hmac=ec3b718d503415a5f513df78db9c36ca29a4371b1a338895bc630547ccef4433"
+  },
+  {
+    "id": 3229131161,
+    "artist": "David Guetta",
+    "title": "Beautiful People",
+    "url": "https://cdnt-preview.dzcdn.net/api/1/1/a/e/9/0/ae9dd494122037ed30488283dd754a25.mp3?hdnea=exp=1764226502~acl=/api/1/1/a/e/9/0/ae9dd494122037ed30488283dd754a25.mp3*~data=user_id=0,application_id=42~hmac=40741fc5c3305d755976d927b241c995e9eea3040153ebd350a23f29beac6d24"
+  },
+  {
+    "id": 2846442802,
+    "artist": "KAROL G",
+    "title": "Si Antes Te Hubiera Conocido",
+    "url": "https://cdnt-preview.dzcdn.net/api/1/1/4/4/9/0/449439df1ef7bf86774b8f8bf174a566.mp3?hdnea=exp=1764226502~acl=/api/1/1/4/4/9/0/449439df1ef7bf86774b8f8bf174a566.mp3*~data=user_id=0,application_id=42~hmac=d158982bb406d33bbaf9358a2820aac1082cf0003fd5203be4d4cd20b2bd0998"
+  },
+  {
+    "id": 2690050002,
+    "artist": "Ariana Grande",
+    "title": "we can't be friends (wait for your love)",
+    "url": "https://cdnt-preview.dzcdn.net/api/1/1/e/4/1/0/e410d2f4630e0fcfbe6cc4defa5a24df.mp3?hdnea=exp=1764226502~acl=/api/1/1/e/4/1/0/e410d2f4630e0fcfbe6cc4defa5a24df.mp3*~data=user_id=0,application_id=42~hmac=1d803a586b76846340abdff311eeefea56eacbd79b45f26f55db2cdeaa492f16"
+  },
+  {
+    "id": 2728070371,
+    "artist": "Chappell Roan",
+    "title": "Good Luck, Babe!",
+    "url": "https://cdnt-preview.dzcdn.net/api/1/1/c/c/7/0/cc78d370bc3fb2028ac03eb1e18e7022.mp3?hdnea=exp=1764226502~acl=/api/1/1/c/c/7/0/cc78d370bc3fb2028ac03eb1e18e7022.mp3*~data=user_id=0,application_id=42~hmac=f614eb0251bd963559f5217c7444cce195b2c74b44d6c02f84f5c500c7873364"
+  },
+  {
+    "id": 2852427372,
+    "artist": "Coldplay",
+    "title": "feelslikeimfallinginlove (Single Version)",
+    "url": "https://cdnt-preview.dzcdn.net/api/1/1/4/a/4/0/4a4812d4a7a6c2b3ac11af7f2ed2a414.mp3?hdnea=exp=1764226502~acl=/api/1/1/4/a/4/0/4a4812d4a7a6c2b3ac11af7f2ed2a414.mp3*~data=user_id=0,application_id=42~hmac=780342ceb71554bc9912728ad437875a343578328dc6b273b99179cca004082d"
+  },
+  {
+    "id": 2780753191,
+    "artist": "Post Malone",
+    "title": "I Had Some Help",
+    "url": "https://cdnt-preview.dzcdn.net/api/1/1/4/5/a/0/45ad068f03b8fcb7d858ea657f6cdaf8.mp3?hdnea=exp=1764226502~acl=/api/1/1/4/5/a/0/45ad068f03b8fcb7d858ea657f6cdaf8.mp3*~data=user_id=0,application_id=42~hmac=d2b207bd4a3bae16805102965896de9470ef7ff3f0d7350ae107e37f1d95aed9"
+  },
+  {
+    "id": 2831602002,
+    "artist": "Sabrina Carpenter",
+    "title": "Please Please Please",
+    "url": "https://cdnt-preview.dzcdn.net/api/1/1/6/8/a/0/68a841cd6df6a619d8b7cd1b2622391b.mp3?hdnea=exp=1764226502~acl=/api/1/1/6/8/a/0/68a841cd6df6a619d8b7cd1b2622391b.mp3*~data=user_id=0,application_id=42~hmac=b2600f22bd2546373886412b4c4030ba1716909d3c0fa3bf4b27e5d64dd99467"
+  },
+  {
+    "id": 2753115381,
+    "artist": "Taylor Swift",
+    "title": "Fortnight",
+    "url": "https://cdnt-preview.dzcdn.net/api/1/1/f/c/2/0/fc2e000c7c125102fc326023834bcbd9.mp3?hdnea=exp=1764226502~acl=/api/1/1/f/c/2/0/fc2e000c7c125102fc326023834bcbd9.mp3*~data=user_id=0,application_id=42~hmac=72d55cfe1616b0e74268b4244ae03aa63dec8a9896ee0b3dea61c5444e9e449b"
+  },
+  {
+    "id": 2444176345,
+    "artist": "Tate McRae",
+    "title": "greedy",
+    "url": "https://cdnt-preview.dzcdn.net/api/1/1/b/2/c/0/b2c0972841d7abdb3856b996dc864a8e.mp3?hdnea=exp=1764226502~acl=/api/1/1/b/2/c/0/b2c0972841d7abdb3856b996dc864a8e.mp3*~data=user_id=0,application_id=42~hmac=427b8a97546d94a2758a72562aeaab06b42a6043a90678c86f65c60031b4ee0c"
+  },
+  {
+    "id": 2801558032,
+    "artist": "Billie Eilish",
+    "title": "LUNCH",
+    "url": "https://cdnt-preview.dzcdn.net/api/1/1/6/4/7/0/64794bd2d788edb12e44b11e09548d10.mp3?hdnea=exp=1764226502~acl=/api/1/1/6/4/7/0/64794bd2d788edb12e44b11e09548d10.mp3*~data=user_id=0,application_id=42~hmac=fc2f2fa0cb523bd0297585ae402bc192dad15c28d1e3fab0c66777d4e84bd280"
+  },
+  {
+    "id": 2105158337,
+    "artist": "Miley Cyrus",
+    "title": "Flowers",
+    "url": "https://cdnt-preview.dzcdn.net/api/1/1/c/a/1/0/ca19f3388408a917038cb083873c4ae1.mp3?hdnea=exp=1764226502~acl=/api/1/1/c/a/1/0/ca19f3388408a917038cb083873c4ae1.mp3*~data=user_id=0,application_id=42~hmac=6058b45d8be51ba288c988adf0e2cf6953f4f8c6bc6a2436e23d3f8533630e16"
+  },
+  {
+    "id": 2525537871,
+    "artist": "Dua Lipa",
+    "title": "Houdini",
+    "url": "https://cdnt-preview.dzcdn.net/api/1/1/3/6/7/0/367e45ecbf07a341e248b400f51fc544.mp3?hdnea=exp=1764226502~acl=/api/1/1/3/6/7/0/367e45ecbf07a341e248b400f51fc544.mp3*~data=user_id=0,application_id=42~hmac=71d2134889e5a55dcba9db3546fcf96ea520f9618be4c37da9ebff3ce5df8b6a"
+  },
+  {
+    "id": 1703487577,
+    "artist": "Harry Styles",
+    "title": "As It Was",
+    "url": "https://cdnt-preview.dzcdn.net/api/1/1/9/3/7/0/9372c78844baf74b7a06bd467151518a.mp3?hdnea=exp=1764226502~acl=/api/1/1/9/3/7/0/9372c78844baf74b7a06bd467151518a.mp3*~data=user_id=0,application_id=42~hmac=8be255a29673e198c5a3e2ddff759156bfc4315899d96bf0fef6ca207b4dfebd"
+  },
+  {
+    "id": 366297921,
+    "artist": "Dua Lipa",
+    "title": "New Rules",
+    "url": "https://cdnt-preview.dzcdn.net/api/1/1/8/8/8/0/888034b031289572c81b681502bdf399.mp3?hdnea=exp=1764226502~acl=/api/1/1/8/8/8/0/888034b031289572c81b681502bdf399.mp3*~data=user_id=0,application_id=42~hmac=ef2bc71bfb5ba0e114e3677f7136110f632c02037ead2d0e543b6cc47b80fa45"
+  },
+  {
+    "id": 79587580,
+    "artist": "Sia",
+    "title": "Chandelier",
+    "url": "https://cdnt-preview.dzcdn.net/api/1/1/8/7/3/0/8732a4eb0fbbcfaf4f163b79cfff29ea.mp3?hdnea=exp=1764226502~acl=/api/1/1/8/7/3/0/8732a4eb0fbbcfaf4f163b79cfff29ea.mp3*~data=user_id=0,application_id=42~hmac=5a3d16f18378b03a152cf0c9cd2cb8511f3d08b8069e3478fb74adacd5b65a6d"
+  },
+  {
+    "id": 8930156,
+    "artist": "Jessie J",
+    "title": "Price Tag",
+    "url": "https://cdnt-preview.dzcdn.net/api/1/1/9/b/c/0/9bc0edb5d9fffbf5cb7c997a3a279bff.mp3?hdnea=exp=1764226502~acl=/api/1/1/9/b/c/0/9bc0edb5d9fffbf5cb7c997a3a279bff.mp3*~data=user_id=0,application_id=42~hmac=4e6346fae75516a06f207a42d8936cc0b3dab7fd151efc123c6bd7a38838f6d4"
+  },
+  {
+    "id": 60726419,
+    "artist": "Carly Rae Jepsen",
+    "title": "Call Me Maybe",
+    "url": "https://cdnt-preview.dzcdn.net/api/1/1/d/f/0/0/df088f34bb4b6671a3c847b10ed81377.mp3?hdnea=exp=1764226502~acl=/api/1/1/d/f/0/0/df088f34bb4b6671a3c847b10ed81377.mp3*~data=user_id=0,application_id=42~hmac=6962ec24946dc8d958ed22097d7522f157f93fd96e780be18c4e43639241a1fa"
+  },
+  {
+    "id": 71137166,
+    "artist": "Miley Cyrus",
+    "title": "Wrecking Ball",
+    "url": "https://cdnt-preview.dzcdn.net/api/1/1/6/f/f/0/6fff7ef2f980356db79aa7a1eea1a7d2.mp3?hdnea=exp=1764226502~acl=/api/1/1/6/f/f/0/6fff7ef2f980356db79aa7a1eea1a7d2.mp3*~data=user_id=0,application_id=42~hmac=77a241184c3183a44c297896a558820645a59b52d13517851429674eb4af4f67"
+  },
+  {
+    "id": 112662366,
+    "artist": "Justin Bieber",
+    "title": "Sorry",
+    "url": "https://cdnt-preview.dzcdn.net/api/1/1/7/8/e/0/78e56ce103487a2c3395c0e6dff48a2f.mp3?hdnea=exp=1764226502~acl=/api/1/1/7/8/e/0/78e56ce103487a2c3395c0e6dff48a2f.mp3*~data=user_id=0,application_id=42~hmac=d482cb53ab64d62155a6ed89108942478b3bbb0db42d9396da74e8b9731fe044"
+  },
+  {
+    "id": 13113525,
+    "artist": "Maroon 5",
+    "title": "Moves Like Jagger (Studio Recording From \"The Voice\" Performance)",
+    "url": "https://cdnt-preview.dzcdn.net/api/1/1/f/2/d/0/f2d1a9422c8c8b94342f699bd90575b0.mp3?hdnea=exp=1764226502~acl=/api/1/1/f/2/d/0/f2d1a9422c8c8b94342f699bd90575b0.mp3*~data=user_id=0,application_id=42~hmac=3112f25b5bc5e77fd452f825fff918b0ada337864ca95516d75617868f5d695d"
+  },
+  {
+    "id": 62376270,
+    "artist": "Rihanna",
+    "title": "Diamonds",
+    "url": "https://cdnt-preview.dzcdn.net/api/1/1/1/b/8/0/1b8400e8d6b85ba63d95f6f60f8f3055.mp3?hdnea=exp=1764226502~acl=/api/1/1/1/b/8/0/1b8400e8d6b85ba63d95f6f60f8f3055.mp3*~data=user_id=0,application_id=42~hmac=a5bb3506678051052d650fd3a1b18dc2968d447202d2696f1042a2c655cbbbce"
+  },
+  {
+    "id": 351594981,
+    "artist": "Shawn Mendes",
+    "title": "Treat You Better",
+    "url": "https://cdnt-preview.dzcdn.net/api/1/1/7/6/4/0/7647f712ffa104e1960f340ffb863ae0.mp3?hdnea=exp=1764226502~acl=/api/1/1/7/6/4/0/7647f712ffa104e1960f340ffb863ae0.mp3*~data=user_id=0,application_id=42~hmac=5f6e237e2a3c0652ed269502e37c43d64bcb5d85c1a587ec2ebba1e167658bb8"
+  },
+  {
+    "id": 70403437,
+    "artist": "Lorde",
+    "title": "Royals",
+    "url": "https://cdnt-preview.dzcdn.net/api/1/1/f/9/b/0/f9bfa0a2439a79f8bdd47213739e2c33.mp3?hdnea=exp=1764226502~acl=/api/1/1/f/9/b/0/f9bfa0a2439a79f8bdd47213739e2c33.mp3*~data=user_id=0,application_id=42~hmac=994e1c3e2f309eba3547a78cb127bd8fe0610a02a185468d38f6f2ebaa20ff52"
+  },
+  {
+    "id": 111780476,
+    "artist": "Ellie Goulding",
+    "title": "Love Me Like You Do (From \"Fifty Shades Of Grey\")",
+    "url": "https://cdnt-preview.dzcdn.net/api/1/1/2/f/7/0/2f7406257ff2ca13311eb7c0581a1ed5.mp3?hdnea=exp=1764226502~acl=/api/1/1/2/f/7/0/2f7406257ff2ca13311eb7c0581a1ed5.mp3*~data=user_id=0,application_id=42~hmac=823712daf331e6c43eb4e7d691e6c7aecdd8022a35d5dfe5dcfd26d229865586"
+  },
+  {
+    "id": 4619465,
+    "artist": "Black Eyed Peas",
+    "title": "Imma Be",
+    "url": "https://cdnt-preview.dzcdn.net/api/1/1/8/0/e/0/80e3e66bddfa48c1195be6512ba33b19.mp3?hdnea=exp=1764226502~acl=/api/1/1/8/0/e/0/80e3e66bddfa48c1195be6512ba33b19.mp3*~data=user_id=0,application_id=42~hmac=599b4b13e9f907f81617f5628aff286d56e458bf4d1a805192b593fdbe670faf"
+  },
+  {
+    "id": 8011849,
+    "artist": "Bruno Mars",
+    "title": "Grenade",
+    "url": "https://cdnt-preview.dzcdn.net/api/1/1/1/2/c/0/12c6a1605606deacfd9f0d8fde07abf2.mp3?hdnea=exp=1764226502~acl=/api/1/1/1/2/c/0/12c6a1605606deacfd9f0d8fde07abf2.mp3*~data=user_id=0,application_id=42~hmac=9966a75d1e34bf971356df28ae77a1ce592b9ff52ab2c3471519dbc838be75ea"
+  },
+  {
+    "id": 73982869,
+    "artist": "Clean Bandit",
+    "title": "Rather Be (feat. Jess Glynne)",
+    "url": "https://cdnt-preview.dzcdn.net/api/1/1/d/b/b/0/dbb449df39281075077e294ef092c2ce.mp3?hdnea=exp=1764226502~acl=/api/1/1/d/b/b/0/dbb449df39281075077e294ef092c2ce.mp3*~data=user_id=0,application_id=42~hmac=ca69ef87ff1409fe052c0db1aff6e33ef7db25e247e1905eff3d7955edb8d8c6"
+  },
+  {
+    "id": 113876568,
+    "artist": "Major Lazer",
+    "title": "Lean On (feat. MØ & DJ Snake)",
+    "url": "https://cdnt-preview.dzcdn.net/api/1/1/5/4/3/0/543e2ee2447d48ed00e96e510a4a9202.mp3?hdnea=exp=1764226502~acl=/api/1/1/5/4/3/0/543e2ee2447d48ed00e96e510a4a9202.mp3*~data=user_id=0,application_id=42~hmac=c8c235efdf7496bf1c410ee5fd45ac32d2a58b839790e86fd33c93a93f49655b"
+  },
+  {
+    "id": 78282333,
+    "artist": "Sam Smith",
+    "title": "I'm Not The Only One",
+    "url": "https://cdnt-preview.dzcdn.net/api/1/1/3/4/1/0/34157a75b508b109e31f570b20b4d862.mp3?hdnea=exp=1764226502~acl=/api/1/1/3/4/1/0/34157a75b508b109e31f570b20b4d862.mp3*~data=user_id=0,application_id=42~hmac=1e7697807fb67ae2ea213595313197d701a8d7fc9dc9d5913b4dd81375fddd6d"
+  },
+  {
+    "id": 10308117,
+    "artist": "Pitbull",
+    "title": "Give Me Everything (feat. Nayer)",
+    "url": "https://cdnt-preview.dzcdn.net/api/1/1/5/d/c/0/5dcb1d36168c2d36031b0708e49e3a46.mp3?hdnea=exp=1764226502~acl=/api/1/1/5/d/c/0/5dcb1d36168c2d36031b0708e49e3a46.mp3*~data=user_id=0,application_id=42~hmac=5f524e203ce38030396d10f70dcc4a003598da2d9b027411b98df9bdfa4fa59f"
+  },
+  {
+    "id": 15595929,
+    "artist": "Kesha",
+    "title": "TiK ToK",
+    "url": "https://cdnt-preview.dzcdn.net/api/1/1/b/8/c/0/b8ce8d3dcc247751d5d97d26f81c2536.mp3?hdnea=exp=1764226502~acl=/api/1/1/b/8/c/0/b8ce8d3dcc247751d5d97d26f81c2536.mp3*~data=user_id=0,application_id=42~hmac=7f907e5017824f9ff99fc3f9875425dbb04426f3509edc828042f06bb09cb5ad"
+  },
+  {
+    "id": 5979884,
+    "artist": "B.o.B",
+    "title": "Nothin' on You (feat. Bruno Mars)",
+    "url": "https://cdnt-preview.dzcdn.net/api/1/1/c/3/a/0/c3af0595acad8f6600d6d427f1cb883f.mp3?hdnea=exp=1764226502~acl=/api/1/1/c/3/a/0/c3af0595acad8f6600d6d427f1cb883f.mp3*~data=user_id=0,application_id=42~hmac=3dddd185f2abddf967f8a7f202b00af39b2ef1d52680d3222a95e3ccab450994"
+  },
+  {
+    "id": 14932098,
+    "artist": "The Black Keys",
+    "title": "Lonely Boy",
+    "url": "https://cdnt-preview.dzcdn.net/api/1/1/3/0/3/0/3031da4126a0dc1cb75571f31010248f.mp3?hdnea=exp=1764226502~acl=/api/1/1/3/0/3/0/3031da4126a0dc1cb75571f31010248f.mp3*~data=user_id=0,application_id=42~hmac=c765816c0de3f4f97c594385d1133854d1ef24ad438a8ee0a6c1efd40bc14c62"
+  },
+  {
+    "id": 12565421,
+    "artist": "LMFAO",
+    "title": "Sexy And I Know It",
+    "url": "https://cdnt-preview.dzcdn.net/api/1/1/4/1/2/0/412b81b0c17304be65729554fdd707c1.mp3?hdnea=exp=1764226502~acl=/api/1/1/4/1/2/0/412b81b0c17304be65729554fdd707c1.mp3*~data=user_id=0,application_id=42~hmac=6847e216558a3a5c219d3bb4b09089f78697b35b9adfffebb694a55973306fc8"
+  },
+  {
+    "id": 38290561,
+    "artist": "Flo Rida",
+    "title": "Whistle",
+    "url": "https://cdnt-preview.dzcdn.net/api/1/1/1/0/a/0/10a3761a9635b8b9bfeff933e8a45fed.mp3?hdnea=exp=1764226502~acl=/api/1/1/1/0/a/0/10a3761a9635b8b9bfeff933e8a45fed.mp3*~data=user_id=0,application_id=42~hmac=083e963fde7e70d2e30327365a914e11864eda25ecc6532316fbdf71f565a7f0"
+  },
+  {
+    "id": 6461440,
+    "artist": "Eminem",
+    "title": "Love The Way You Lie",
+    "url": "https://cdnt-preview.dzcdn.net/api/1/1/c/8/9/0/c89ba14b5d142a98e3ad48036b05d10d.mp3?hdnea=exp=1764226502~acl=/api/1/1/c/8/9/0/c89ba14b5d142a98e3ad48036b05d10d.mp3*~data=user_id=0,application_id=42~hmac=a08452a1ca9161bee294769d47e3b086f81374ce084fdd3fdf01f6609160006d"
+  },
+  {
+    "id": 7667349,
+    "artist": "Ellie Goulding",
+    "title": "Lights (Single Version)",
+    "url": "https://cdnt-preview.dzcdn.net/api/1/1/6/2/7/0/6274be92ed30d716a2c760b59d828475.mp3?hdnea=exp=1764226502~acl=/api/1/1/6/2/7/0/6274be92ed30d716a2c760b59d828475.mp3*~data=user_id=0,application_id=42~hmac=f94b200f7ada4ffa9a00694d2197890c0bb2e4e27276e740d1ca233ff1fc83c1"
+  },
+  {
+    "id": 16099863,
+    "artist": "Demi Lovato",
+    "title": "Give Your Heart a Break",
+    "url": "https://cdnt-preview.dzcdn.net/api/1/1/6/9/2/0/692ca67b5e226fe23d39024e82d153d0.mp3?hdnea=exp=1764226502~acl=/api/1/1/6/9/2/0/692ca67b5e226fe23d39024e82d153d0.mp3*~data=user_id=0,application_id=42~hmac=c6116694b83d29bb2b23de223b6dc4949abc85959aadb8cec6171ef51ae1cc95"
+  },
+  {
+    "id": 2550920662,
+    "artist": "Martin Solveig",
+    "title": "Hello",
+    "url": "https://cdnt-preview.dzcdn.net/api/1/1/6/2/0/0/620d3e6978e8ca73e44c7882923e2859.mp3?hdnea=exp=1764226502~acl=/api/1/1/6/2/0/0/620d3e6978e8ca73e44c7882923e2859.mp3*~data=user_id=0,application_id=42~hmac=77bd26466b69d508ee981caf2525ca1bc92822ec92ccbc2a5caccde5232eb277"
+  },
+  {
+    "id": 60200381,
+    "artist": "P!nk",
+    "title": "Try",
+    "url": "https://cdnt-preview.dzcdn.net/api/1/1/c/2/7/0/c275443df7f61b02f097bd99757b4415.mp3?hdnea=exp=1764226502~acl=/api/1/1/c/2/7/0/c275443df7f61b02f097bd99757b4415.mp3*~data=user_id=0,application_id=42~hmac=7713191d751b18aad1629232cc4a1773baabcf2eee953633db96ce0df833802b"
+  },
+  {
+    "id": 7303269,
+    "artist": "CeeLo Green",
+    "title": "Fuck You",
+    "url": "https://cdnt-preview.dzcdn.net/api/1/1/a/a/5/0/aa5cbd6401e1249b8e195749f64937fe.mp3?hdnea=exp=1764226502~acl=/api/1/1/a/a/5/0/aa5cbd6401e1249b8e195749f64937fe.mp3*~data=user_id=0,application_id=42~hmac=dbf7f8ff8b2a26fca9f35caaea46f3330ab4bc6b735a5f5c1f290b9c3186ff85"
+  },
+  {
+    "id": 86453925,
+    "artist": "Galantis",
+    "title": "Runaway (U & I)",
+    "url": "https://cdnt-preview.dzcdn.net/api/1/1/b/6/2/0/b629c34eaf0878bef1b72f16ee027ec8.mp3?hdnea=exp=1764226502~acl=/api/1/1/b/6/2/0/b629c34eaf0878bef1b72f16ee027ec8.mp3*~data=user_id=0,application_id=42~hmac=dce7ddcf8507c9f7316888191d91db58a43cbab0d2076496ea1de1cf0cce60be"
+  },
+  {
+    "id": 15597227,
+    "artist": "Usher",
+    "title": "OMG (feat. will.i.am)",
+    "url": "https://cdnt-preview.dzcdn.net/api/1/1/b/b/7/0/bb7b98c21f535c7b8dba2fb85471ddee.mp3?hdnea=exp=1764226502~acl=/api/1/1/b/b/7/0/bb7b98c21f535c7b8dba2fb85471ddee.mp3*~data=user_id=0,application_id=42~hmac=ac770ee935c5836f050b8f721a5fd625b22e9754b2005db9faa0a33cc2b9f367"
+  },
+  {
+    "id": 79223833,
+    "artist": "Lilly Wood And The Prick",
+    "title": "Prayer in C (Robin Schulz Remix) [Radio Edit]",
+    "url": "https://cdnt-preview.dzcdn.net/api/1/1/a/9/7/0/a97d937fcbdbcf18753eaf45aff6c9df.mp3?hdnea=exp=1764226502~acl=/api/1/1/a/9/7/0/a97d937fcbdbcf18753eaf45aff6c9df.mp3*~data=user_id=0,application_id=42~hmac=f54cc29f9e23a2fd3ac38d2bdc0dc69b0fdc0f8a18df2845c4b327a8105a7cd1"
+  },
+  {
+    "id": 44230981,
+    "artist": "Maroon 5",
+    "title": "One More Night",
+    "url": "https://cdnt-preview.dzcdn.net/api/1/1/8/6/8/0/8681a5aa3360951b22e4a305028c7f4a.mp3?hdnea=exp=1764226502~acl=/api/1/1/8/6/8/0/8681a5aa3360951b22e4a305028c7f4a.mp3*~data=user_id=0,application_id=42~hmac=8fbb0484d8d42b43efe52f8355fccb9260234215a78139460769a301770a5939"
+  },
+  {
+    "id": 14993990,
+    "artist": "Gotye",
+    "title": "Somebody That I Used To Know",
+    "url": "https://cdnt-preview.dzcdn.net/api/1/1/5/d/5/0/5d5488ceea4fee4901faa1bae7909235.mp3?hdnea=exp=1764226502~acl=/api/1/1/5/d/5/0/5d5488ceea4fee4901faa1bae7909235.mp3*~data=user_id=0,application_id=42~hmac=47794adc2c76e52bf8f64323b7444c2ba117fa167d7d71f1f8abb8958b8fdce0"
+  },
+  {
+    "id": 79845486,
+    "artist": "Magic!",
+    "title": "Rude",
+    "url": "https://cdnt-preview.dzcdn.net/api/1/1/9/4/a/0/94ad7aa3890dfef93c9314a4762eaa45.mp3?hdnea=exp=1764226502~acl=/api/1/1/9/4/a/0/94ad7aa3890dfef93c9314a4762eaa45.mp3*~data=user_id=0,application_id=42~hmac=b77893c90996f3741fe9055056c1bea594771b7f824d2bea5cfee3e47d7c64d5"
+  },
+  {
+    "id": 12526446,
+    "artist": "Taio Cruz",
+    "title": "Break Your Heart",
+    "url": "https://cdnt-preview.dzcdn.net/api/1/1/0/e/e/0/0ee75b3fdc47cc5ec10fac79969d200c.mp3?hdnea=exp=1764226502~acl=/api/1/1/0/e/e/0/0ee75b3fdc47cc5ec10fac79969d200c.mp3*~data=user_id=0,application_id=42~hmac=4d734347ff2770b05a33f1109fe30c41dacdb557587f649422c1665194fa312d"
+  },
+  {
+    "id": 13529563,
+    "artist": "Rihanna",
+    "title": "Only Girl (In The World)",
+    "url": "https://cdnt-preview.dzcdn.net/api/1/1/3/d/1/0/3d19eee9be5382b0e93b98a55a16c507.mp3?hdnea=exp=1764226502~acl=/api/1/1/3/d/1/0/3d19eee9be5382b0e93b98a55a16c507.mp3*~data=user_id=0,application_id=42~hmac=616a41550efbdbfa2f0af5812f2d6cd553b046fe9540d89db11dd4b726373492"
+  },
+  {
+    "id": 7180013,
+    "artist": "Far East Movement",
+    "title": "Like A G6",
+    "url": "https://cdnt-preview.dzcdn.net/api/1/1/0/4/3/0/0439e80fd522411f785f8135e193bcb7.mp3?hdnea=exp=1764226502~acl=/api/1/1/0/4/3/0/0439e80fd522411f785f8135e193bcb7.mp3*~data=user_id=0,application_id=42~hmac=ac52d3e2cfcc1a329096769fdd005b2019335beef0cec00d1bcfadf6a7ac6477"
+  },
+  {
+    "id": 90326361,
+    "artist": "Walk The Moon",
+    "title": "Shut Up and Dance",
+    "url": "https://cdnt-preview.dzcdn.net/api/1/1/a/9/b/0/a9bb99c03f2ecfde508ccc9ffa60421f.mp3?hdnea=exp=1764226502~acl=/api/1/1/a/9/b/0/a9bb99c03f2ecfde508ccc9ffa60421f.mp3*~data=user_id=0,application_id=42~hmac=4f6754f34695d4be178fc42a3df3cc7f2ae56dd3d3dfef160f34e6d25741ccd5"
+  },
+  {
+    "id": 8011850,
+    "artist": "Bruno Mars",
+    "title": "Just the Way You Are",
+    "url": "https://cdnt-preview.dzcdn.net/api/1/1/f/9/f/0/f9fe7ab157c5496285f09fbefd7bc647.mp3?hdnea=exp=1764226502~acl=/api/1/1/f/9/f/0/f9fe7ab157c5496285f09fbefd7bc647.mp3*~data=user_id=0,application_id=42~hmac=e46eab7d88b1f9305f07636f7c8a088387df646dc4e3462052e80ab90f64d985"
+  },
+  {
+    "id": 15597831,
+    "artist": "P!nk",
+    "title": "Raise Your Glass",
+    "url": "https://cdnt-preview.dzcdn.net/api/1/1/8/7/3/0/87392814cf62bce1faebb3d85d8ea475.mp3?hdnea=exp=1764226502~acl=/api/1/1/8/7/3/0/87392814cf62bce1faebb3d85d8ea475.mp3*~data=user_id=0,application_id=42~hmac=6ba5b1b7d48ab835ca02ae535275dd6f47b4c53fb9ae0e87f82cc700694b6fef"
+  },
+  {
+    "id": 13460184,
+    "artist": "Katy Perry",
+    "title": "Last Friday Night (T.G.I.F.)",
+    "url": "https://cdnt-preview.dzcdn.net/api/1/1/5/e/d/0/5edb44ec9dec7d37935ef2170cef0957.mp3?hdnea=exp=1764226502~acl=/api/1/1/5/e/d/0/5edb44ec9dec7d37935ef2170cef0957.mp3*~data=user_id=0,application_id=42~hmac=936330acd0e48f965dc59d8f0270331c11de9744ba82b4fa5d36188018bce16d"
+  },
+  {
+    "id": 136341758,
+    "artist": "DNCE",
+    "title": "Cake By The Ocean",
+    "url": "https://cdnt-preview.dzcdn.net/api/1/1/8/9/4/0/894bb0470dd38238cb9f1f86d1320f94.mp3?hdnea=exp=1764226502~acl=/api/1/1/8/9/4/0/894bb0470dd38238cb9f1f86d1320f94.mp3*~data=user_id=0,application_id=42~hmac=aaeacb1f14c1407afc71216621ca7e3a8bfd978a51f2c5913e14e5fb62f98d6e"
+  },
+  {
+    "id": 12565420,
+    "artist": "LMFAO",
+    "title": "Party Rock Anthem",
+    "url": "https://cdnt-preview.dzcdn.net/api/1/1/4/2/8/0/428fc044ac478363aedb168e790bc525.mp3?hdnea=exp=1764226502~acl=/api/1/1/4/2/8/0/428fc044ac478363aedb168e790bc525.mp3*~data=user_id=0,application_id=42~hmac=3829aae000f2231e810e2c33b80859c7498f1415ee3e0253338edebc40cc2c65"
+  },
+  {
+    "id": 10287260,
+    "artist": "Britney Spears",
+    "title": "Hold It Against Me",
+    "url": "https://cdnt-preview.dzcdn.net/api/1/1/d/8/a/0/d8a23839416a3505daaa427950aed572.mp3?hdnea=exp=1764226502~acl=/api/1/1/d/8/a/0/d8a23839416a3505daaa427950aed572.mp3*~data=user_id=0,application_id=42~hmac=7296b42f3e774ce7dca8d7095d82d597d470755950cc543873c19597793ea439"
+  },
+  {
+    "id": 1077837262,
+    "artist": "Ava Max",
+    "title": "Sweet but Psycho",
+    "url": "https://cdnt-preview.dzcdn.net/api/1/1/b/e/9/0/be9199583424d6b2bcd324cfd8e61cb4.mp3?hdnea=exp=1764226502~acl=/api/1/1/b/e/9/0/be9199583424d6b2bcd324cfd8e61cb4.mp3*~data=user_id=0,application_id=42~hmac=795dd912bfc6e5bd81ad1c8902839ae7f8227098dec9e156a5b3e6cef7b44241"
+  },
+  {
+    "id": 13460186,
+    "artist": "Katy Perry",
+    "title": "Firework",
+    "url": "https://cdnt-preview.dzcdn.net/api/1/1/b/1/1/0/b118b5669944c9c69a0c47e64a685f84.mp3?hdnea=exp=1764226502~acl=/api/1/1/b/1/1/0/b118b5669944c9c69a0c47e64a685f84.mp3*~data=user_id=0,application_id=42~hmac=e0e5b2071599deedc64f8feb52a45fdf0df0bd383ae6e7e2d96054a9bf3628e4"
+  },
+  {
+    "id": 84669141,
+    "artist": "Tove Lo",
+    "title": "Habits (Stay High)",
+    "url": "https://cdnt-preview.dzcdn.net/api/1/1/0/1/f/0/01f0368d5d413cfcef98089c870e8da1.mp3?hdnea=exp=1764226502~acl=/api/1/1/0/1/f/0/01f0368d5d413cfcef98089c870e8da1.mp3*~data=user_id=0,application_id=42~hmac=616f27fe3c5842bb5bcce803b07ba9506d3d35fda0c3a5d91003d85ea123393d"
+  },
+  {
+    "id": 13529560,
+    "artist": "Rihanna",
+    "title": "What's My Name? (Album Version)",
+    "url": "https://cdnt-preview.dzcdn.net/api/1/1/e/e/d/0/eed9b5164512b0a0df27e4043fb7f57c.mp3?hdnea=exp=1764226502~acl=/api/1/1/e/e/d/0/eed9b5164512b0a0df27e4043fb7f57c.mp3*~data=user_id=0,application_id=42~hmac=845e8ad64f34c931d699f0a7ed34aafe9973c8802f67eed92bf280a5dfa7e0e8"
+  },
+  {
+    "id": 16501728,
+    "artist": "fun.",
+    "title": "We Are Young (feat. Janelle Monáe)",
+    "url": "https://cdnt-preview.dzcdn.net/api/1/1/8/2/c/0/82c08ccf615f63cca82adfe5d7110dd4.mp3?hdnea=exp=1764226502~acl=/api/1/1/8/2/c/0/82c08ccf615f63cca82adfe5d7110dd4.mp3*~data=user_id=0,application_id=42~hmac=2dad67b2eb28c93d1d81a179d86d901026ebd1059d8526266cbc0de570e0ae60"
+  }
+]
