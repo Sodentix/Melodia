@@ -50,7 +50,7 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr v-for="player in leaderboard" :key="player.username">
+                                <tr v-for="player in leaderboard.slice(3)" :key="player.username">
                                 <td>#{{ player.rank }}</td>
                                 <td>{{ player.username }}</td>
                                 <td>{{ player.totalPoints.toLocaleString() }}</td>

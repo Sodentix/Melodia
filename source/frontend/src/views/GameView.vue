@@ -995,7 +995,6 @@ export default {
 .control-btn:disabled {
   opacity: 0.5;
   cursor: not-allowed;
-  }
 }
 
 @media (min-width: 720px) {
