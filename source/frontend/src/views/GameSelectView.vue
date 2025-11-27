@@ -114,279 +114,411 @@ onMounted(() => {
 
 <template>
   <div class="selection-page">
-    <section class="panel intro">
-      <div>
-        <p class="eyebrow">Spielmodus wählen</p>
-        <h1>Wie möchtest du spielen?</h1>
-        <p class="copy">
-          Competitive zählt deine Punkte fürs Leaderboard, Freeplay ist ideal zum Aufwärmen. Wähle
-          anschließend eine Kategorie, um das Theme der Runde festzulegen.
-        </p>
-      </div>
-      <div class="mode-grid">
-        <button
-          v-for="mode in modeOptions"
-          :key="mode.id"
-          type="button"
-          class="mode-card"
-          :class="{ active: selectedMode === mode.id }"
-          @click="setMode(mode.id)"
-        >
-          <span class="badge">{{ mode.badge }}</span>
-          <h2>{{ mode.title }}</h2>
-          <p>{{ mode.subtitle }}</p>
+    <div class="background-glow"></div>
+    
+    <header class="page-header">
+      <h1>Choose Your Path</h1>
+      <p class="subtitle">Select a mode and category to start your journey.</p>
+    </header>
+
+    <main class="content-wrapper">
+      <!-- Mode Selection -->
+      <section class="section modes">
+        <div class="section-header">
+          <h2><span class="step-number">01</span> Mode</h2>
+        </div>
+        <div class="mode-grid">
+          <button
+            v-for="mode in modeOptions"
+            :key="mode.id"
+            type="button"
+            class="mode-card"
+            :class="{ active: selectedMode === mode.id }"
+            @click="setMode(mode.id)"
+          >
+            <div class="mode-content">
+              <span class="badge">{{ mode.badge }}</span>
+              <h3>{{ mode.title }}</h3>
+              <p>{{ mode.subtitle }}</p>
+            </div>
+            <div class="mode-bg"></div>
+          </button>
+        </div>
+      </section>
+
+      <!-- Category Selection -->
+      <section class="section categories">
+        <div class="section-header">
+          <h2><span class="step-number">02</span> Category</h2>
+          <button type="button" class="refresh-btn" @click="fetchCategories" :disabled="loading" title="Refresh Categories">
+            <span class="icon">↻</span>
+          </button>
+        </div>
+
+        <div v-if="errorMessage" class="error-banner">
+          {{ errorMessage }}
+        </div>
+
+        <div v-else class="category-grid" :class="{ loading }">
+          <div
+            v-for="category in categories"
+            :key="category.id"
+            class="category-card"
+            :class="{ active: selectedCategory?.id === category.id }"
+            :style="{ '--accent': category.accent || '#5eead4' }"
+            @click="setCategory(category)"
+          >
+            <div class="card-glow"></div>
+            <div class="card-content">
+              <span class="difficulty">{{ category.difficulty }}</span>
+              <h3>{{ category.name }}</h3>
+              <p class="description">{{ category.description }}</p>
+            </div>
+          </div>
+          <div v-if="loading" class="loading-overlay">
+            <div class="spinner"></div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="actions-bar">
+      <div class="actions-container">
+        <button type="button" class="btn secondary" @click="router.push('/home')">
+          Back
+        </button>
+        <button type="button" class="btn primary" :disabled="!canStart" @click="startGame">
+          Start Game
+          <span class="arrow">→</span>
         </button>
       </div>
-    </section>
-
-    <section class="panel categories">
-      <div class="header">
-        <div>
-          <p class="eyebrow">Kategorie</p>
-          <h2>Wähle deinen Flavor</h2>
-        </div>
-        <button type="button" class="ghost-link" @click="fetchCategories" :disabled="loading">
-          Neu laden
-        </button>
-      </div>
-
-      <div v-if="errorMessage" class="error-banner">
-        {{ errorMessage }}
-      </div>
-
-      <div v-else class="category-grid" :class="{ loading }">
-        <div
-          v-for="category in categories"
-          :key="category.id"
-          class="category-card"
-          :class="{ active: selectedCategory?.id === category.id }"
-          :style="{ '--accent': category.accent || '#5eead4' }"
-          @click="setCategory(category)"
-        >
-          <p class="label">{{ category.difficulty }}</p>
-          <h3>{{ category.name }}</h3>
-          <p class="description">{{ category.description }}</p>
-        </div>
-        <p v-if="loading" class="loading-text">Kategorien werden geladen ...</p>
-      </div>
-    </section>
-
-    <div class="actions">
-      <button type="button" class="primary" :disabled="!canStart" @click="startGame">
-        Spiel starten
-      </button>
-      <button type="button" class="secondary" @click="router.push('/home')">
-        Zurück zur Übersicht
-      </button>
-    </div>
+    </footer>
   </div>
 </template>
 
 <style scoped>
 .selection-page {
-  min-height: calc(100vh - 6rem);
-  padding: 4rem clamp(1rem, 4vw, 4rem);
-  display: flex;
-  flex-direction: column;
-  gap: 2.5rem;
+  min-height: 100vh;
+  padding: 6rem 2rem 8rem;
+  position: relative;
+  overflow-x: hidden;
   color: var(--text, #f8fafc);
+  max-width: 1600px;
+  margin: 0 auto;
 }
 
-.panel {
-  background: rgba(12, 14, 26, 0.85);
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  border-radius: 28px;
-  padding: clamp(1.5rem, 3vw, 2.75rem);
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
+.background-glow {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: 
+    radial-gradient(circle at 15% 20%, rgba(255, 0, 200, 0.08), transparent 40%),
+    radial-gradient(circle at 85% 80%, rgba(0, 236, 255, 0.08), transparent 40%);
+  z-index: -1;
+  pointer-events: none;
 }
 
-.intro {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-  gap: 2rem;
-  align-items: center;
-}
-
-.eyebrow {
-  text-transform: uppercase;
-  letter-spacing: 0.2em;
-  font-size: 0.75rem;
-  color: rgba(248, 250, 252, 0.65);
-  margin-bottom: 0.8rem;
+/* Header */
+.page-header {
+  text-align: center;
+  margin-bottom: 4rem;
 }
 
 h1 {
-  font-size: clamp(2rem, 3.4vw, 3rem);
-  margin-bottom: 0.8rem;
+  font-size: clamp(2.5rem, 5vw, 4rem);
+  font-weight: 800;
+  margin-bottom: 1rem;
+  background: linear-gradient(135deg, #fff 0%, rgba(255,255,255,0.7) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  letter-spacing: -0.02em;
 }
 
-h2 {
-  font-size: clamp(1.4rem, 2.4vw, 2rem);
-  margin-bottom: 0.4rem;
+.subtitle {
+  font-size: 1.1rem;
+  color: rgba(255, 255, 255, 0.6);
+  max-width: 600px;
+  margin: 0 auto;
 }
 
-.copy {
-  color: rgba(248, 250, 252, 0.8);
-  line-height: 1.6;
-  max-width: 520px;
+/* Sections */
+.section {
+  margin-bottom: 4rem;
 }
 
+.section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 2rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.section-header h2 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.step-number {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #00ecff;
+  background: rgba(0, 236, 255, 0.1);
+  padding: 0.2rem 0.6rem;
+  border-radius: 4px;
+  font-family: monospace;
+}
+
+/* Mode Cards */
 .mode-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2rem;
 }
 
 .mode-card {
   position: relative;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 20px;
-  background: rgba(21, 24, 45, 0.7);
-  color: inherit;
-  padding: 1.5rem;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 24px;
+  padding: 2.5rem;
   text-align: left;
   cursor: pointer;
-  transition: transform 0.25s ease, border-color 0.25s ease;
+  overflow: hidden;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.mode-card:hover {
+  background: rgba(255, 255, 255, 0.05);
+  transform: translateY(-4px);
 }
 
 .mode-card.active {
-  border-color: rgba(94, 234, 212, 0.8);
-  transform: translateY(-4px);
-  box-shadow: 0 12px 30px rgba(94, 234, 212, 0.25);
+  border-color: #00ecff;
+  background: rgba(0, 236, 255, 0.05);
+  box-shadow: 0 0 30px rgba(0, 236, 255, 0.1);
 }
 
-.mode-card .badge {
-  display: inline-flex;
-  padding: 0.25rem 0.8rem;
-  border-radius: 999px;
-  border: 1px solid rgba(255, 255, 255, 0.15);
+.mode-content {
+  position: relative;
+  z-index: 2;
+}
+
+.badge {
+  display: inline-block;
   font-size: 0.75rem;
+  text-transform: uppercase;
   letter-spacing: 0.1em;
-  text-transform: uppercase;
-  margin-bottom: 0.8rem;
+  color: #00ecff;
+  margin-bottom: 1rem;
+  font-weight: 700;
 }
 
-.categories .header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 1.5rem;
-  margin-bottom: 1.4rem;
+.mode-card h3 {
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+  color: white;
 }
 
-.ghost-link {
-  border: none;
-  background: transparent;
-  color: rgba(248, 250, 252, 0.6);
-  font-weight: 600;
-  cursor: pointer;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
+.mode-card p {
+  color: rgba(255, 255, 255, 0.6);
+  line-height: 1.5;
 }
 
+/* Category Grid */
 .category-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-  gap: 1.2rem;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 1.5rem;
+  position: relative;
 }
 
 .category-card {
-  border-radius: 22px;
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  background: rgba(17, 20, 37, 0.8);
-  padding: 1.6rem;
+  position: relative;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 20px;
+  padding: 2rem;
   cursor: pointer;
-  transition: border-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
+  transition: all 0.3s ease;
+  overflow: hidden;
+}
+
+.category-card:hover {
+  transform: translateY(-4px);
+  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(255, 255, 255, 0.2);
 }
 
 .category-card.active {
   border-color: var(--accent);
-  transform: translateY(-4px);
-  box-shadow: 0 12px 32px color-mix(in srgb, var(--accent) 20%, black);
+  background: linear-gradient(145deg, rgba(255,255,255,0.05), rgba(255,255,255,0.01));
+  box-shadow: 0 0 20px color-mix(in srgb, var(--accent) 20%, transparent);
 }
 
-.category-card .label {
+.card-glow {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 100px;
+  height: 100px;
+  background: radial-gradient(circle at top right, var(--accent), transparent 70%);
+  opacity: 0.1;
+  transition: opacity 0.3s ease;
+}
+
+.category-card.active .card-glow {
+  opacity: 0.3;
+}
+
+.difficulty {
+  font-size: 0.7rem;
   text-transform: uppercase;
-  letter-spacing: 0.2em;
-  font-size: 0.75rem;
-  color: rgba(248, 250, 252, 0.55);
+  letter-spacing: 0.15em;
+  color: rgba(255, 255, 255, 0.5);
+  display: block;
+  margin-bottom: 0.8rem;
 }
 
 .category-card h3 {
-  margin: 0.8rem 0 0.4rem;
-  font-size: 1.15rem;
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+  color: white;
 }
 
 .category-card .description {
-  color: rgba(248, 250, 252, 0.75);
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.6);
   line-height: 1.4;
 }
 
-.loading-text {
-  grid-column: 1 / -1;
-  text-align: center;
-  color: rgba(248, 250, 252, 0.6);
-  padding: 1rem 0;
-}
-
-.error-banner {
-  border-radius: 18px;
-  padding: 1rem 1.4rem;
-  background: rgba(239, 68, 68, 0.15);
-  border: 1px solid rgba(239, 68, 68, 0.4);
-  color: #fecaca;
-  margin-bottom: 1rem;
-}
-
-.actions {
+/* Actions Bar */
+.actions-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  padding: 1.5rem;
+  background: rgba(5, 5, 5, 0.8);
+  backdrop-filter: blur(20px);
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  z-index: 100;
   display: flex;
-  flex-wrap: wrap;
-  gap: 1rem;
+  justify-content: center;
 }
 
-.actions button {
-  border-radius: 999px;
-  padding: 0.9rem 2.4rem;
+.actions-container {
+  width: 100%;
+  max-width: 1600px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.btn {
+  padding: 1rem 2rem;
+  border-radius: 99px;
   font-weight: 600;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+  font-size: 1rem;
   cursor: pointer;
+  transition: all 0.2s ease;
   border: none;
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
 }
 
-.actions .primary {
-  background: linear-gradient(120deg, #f472b6, #60a5fa, #34d399);
-  color: #050505;
+.btn.primary {
+  background: white;
+  color: black;
 }
 
-.actions .secondary {
-  background: transparent;
-  border: 1px solid rgba(248, 250, 252, 0.2);
-  color: rgba(248, 250, 252, 0.8);
+.btn.primary:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 20px rgba(255, 255, 255, 0.2);
 }
 
-.actions button:disabled {
+.btn.primary:disabled {
   opacity: 0.5;
   cursor: not-allowed;
 }
 
-@media (max-width: 640px) {
-  .intro {
+.btn.secondary {
+  background: transparent;
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.btn.secondary:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.refresh-btn {
+  background: transparent;
+  border: none;
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 1.2rem;
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.refresh-btn:hover {
+  color: white;
+}
+
+.loading-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(5, 5, 5, 0.5);
+  backdrop-filter: blur(2px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid rgba(255, 255, 255, 0.1);
+  border-top-color: #00ecff;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+@media (max-width: 768px) {
+  .selection-page {
+    padding: 4rem 1.5rem 8rem;
+  }
+  
+  h1 {
+    font-size: 2rem;
+  }
+  
+  .mode-grid {
     grid-template-columns: 1fr;
   }
-
-  .mode-grid,
-  .category-grid {
-    grid-template-columns: 1fr;
+  
+  .actions-bar {
+    padding: 1rem;
   }
-
-  .actions {
-    flex-direction: column;
-  }
-
-  .actions button {
-    width: 100%;
-    text-align: center;
+  
+  .btn {
+    padding: 0.8rem 1.5rem;
+    font-size: 0.9rem;
   }
 }
 </style>

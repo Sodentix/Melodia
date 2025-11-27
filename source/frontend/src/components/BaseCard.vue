@@ -1,4 +1,5 @@
 <script setup>
+import { computed } from 'vue';
 import { Icon } from '@iconify/vue';
 
 const props = defineProps({
@@ -41,10 +42,16 @@ const props = defineProps({
     default: '14rem'
   }
 });
+
+const cardStyle = computed(() => ({
+  width: '100%',
+  maxWidth: props.cardWidth,
+  minHeight: props.cardHeight,
+}));
 </script>
 
 <template>
-  <div class="card" :style="{ width: cardWidth, height: cardHeight }">
+  <div class="card" :style="cardStyle">
     <div class="imageContent">
       <Icon
         :icon="icon"
@@ -64,6 +71,9 @@ const props = defineProps({
 .card {
   display: flex;
   justify-content: center;
+  flex-direction: column;
+  width: 100%;
+  flex: 1 1 15rem;
   background-color: var(--card);
   padding: 1rem;
   border-radius: 1rem;

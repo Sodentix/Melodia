@@ -84,8 +84,8 @@ onMounted(async () => {
 <style scoped>
 .leaderboard {
     background-color: var(--card);
-    width: 40rem;
-    height: 33rem;
+    width: min(100%, 40rem);
+    min-height: 33rem;
     border: 1px solid rgba(255,255,255,0.03);
     padding-top: 0;
     border-radius: 16px;
@@ -103,9 +103,10 @@ onMounted(async () => {
 
 .ranking {
     margin: 2.5rem;
-    height: 26rem;
+    min-height: 26rem;
     border: 1px solid rgba(255,255,255,0.03);
     border-radius: 16px;
+    overflow: hidden;
 }
 
 .podium {
@@ -135,6 +136,17 @@ onMounted(async () => {
 
 .podiumItem.third {
     transform: translateY(0);
+}
+
+.leaderboard-list {
+  max-height: 15rem;
+  overflow-y: auto;
+  overflow-x: auto;
+  padding: 0 0.5rem 0.5rem;
+}
+
+.leaderboard-list table {
+  min-width: 320px;
 }
 
 
@@ -183,5 +195,56 @@ td {
 
 .username:hover {
   color: #93c5fd;           /* leichtes Blau beim Hover */
+}
+
+@media (max-width: 768px) {
+  .leaderboard {
+    width: 100%;
+  }
+
+  .ranking {
+    margin: 1.25rem 0;
+  }
+
+  .podium {
+    flex-wrap: wrap;
+    margin: 1.5rem 1rem;
+  }
+
+  .podiumItem {
+    width: calc(50% - 0.75rem);
+    min-width: 8rem;
+  }
+
+  table {
+    font-size: 0.9rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .topText {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .ranking {
+    margin: 1rem 0;
+    border-radius: 14px;
+  }
+
+  .podium {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .podiumItem {
+    width: 100%;
+  }
+
+  .podiumItem.first,
+  .podiumItem.second,
+  .podiumItem.third {
+    transform: none;
+  }
 }
 </style>

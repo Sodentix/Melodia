@@ -1,100 +1,135 @@
 <template>
   <div class="game-view">
-    <h1>Guess The Song</h1>
+    <div class="background-glow"></div>
 
-    <div class="mode-banner">
-      <span class="chip" :class="{ free: isFreeplay }">
-        {{ isFreeplay ? 'Freeplay' : 'Competitive' }}
-      </span>
-      <span class="chip category">
-        {{ categoryLabel }}
-      </span>
-      <button type="button" class="chip link" @click="$router.push('/game')">
-        Modus wechseln
-      </button>
-    </div>
-
-    <!-- Audio Player -->
-    <div v-if="currentRound" class="audio-section">
-      <p class="game-instruction">Listen to the preview and guess the song!</p>
-      <audio 
-        ref="audioPlayer" 
-        :src="currentRound.preview_url" 
-        controls 
-        autoplay
-        @ended="onAudioEnded"
-      />
-      <div v-if="currentRound.guessCount > 0" class="guess-info">
-        <p>Guesses: {{ currentRound.guessCount }}</p>
+    <!-- Header -->
+    <header class="game-header">
+      <div class="header-left">
+        <div class="mode-badge" :class="{ free: isFreeplay }">
+          {{ isFreeplay ? 'Freeplay' : 'Competitive' }}
+        </div>
+        <div class="category-badge">
+          {{ categoryLabel }}
+        </div>
       </div>
-    </div>
+      <div class="header-right">
+        <button class="exit-btn" @click="$router.push('/game')">
+          <span class="icon">✕</span>
+          <span class="label">Exit</span>
+        </button>
+      </div>
+    </header>
 
-    <!-- Guess Input with Suggestions -->
-    <div class="guess-section">
-      <div class="input-wrapper">
-        <input 
-          v-model="guessInput" 
-          @input="onGuessInput" 
-          @keydown="handleKeydown"
-          @focus="onInputFocus"
-          placeholder="Type your guess..." 
-          :disabled="!currentRound || isSubmitting"
-          class="guess-input"
-        />
-        
-        <!-- Suggestions Dropdown -->
-        <div v-if="showSuggestions && suggestions.length > 0" class="suggestions-dropdown">
-          <div
-            v-for="(suggestion, index) in suggestions"
-            :key="suggestion.id"
-            @click="selectSuggestion(suggestion)"
-            @mouseenter="selectedIndex = index"
-            :class="['suggestion-item', { selected: selectedIndex === index }]"
-          >
-            <img v-if="suggestion.image" :src="suggestion.image" alt="" class="suggestion-image" />
-            <div class="suggestion-info">
-              <div class="suggestion-name">{{ suggestion.name }}</div>
-              <div class="suggestion-artists">
-                {{ suggestion.artists.map(a => a.name).join(', ') }}
-              </div>
-            </div>
+    <!-- Main Game Area -->
+    <main class="game-stage">
+      
+      <!-- Status Messages (Toast style) -->
+      <transition name="toast">
+        <div v-if="message" :class="['status-toast', messageType]">
+          <span class="status-icon">
+            {{ messageType === 'success' ? '✓' : messageType === 'error' ? '✕' : 'ℹ' }}
+          </span>
+          <span class="status-text">{{ message }}</span>
+        </div>
+      </transition>
+
+      <!-- Points Animation -->
+      <transition name="pop">
+        <div v-if="!isFreeplay && lastPoints > 0" class="points-pop">
+          +{{ lastPoints }}
+        </div>
+      </transition>
+
+      <!-- Audio Visualizer / Player Placeholder -->
+      <div class="audio-visualizer">
+        <div class="visualizer-circle" :class="{ playing: currentRound && !currentRound.completed }">
+          <div class="wave"></div>
+          <div class="wave"></div>
+          <div class="wave"></div>
+          <div class="icon-container">
+            <span class="music-icon">♫</span>
           </div>
+        </div>
+        
+        <div class="player-controls">
+          <audio
+            ref="audioPlayer"
+            :src="currentRound?.preview_url"
+            controls
+            autoplay
+            @ended="onAudioEnded"
+            class="hidden-audio"
+          />
+          <p v-if="currentRound" class="instruction-text">
+            {{ currentRound.completed ? 'Round finished' : 'Listen and guess...' }}
+          </p>
+          <p v-else class="instruction-text idle">
+            Ready for the next beat?
+          </p>
         </div>
       </div>
 
-      <button 
-        @click="submitGuess" 
-        :disabled="!currentRound || !guessInput.trim() || isSubmitting"
-        class="submit-btn"
-      >
-        {{ isSubmitting ? 'Submitting...' : 'Submit Guess' }}
-      </button>
-    </div>
+      <!-- Input Area -->
+      <div class="input-area">
+        <div class="input-wrapper">
+          <input
+            v-model="guessInput"
+            @input="onGuessInput"
+            @keydown="handleKeydown"
+            @focus="onInputFocus"
+            placeholder="Type song or artist..."
+            :disabled="!currentRound || isSubmitting || currentRound.completed"
+            class="hero-input"
+            ref="guessInputRef"
+          />
+          <div class="input-glow"></div>
+          
+          <!-- Suggestions -->
+          <transition name="fade">
+            <div v-if="showSuggestions && suggestions.length > 0" class="suggestions-menu">
+              <div
+                v-for="(suggestion, index) in suggestions"
+                :key="suggestion.id"
+                @click="selectSuggestion(suggestion)"
+                @mouseenter="selectedIndex = index"
+                :class="['suggestion-item', { selected: selectedIndex === index }]"
+              >
+                <img v-if="suggestion.image" :src="suggestion.image" alt="" class="thumb" />
+                <div class="info">
+                  <div class="name">{{ suggestion.name }}</div>
+                  <div class="artist">{{ suggestion.artists.map(a => a.name).join(', ') }}</div>
+                </div>
+              </div>
+            </div>
+          </transition>
+        </div>
+      </div>
 
-    <!-- Game Controls -->
-    <div class="game-controls">
-      <button @click="startNewRound" :disabled="isSubmitting" class="control-btn">
-        Start New Round
-      </button>
-      <button v-if="currentRound" @click="giveUp" :disabled="isSubmitting" class="control-btn secondary">
-        Give Up
-      </button>
-    </div>
+    </main>
 
-    <!-- Messages / Feedback -->
-    <div v-if="message" :class="['message', messageType]">
-      {{ message }}
-    </div>
-
-    <!-- Points Display -->
-    <div v-if="!isFreeplay && lastPoints > 0" class="points-display">
-      <p>🎉 Correct! You earned {{ lastPoints }} points!</p>
-    </div>
-
-    <!-- Round Status -->
-    <div v-if="currentRound && !currentRound.completed" class="round-status">
-      <p>Round active - Make your guess!</p>
-    </div>
+    <!-- Footer Controls -->
+    <footer class="game-controls">
+      <div class="controls-wrapper">
+        <button 
+          v-if="currentRound && !currentRound.completed" 
+          @click="giveUp" 
+          :disabled="isSubmitting" 
+          class="control-btn give-up"
+        >
+          Give Up
+        </button>
+        
+        <button 
+          @click="startNewRound" 
+          :disabled="isSubmitting" 
+          class="control-btn next-round"
+          :class="{ primary: !currentRound || currentRound.completed }"
+        >
+          {{ currentRound ? 'Next Round' : 'Start Game' }}
+          <span class="arrow">→</span>
+        </button>
+      </div>
+    </footer>
   </div>
 </template>
 
@@ -609,262 +644,411 @@ export default {
 
 <style scoped>
 .game-view {
-  max-width: 800px;
-  margin: 0 auto;
-  padding: 2rem;
-}
-
-.mode-banner {
+  min-height: 100vh;
+  position: relative;
   display: flex;
-  flex-wrap: wrap;
-  gap: 0.75rem;
-  margin-bottom: 1.5rem;
-  align-items: center;
+  flex-direction: column;
+  color: white;
+  overflow: hidden;
 }
 
-.chip {
-  border-radius: 999px;
-  padding: 0.4rem 1rem;
-  font-size: 0.85rem;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  background: rgba(255, 255, 255, 0.08);
-  color: #0b0c14;
-  font-weight: 600;
-}
-
-.chip.free {
-  background: #fcd34d;
-  color: #1b1c30;
-  border-color: rgba(252, 211, 77, 0.4);
-}
-
-.chip.category {
-  background: #38bdf8;
-  color: #04121f;
-  border-color: rgba(56, 189, 248, 0.4);
-}
-
-.chip.link {
-  background: transparent;
-  color: #ffffff;
-  border-color: rgba(255, 255, 255, 0.35);
-  cursor: pointer;
-  transition: background 0.2s ease;
-}
-
-.chip.link:hover {
-  background: rgba(255, 255, 255, 0.1);
-}
-
-h1 {
-  text-align: center;
-  margin-bottom: 2rem;
-}
-
-.audio-section {
-  margin-bottom: 2rem;
-  text-align: center;
-}
-
-.game-instruction {
-  font-size: 1.1rem;
-  margin-bottom: 1rem;
-  color: #666;
-}
-
-audio {
+.background-glow {
+  position: fixed;
+  top: 0;
+  left: 0;
   width: 100%;
-  max-width: 500px;
-  margin: 0 auto;
+  height: 100%;
+  background: radial-gradient(circle at 50% 30%, rgba(20, 30, 60, 1), #050505 80%);
+  z-index: -1;
 }
 
-.guess-info {
-  margin-top: 1rem;
+/* Header */
+.game-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem 2rem;
+  z-index: 10;
+}
+
+.header-left {
+  display: flex;
+  gap: 1rem;
+}
+
+.mode-badge, .category-badge {
+  padding: 0.4rem 1rem;
+  border-radius: 99px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.mode-badge.free {
+  color: #fcd34d;
+  border-color: rgba(252, 211, 77, 0.3);
+  background: rgba(252, 211, 77, 0.1);
+}
+
+.exit-btn {
+  background: transparent;
+  border: none;
+  color: rgba(255, 255, 255, 0.6);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
   font-size: 0.9rem;
-  color: #666;
+  transition: color 0.2s;
 }
 
-.guess-section {
-  margin-bottom: 2rem;
+.exit-btn:hover {
+  color: white;
+}
+
+/* Main Stage */
+.game-stage {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4rem;
+  padding: 2rem;
+  position: relative;
+}
+
+/* Visualizer */
+.audio-visualizer {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2rem;
+}
+
+.visualizer-circle {
+  width: 180px;
+  height: 180px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05));
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  box-shadow: 0 0 50px rgba(0, 0, 0, 0.5);
+}
+
+.icon-container {
+  font-size: 3rem;
+  color: rgba(255, 255, 255, 0.8);
+  z-index: 2;
+}
+
+.wave {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  border: 2px solid rgba(0, 236, 255, 0.3);
+  opacity: 0;
+}
+
+.visualizer-circle.playing .wave {
+  animation: ripple 2s infinite cubic-bezier(0, 0.2, 0.8, 1);
+}
+
+.visualizer-circle.playing .wave:nth-child(2) {
+  animation-delay: 0.6s;
+}
+
+.visualizer-circle.playing .wave:nth-child(3) {
+  animation-delay: 1.2s;
+}
+
+@keyframes ripple {
+  0% {
+    width: 100%;
+    height: 100%;
+    opacity: 0.8;
+    border-width: 2px;
+  }
+  100% {
+    width: 250%;
+    height: 250%;
+    opacity: 0;
+    border-width: 0px;
+  }
+}
+
+.hidden-audio {
+  display: none; /* Hide default player */
+}
+
+.instruction-text {
+  font-size: 1.1rem;
+  color: rgba(255, 255, 255, 0.8);
+  text-align: center;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+}
+
+.instruction-text.idle {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+/* Input Area */
+.input-area {
+  width: 100%;
+  max-width: 600px;
+  position: relative;
+  z-index: 20;
 }
 
 .input-wrapper {
   position: relative;
-  margin-bottom: 1rem;
 }
 
-.guess-input {
+.hero-input {
   width: 100%;
-  padding: 0.75rem 1rem;
-  font-size: 1rem;
-  border: 2px solid #ddd;
-  border-radius: 8px;
-  box-sizing: border-box;
+  background: rgba(0, 0, 0, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 16px;
+  padding: 1.2rem 1.5rem;
+  font-size: 1.5rem;
+  color: white;
+  text-align: center;
+  backdrop-filter: blur(10px);
+  transition: all 0.3s ease;
 }
 
-.guess-input:focus {
+.hero-input:focus {
   outline: none;
-  border-color: #4CAF50;
+  border-color: #00ecff;
+  background: rgba(0, 0, 0, 0.8);
+  box-shadow: 0 0 30px rgba(0, 236, 255, 0.15);
 }
 
-.guess-input:disabled {
-  background-color: #f5f5f5;
+.hero-input::placeholder {
+  color: rgba(255, 255, 255, 0.3);
+}
+
+.hero-input:disabled {
+  opacity: 0.5;
   cursor: not-allowed;
 }
 
-.suggestions-dropdown {
+/* Suggestions */
+.suggestions-menu {
   position: absolute;
-  top: 100%;
+  bottom: 100%;
   left: 0;
   right: 0;
-  background: white;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  max-height: 300px;
-  overflow-y: auto;
-  z-index: 1000;
-  margin-top: 4px;
+  margin-bottom: 1rem;
+  background: rgba(15, 20, 35, 0.95);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  overflow: hidden;
+  backdrop-filter: blur(20px);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
 }
 
 .suggestion-item {
   display: flex;
   align-items: center;
-  padding: 0.75rem;
+  gap: 1rem;
+  padding: 0.8rem 1rem;
   cursor: pointer;
-  border-bottom: 1px solid #f0f0f0;
-  transition: background-color 0.2s;
+  transition: background 0.2s;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 .suggestion-item:last-child {
   border-bottom: none;
 }
 
-.suggestion-item:hover,
-.suggestion-item.selected {
-  background-color: #f5f5f5;
+.suggestion-item:hover, .suggestion-item.selected {
+  background: rgba(255, 255, 255, 0.1);
 }
 
-.suggestion-image {
+.thumb {
   width: 40px;
   height: 40px;
+  border-radius: 6px;
   object-fit: cover;
-  border-radius: 4px;
-  margin-right: 0.75rem;
 }
 
-.suggestion-info {
+.info {
   flex: 1;
+  text-align: left;
 }
 
-.suggestion-name {
+.name {
   font-weight: 600;
-  margin-bottom: 0.25rem;
-}
-
-.suggestion-artists {
-  font-size: 0.9rem;
-  color: #666;
-}
-
-.submit-btn {
-  width: 100%;
-  padding: 0.75rem 1rem;
-  font-size: 1rem;
-  background-color: #4CAF50;
   color: white;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: background-color 0.2s;
 }
 
-.submit-btn:hover:not(:disabled) {
-  background-color: #45a049;
+.artist {
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.6);
 }
 
-.submit-btn:disabled {
-  background-color: #ccc;
-  cursor: not-allowed;
+/* Toast Messages */
+.status-toast {
+  position: absolute;
+  top: 10%;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(255, 255, 255, 0.95);
+  color: black;
+  padding: 0.8rem 1.5rem;
+  border-radius: 99px;
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  font-weight: 600;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  z-index: 100;
 }
 
+.status-toast.error {
+  background: #ff4d4d;
+  color: white;
+}
+
+.status-toast.success {
+  background: #00ecff;
+  color: black;
+}
+
+.status-icon {
+  font-size: 1.2rem;
+}
+
+/* Points Pop */
+.points-pop {
+  position: absolute;
+  top: 40%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 4rem;
+  font-weight: 800;
+  color: #00ecff;
+  text-shadow: 0 0 20px rgba(0, 236, 255, 0.5);
+  z-index: 50;
+  pointer-events: none;
+}
+
+/* Controls */
 .game-controls {
+  padding: 2rem;
+  display: flex;
+  justify-content: center;
+}
+
+.controls-wrapper {
   display: flex;
   gap: 1rem;
-  margin-bottom: 2rem;
 }
 
 .control-btn {
-  flex: 1;
-  padding: 0.75rem 1rem;
-  font-size: 1rem;
-  background-color: #2196F3;
-  color: white;
-  border: none;
-  border-radius: 8px;
+  padding: 1rem 2rem;
+  border-radius: 99px;
+  font-weight: 600;
   cursor: pointer;
-  transition: background-color 0.2s;
+  border: none;
+  font-size: 1rem;
+  transition: all 0.2s;
 }
 
-.control-btn:hover:not(:disabled) {
-  background-color: #0b7dda;
+.control-btn.primary {
+  background: white;
+  color: black;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
-.control-btn.secondary {
-  background-color: #ff9800;
+.control-btn.primary:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 20px rgba(255, 255, 255, 0.2);
 }
 
-.control-btn.secondary:hover:not(:disabled) {
-  background-color: #e68900;
+.control-btn.give-up {
+  background: transparent;
+  color: rgba(255, 255, 255, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.control-btn.give-up:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
 }
 
 .control-btn:disabled {
-  background-color: #ccc;
+  opacity: 0.5;
   cursor: not-allowed;
+  }
 }
 
-.message {
-  padding: 1rem;
-  border-radius: 8px;
-  margin-bottom: 1rem;
-  text-align: center;
+@media (min-width: 720px) {
+  .guess-actions {
+    flex-direction: row;
+    align-items: flex-start;
+  }
+
+  .submit-btn {
+    width: auto;
+    min-width: 180px;
+  }
 }
 
-.message.success {
-  background-color: #d4edda;
-  color: #155724;
-  border: 1px solid #c3e6cb;
+@media (max-width: 600px) {
+  .control-btn {
+    min-width: 100%;
+  }
+
+  .mode-banner {
+    width: 100%;
+    justify-content: flex-start;
+  }
 }
 
-.message.error {
-  background-color: #f8d7da;
-  color: #721c24;
-  border: 1px solid #f5c6cb;
-}
+@media (max-width: 480px) {
+  .panel {
+    padding: 1rem;
+    border-radius: 18px;
+  }
 
-.message.info {
-  background-color: #d1ecf1;
-  color: #0c5460;
-  border: 1px solid #bee5eb;
-}
+  .chip {
+    width: 100%;
+    justify-content: center;
+    font-size: 0.75rem;
+  }
 
-.points-display {
-  text-align: center;
-  padding: 1rem;
-  background-color: #fff3cd;
-  border: 1px solid #ffc107;
-  border-radius: 8px;
-  margin-bottom: 1rem;
-  font-size: 1.2rem;
-  font-weight: 600;
-}
+  .mode-banner {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.5rem;
+  }
 
-.round-status {
-  text-align: center;
-  padding: 0.5rem;
-  color: #666;
-  font-size: 0.9rem;
+  .guess-actions {
+    flex-direction: column;
+  }
+
+  .submit-btn {
+    width: 100%;
+  }
+
+  .game-controls {
+    flex-direction: column;
+  }
 }
 </style>
