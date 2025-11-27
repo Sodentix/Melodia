@@ -23,6 +23,7 @@
                         </div>
 
                         <div class="podiumItem first">
+                            <Icon class="crown" icon="mdi:crown"/>
                             <p class="textType1">1</p>
                             <p class="textType2 username" :title="leaderboard[0]?.username">
                                 {{ leaderboard[0]?.username || "–" }}
@@ -66,6 +67,7 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import axios from "axios";
+import { Icon } from '@iconify/vue';
 
 const leaderboard = ref([]);
 
@@ -101,12 +103,22 @@ onMounted(async () => {
     line-height: 1.5rem;
 }
 
+.crown {
+    position: absolute;
+    top: -1.2rem;
+    right: -0.8rem;
+    color: #f7ba2a;
+    rotate: 30deg;
+    width: 2rem;
+    height: 2rem;
+    z-index: 1000;
+}
+
 .ranking {
     margin: 2.5rem;
     min-height: 26rem;
     border: 1px solid rgba(255,255,255,0.03);
     border-radius: 16px;
-    overflow: hidden;
 }
 
 .podium {
@@ -118,6 +130,7 @@ onMounted(async () => {
 }
 
 .podiumItem {
+    position: relative;
     background-color: var(--stroke);
     text-align: center;
     width: 9rem;
@@ -128,6 +141,7 @@ onMounted(async () => {
 
 .podiumItem.first {
     transform: translateY(-1.5rem);
+    box-shadow: 0 0 20px 2px #f7ba2a;
 }
 
 .podiumItem.second {
