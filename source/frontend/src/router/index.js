@@ -29,7 +29,7 @@ const router = createRouter({
       alias: ['/login', '/register'],
     },
     {
-      path: '/profile',
+      path: '/profile/:username?',
       name: 'profile',
       component: () => import('@/views/ProfileView.vue'),
     }
