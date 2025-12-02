@@ -4,6 +4,7 @@ const helmet = require('helmet');
 const authRoutes = require('./routes/authRoutes');
 const statsRoutes = require('./routes/statsRoutes');
 const gameRoutes = require('./routes/gameRoutes');
+const userRoutes = require('./routes/userRoutes');
 const libraryRoutes = require('./routes/libraryRoutes');
 const createLogger = require('./middleware/logger');
 const path = require('path');
@@ -112,6 +113,7 @@ app.use('/auth', authRoutes);
 app.use('/stats', statsRoutes);
 app.use('/game', gameRoutes);
 app.use('/library', libraryRoutes);
+app.use('/users', userRoutes);
 
 // Global error handler (ensure all unhandled route errors are logged)
 // Must be after routes
