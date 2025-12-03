@@ -783,8 +783,104 @@ const handleRegister = async () => {
 }
 
 @media (max-width: 1150px) {
+  .card-body {
+    grid-template-columns: 1fr;
+  }
+
   .cta-panel {
-    display: none;
+    width: 100%;
+    order: -1;
+    display: flex;
+  }
+}
+
+@media (max-width: 900px) {
+  .auth-page {
+    margin: 1.5rem 0;
+    height: auto;
+    min-height: auto;
+    padding: 1.5rem 1rem 2rem;
+  }
+
+  .auth-card {
+    padding: 1.75rem;
+    border-radius: 24px;
+  }
+
+  .card-header {
+    align-items: flex-start;
+  }
+
+  .mode-toggle button {
+    font-size: 0.85rem;
+    padding: 0.5rem 0.8rem;
+  }
+
+  .form-container {
+    padding: 2rem 1.25rem;
+  }
+
+  .form-feedback {
+    margin: 1rem;
+  }
+}
+
+@media (max-width: 640px) {
+  .form-headline h2 {
+    font-size: 1.2rem;
+  }
+
+  .split-fields {
+    grid-template-columns: 1fr;
+  }
+
+  .form-window {
+    border-radius: 20px;
+  }
+
+  .primary-action,
+  .ghost-action {
+    width: 100%;
+    text-align: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .auth-card {
+    padding: 1.25rem;
+    border-radius: 20px;
+  }
+
+  .card-header {
+    width: 100%;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 1rem;
+  }
+
+  .mode-toggle {
+    width: 100%;
+  }
+
+  .mode-toggle button {
+    font-size: 0.78rem;
+    padding: 0.45rem 0.6rem;
+  }
+
+  .card-body {
+    gap: 1.25rem;
+  }
+
+  .form-container {
+    padding: 1.35rem 1rem;
+  }
+
+  .form-feedback {
+    margin: 0.75rem 0.85rem 0;
+  }
+
+  .cta-panel {
+    padding: 1.5rem;
   }
 }
 </style>

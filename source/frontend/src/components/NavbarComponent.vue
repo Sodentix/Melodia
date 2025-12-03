@@ -5,7 +5,12 @@ import axios from 'axios';
 
 const canvasRef = ref(null);
 const isAuthenticated = ref(false);
+const isMenuOpen = ref(false);
 let animationId;
+let resizeObserver;
+let canvas;
+let ctx;
+let pixelRatio = 1;
 
 const apiRoot = import.meta.env.VITE_API_URL
   ? import.meta.env.VITE_API_URL.replace(/\/$/, '')
@@ -46,16 +51,61 @@ function handleAuthChange() {
   validateSession();
 }
 
+function toggleMenu() {
+  isMenuOpen.value = !isMenuOpen.value;
+}
+
+function closeMenu() {
+  isMenuOpen.value = false;
+}
+
 // Code für die Wellenanimation
+function resizeCanvas() {
+  if (!canvas || !ctx) {
+    return;
+  }
+
+  pixelRatio = window.devicePixelRatio || 1;
+  const parent = canvas.parentElement;
+  const targetWidth = parent?.offsetWidth || window.innerWidth || 800;
+  const targetHeight = parent?.offsetHeight || 160;
+
+  canvas.width = targetWidth * pixelRatio;
+  canvas.height = targetHeight * pixelRatio;
+  canvas.style.width = `${targetWidth}px`;
+  canvas.style.height = `${targetHeight}px`;
+
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+  ctx.scale(pixelRatio, pixelRatio);
+}
+
+function cleanupCanvasListeners() {
+  if (resizeObserver) {
+    resizeObserver.disconnect();
+    resizeObserver = null;
+  }
+  window.removeEventListener('resize', resizeCanvas);
+}
+
 onMounted(() => {
   validateSession();
   window.addEventListener('melodia-auth-changed', handleAuthChange);
 
-  const canvas = canvasRef.value;
-  const ctx = canvas.getContext('2d');
+  canvas = canvasRef.value;
+  if (!canvas) {
+    return;
+  }
+  ctx = canvas.getContext('2d');
 
-  canvas.width = 800;
-  canvas.height = 300;
+  if (canvas) {
+    resizeCanvas();
+    if (window.ResizeObserver) {
+      resizeObserver = new ResizeObserver(resizeCanvas);
+      resizeObserver.observe(canvas.parentElement || canvas);
+    } else {
+      window.addEventListener('resize', resizeCanvas);
+    }
+  }
 
     const colors = [
     'rgba(255,0,200,0.6)',  
@@ -72,9 +122,12 @@ onMounted(() => {
   }
 
   function draw() {
+    if (!canvas || !ctx) {
+      return;
+    }
     time += 0.018;
-    const width = canvas.width;
-    const height = canvas.height;
+    const width = canvas.width / pixelRatio;
+    const height = canvas.height / pixelRatio;
     ctx.clearRect(0, 0, width, height);
 
     const topLimit = 20;
@@ -109,6 +162,7 @@ onMounted(() => {
 
 onBeforeUnmount(() => {
   window.removeEventListener('melodia-auth-changed', handleAuthChange);
+  cleanupCanvasListeners();
   if (animationId) {
     cancelAnimationFrame(animationId);
   }
@@ -116,26 +170,59 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-    <div id="navbar">
-        <div class="wave-layer">
-        <canvas ref="canvasRef" />
-        </div>
-        <div id="logo">Melodia - Feel The Rythm.</div>
-        <nav id="primary-nav">
-            <ul class="nav-list">
-            <li><router-link class="nav-link" :to="{ name: 'home' }">Home</router-link></li>
-            <li><router-link class="nav-link" :to="{ path: '/home', hash: '#howtoplay' }">How to play</router-link></li>
-            </ul>
-            <div class="nav-actions">
-            <router-link class="btn primary" v-if="!isAuthenticated" :to="{ name: 'auth' }">Sign Up</router-link>
-            <router-link v-if="isAuthenticated" :to="{ name: 'profile' }">
-              <div class="profile-orb">
-                <Icon icon="solar:user-bold-duotone" class="userIcon"/>
-              </div>
-            </router-link>
-            </div>
-        </nav>
+  <div id="navbar">
+    <div class="wave-layer">
+      <canvas ref="canvasRef" />
     </div>
+    <div class="nav-inner">
+      <div id="logo">Melodia - Feel The Rythm.</div>
+      <button
+        type="button"
+        class="menu-toggle"
+        :aria-expanded="isMenuOpen"
+        aria-controls="primary-nav"
+        @click="toggleMenu"
+        aria-label="Navigation öffnen oder schließen"
+      >
+        <span />
+        <span />
+        <span />
+      </button>
+      <nav id="primary-nav" :class="{ 'is-open': isMenuOpen }">
+        <ul class="nav-list">
+          <li>
+            <router-link class="nav-link" :to="{ name: 'home' }" @click="closeMenu">
+              Home
+            </router-link>
+          </li>
+          <li>
+            <router-link
+              class="nav-link"
+              :to="{ path: '/home', hash: '#howtoplay' }"
+              @click="closeMenu"
+            >
+              How to play
+            </router-link>
+          </li>
+        </ul>
+        <div class="nav-actions">
+          <router-link
+            class="btn primary"
+            v-if="!isAuthenticated"
+            :to="{ name: 'auth' }"
+            @click="closeMenu"
+          >
+            Sign Up
+          </router-link>
+          <router-link v-if="isAuthenticated" :to="{ name: 'profile' }" @click="closeMenu">
+            <div class="profile-orb">
+              <Icon icon="solar:user-bold-duotone" class="userIcon" />
+            </div>
+          </router-link>
+        </div>
+      </nav>
+    </div>
+  </div>
 </template>
 
 <style scoped>
@@ -143,19 +230,28 @@ onBeforeUnmount(() => {
 #navbar {
     display: flex;
     position: relative;
-    flex-direction: row;
     background-color: black;
-    height: 5rem;
+    min-height: 5rem;
     z-index: 999;
+    padding: 0 1.5rem;
+    width: 100%;
+}
+
+.nav-inner {
+    display: flex;
+    align-items: center;
+    flex: 1;
+    gap: 1.5rem;
 }
 
 #primary-nav {
     display: flex;
     flex-direction: row;
-    margin-left: 10rem;
+    margin-left: auto;
     align-items: center;
     justify-content: flex-end;
     flex: 1;
+    gap: 2rem;
 }
 
 #logo {
@@ -172,9 +268,7 @@ onBeforeUnmount(() => {
     background-clip: text;
     color: transparent;
     text-shadow: 0 0 22px rgba(0, 236, 255, 0.2);
-    padding-left: 2.5rem;
 }
-
 
 
 /* Navbar-Items */
@@ -195,8 +289,9 @@ onBeforeUnmount(() => {
 }
 
 .nav-actions {
-    padding-left: 5rem;
-    padding-right: 2.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
 }
 
 :deep(.router-link-exact-active[href="/home"])::after {
@@ -225,6 +320,25 @@ onBeforeUnmount(() => {
     color: #ffffff;
 }
 
+
+.menu-toggle {
+    display: none;
+    background: transparent;
+    border: none;
+    flex-direction: column;
+    justify-content: center;
+    gap: 5px;
+    cursor: pointer;
+    padding: 0.5rem;
+    margin-left: auto;
+}
+
+.menu-toggle span {
+    width: 26px;
+    height: 3px;
+    background: linear-gradient(120deg, var(--accent-pink), var(--accent-cyan));
+    display: block;
+}
 
 
 /* Wellenanimation / Canvas */
@@ -320,6 +434,113 @@ canvas {
     font-size: 22px;
     color: white;
     filter: drop-shadow(0 0 4px rgba(255, 255, 255, 0.7));
+}
+
+@media (max-width: 900px) {
+    #navbar {
+        padding: 0 1rem;
+    }
+
+    .menu-toggle {
+        display: flex;
+        z-index: 1001; /* Ensure it's above the overlay */
+    }
+
+    /* Hamburger Animation */
+    .menu-toggle span {
+        transition: all 0.3s ease-in-out;
+        transform-origin: center;
+    }
+
+    .menu-toggle[aria-expanded="true"] span:nth-child(1) {
+        transform: translateY(8px) rotate(45deg);
+    }
+
+    .menu-toggle[aria-expanded="true"] span:nth-child(2) {
+        opacity: 0;
+        transform: translateX(-10px);
+    }
+
+    .menu-toggle[aria-expanded="true"] span:nth-child(3) {
+        transform: translateY(-8px) rotate(-45deg);
+    }
+
+    /* Full Screen Overlay */
+    #primary-nav {
+        position: fixed;
+        inset: 0;
+        width: 100vw;
+        height: 100vh;
+        background: rgba(5, 5, 5, 0.95);
+        backdrop-filter: blur(12px);
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        margin-left: 0;
+        gap: 2.5rem;
+        z-index: 1000;
+        
+        /* Transition states */
+        opacity: 0;
+        visibility: hidden;
+        pointer-events: none;
+        transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        transform: scale(0.95);
+    }
+
+    #primary-nav.is-open {
+        opacity: 1;
+        visibility: visible;
+        pointer-events: all;
+        transform: scale(1);
+        max-height: 100vh; /* Override previous max-height */
+    }
+
+    .nav-inner {
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+        width: 100%;
+    }
+    .nav-list {
+        flex-direction: column;
+        width: auto;
+        gap: 2rem;
+        align-items: center;
+    }
+
+    .nav-link {
+        font-size: 2rem; /* Larger font for mobile */
+        font-weight: 700;
+        opacity: 0;
+        transform: translateY(20px);
+        transition: opacity 0.4s ease, transform 0.4s ease;
+    }
+
+    #primary-nav.is-open .nav-link {
+        opacity: 1;
+        transform: translateY(0);
+        transition-delay: 0.1s;
+    }
+    
+    #primary-nav.is-open .nav-list li:nth-child(1) .nav-link { transition-delay: 0.1s; }
+    #primary-nav.is-open .nav-list li:nth-child(2) .nav-link { transition-delay: 0.2s; }
+
+    .nav-actions {
+        width: auto;
+        justify-content: center;
+        flex-direction: column;
+        gap: 1.5rem;
+        opacity: 0;
+        transform: translateY(20px);
+        transition: opacity 0.4s ease, transform 0.4s ease;
+    }
+
+    #primary-nav.is-open .nav-actions {
+        opacity: 1;
+        transform: translateY(0);
+        transition-delay: 0.3s;
+    }
 }
 
 </style>
