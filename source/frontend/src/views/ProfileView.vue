@@ -2,6 +2,7 @@
 import { computed, onMounted, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { Icon } from '@iconify/vue';
+import AvatarCropper from '../components/AvatarCropper.vue';
 
 const route = useRoute();
 const router = useRouter();
@@ -31,6 +32,8 @@ const pendingEmailVerification = ref(false);
 
 const storedUser = ref(null);
 const avatarInputRef = ref(null);
+const isCroppingAvatar = ref(false);
+const avatarFileToCrop = ref(null);
 
 const viewingUsername = computed(() => {
   return route.params.username || storedUser.value?.username || null;
@@ -242,6 +245,7 @@ function closeEditProfile() {
   if (editSaving.value) return;
   currentPassword.value = '';
   isEditingInline.value = false;
+  avatarEditHintShown.value = false;
 }
 
 function handleAvatarClick() {
@@ -261,12 +265,24 @@ function handleAvatarClick() {
   }
 }
 
-async function handleAvatarSelected(event) {
+function handleAvatarSelected(event) {
   const files = event.target?.files;
   if (!files || !files[0] || !usersBase) return;
 
   const file = files[0];
   avatarUploadError.value = null;
+  avatarFileToCrop.value = file;
+  isCroppingAvatar.value = true;
+}
+
+function resetAvatarInput() {
+  if (avatarInputRef.value) {
+    avatarInputRef.value.value = '';
+  }
+}
+
+async function uploadCroppedAvatar(blob) {
+  if (!isOwnProfile.value || !usersBase) return;
 
   const token =
     localStorage.getItem('melodia_token') || localStorage.getItem('token') || '';
@@ -276,6 +292,7 @@ async function handleAvatarSelected(event) {
     return;
   }
 
+  const file = new File([blob], 'avatar.png', { type: 'image/png' });
   const formData = new FormData();
   formData.append('avatar', file);
 
@@ -323,12 +340,14 @@ async function handleAvatarSelected(event) {
     avatarUploadError.value = 'Es ist ein Fehler beim Hochladen des Profilbilds aufgetreten.';
   } finally {
     avatarUploading.value = false;
-    if (event?.target) {
-      // reset input so same file can be selected again
-      // eslint-disable-next-line no-param-reassign
-      event.target.value = '';
-    }
+    resetAvatarInput();
+    avatarFileToCrop.value = null;
   }
+}
+
+function handleCropCanceled() {
+  resetAvatarInput();
+  avatarFileToCrop.value = null;
 }
 
 async function saveProfileChanges(updated) {
@@ -764,6 +783,14 @@ async function resetAvatar() {
 
     </div>
   </div>
+
+  <AvatarCropper
+    v-if="isOwnProfile"
+    v-model="isCroppingAvatar"
+    :file="avatarFileToCrop"
+    @cropped="uploadCroppedAvatar"
+    @cancel="handleCropCanceled"
+  />
 </template>
 
 <style scoped>
