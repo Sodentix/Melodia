@@ -390,7 +390,13 @@ const handleRegister = async () => {
 </template>
 
 <style scoped>
-.auth-page {
+:root {
+  --the-background-color: rbg(39, 39, 39);
+  --height-navbar: 5rem;
+}
+
+
+/* .auth-page {
   position: relative;
   margin: 2.5rem 0;
   height: calc(100vh - 5rem - 5rem);
@@ -403,7 +409,24 @@ const handleRegister = async () => {
   background-color: rgb(10, 6, 33);
   overflow: hidden;
   color: #f4f6ff;
+} */
+
+
+.auth-page {
+  position: absolute;
+  display: flex;
+  margin-top: var(--height-navbar);
+  left: 3%;
+  bottom: 0;
+  width: 94%;
+  height: 90%;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--the-background-color);
 }
+
+  
+
 
 .auth-page::before {
   content: '';

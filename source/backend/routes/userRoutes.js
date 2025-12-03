@@ -3,6 +3,43 @@ const router = express.Router();
 const User = require('../models/User');
 const Stats = require('../models/Stats');
 const auth = require('../middleware/auth');
+const { generateVerificationToken, sendVerificationEmail } = require('../services/emailService');
+
+const USERNAME_PATTERN = /^[a-z0-9_.-]+$/;
+
+function sanitizeName(value) {
+  if (typeof value !== 'string') {
+    return '';
+  }
+  return value.trim();
+}
+
+function sanitizeEmail(value) {
+  if (typeof value !== 'string') {
+    return '';
+  }
+  return value.trim().toLowerCase();
+}
+
+function sanitizeUsername(value) {
+  if (typeof value !== 'string') {
+    return '';
+  }
+  return value.trim().toLowerCase();
+}
+
+function formatUserProfile(user) {
+  return {
+    id: user.id,
+    email: user.email,
+    username: user.username,
+    firstName: user.firstName,
+    lastName: user.lastName,
+    emailVerified: user.emailVerified,
+    createdAt: user.createdAt,
+    updatedAt: user.updatedAt,
+  };
+}
 
 // Public profile - accessible to everyone
 router.get('/profile/:username', auth(false, false), async (req, res) => {
@@ -55,14 +92,15 @@ router.get('/me', auth(true, true), async (req, res) => {
         const stats = await Stats.findOne({ user: user._id });
 
         const privateProfile = {
-            id: user._id,
-            username: user.username,
-            firstname: user.firstName,
-            lastname: user.lastName,
-            email: user.email,
-            createdAt: user.createdAt,
-            // any other private fields you want to expose to the logged-in user
-            stats: stats ? {
+          id: user._id,
+          username: user.username,
+          firstname: user.firstName,
+          lastname: user.lastName,
+          email: user.email,
+          createdAt: user.createdAt,
+          // any other private fields you want to expose to the logged-in user
+          stats: stats
+            ? {
                 totalGames: stats.totalGames,
                 wins: stats.wins,
                 averageTimeMs: stats.averageTimeMs,
@@ -70,9 +108,10 @@ router.get('/me', auth(true, true), async (req, res) => {
                 currentStreak: stats.currentStreak,
                 bestTimeMs: stats.bestTimeMs,
                 totalPlayed: stats.totalPlayed,
-                totalPoints: stats.totalPoints, 
+                totalPoints: stats.totalPoints,
                 totalWins: stats.totalWins,
-            } : null
+              }
+            : null,
         };
 
         res.json(privateProfile);
@@ -81,6 +120,139 @@ router.get('/me', auth(true, true), async (req, res) => {
         console.error(error);
         res.status(500).json({ error: 'Server error' });
     }
+});
+
+// Update own profile (name, username, email, ...)
+router.put('/me', auth(true, true), async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id);
+
+    if (!user) {
+      return res.status(404).json({ message: 'User not found.' });
+    }
+
+    const updates = {};
+
+    const firstName = sanitizeName(req.body.firstName ?? req.body.firstname);
+    const lastName = sanitizeName(req.body.lastName ?? req.body.lastname);
+    const usernameInput = sanitizeUsername(req.body.username);
+    const emailInput = sanitizeEmail(req.body.email);
+
+    if (firstName) {
+      updates.firstName = firstName;
+    }
+
+    if (lastName) {
+      updates.lastName = lastName;
+    }
+
+    if (usernameInput && usernameInput !== user.username) {
+      if (!USERNAME_PATTERN.test(usernameInput)) {
+        return res.status(400).json({
+          message:
+            'Username may only contain letters, numbers, underscores, dashes, and dots.',
+        });
+      }
+
+      const existingUsername = await User.findOne({
+        _id: { $ne: user._id },
+        username: usernameInput,
+      });
+      if (existingUsername) {
+        return res.status(409).json({
+          field: 'username',
+          message: 'Username is already taken.',
+        });
+      }
+
+      updates.username = usernameInput;
+      updates.usernameLower = usernameInput;
+    }
+
+    let emailChanged = false;
+    if (emailInput && emailInput !== user.email) {
+      const existingEmail = await User.findOne({
+        _id: { $ne: user._id },
+        email: emailInput,
+      });
+      if (existingEmail) {
+        return res.status(409).json({
+          field: 'email',
+          message: 'Email is already registered.',
+        });
+      }
+
+      updates.email = emailInput;
+      updates.emailVerified = false;
+      emailChanged = true;
+
+      const verificationToken = generateVerificationToken();
+      const verificationExpires = new Date(Date.now() + 24 * 60 * 60 * 1000);
+
+      updates.emailVerificationToken = verificationToken;
+      updates.emailVerificationExpires = verificationExpires;
+
+      try {
+        const emailSent = await sendVerificationEmail(emailInput, verificationToken);
+        if (!emailSent) {
+          console.error('Failed to send verification email on profile update.', {
+            email: emailInput,
+          });
+        }
+      } catch (err) {
+        console.error('Error sending verification email on profile update:', err);
+      }
+    }
+
+    Object.assign(user, updates);
+    await user.save();
+
+    return res.json({
+      message: emailChanged
+        ? 'Profile updated. A verification code has been sent to your new email.'
+        : 'Profile updated successfully.',
+      verificationRequired: emailChanged,
+      user: formatUserProfile(user),
+    });
+  } catch (error) {
+    console.error('Update profile error:', error);
+    return res.status(500).json({ message: 'Failed to update profile.' });
+  }
+});
+
+// Verify email with code (used from in-app profile flow)
+router.post('/verify-email-code', auth(true, true), async (req, res) => {
+  try {
+    const code =
+      typeof req.body.code === 'string' ? req.body.code.trim() : String(req.body.code || '').trim();
+
+    if (!code) {
+      return res.status(400).json({ message: 'Verification code is required.' });
+    }
+
+    const user = await User.findOne({
+      _id: req.user.id,
+      emailVerificationToken: code,
+      emailVerificationExpires: { $gt: new Date() },
+    });
+
+    if (!user) {
+      return res.status(400).json({ message: 'Verification code is invalid or expired.' });
+    }
+
+    user.emailVerified = true;
+    user.emailVerificationToken = undefined;
+    user.emailVerificationExpires = undefined;
+    await user.save();
+
+    return res.json({
+      message: 'Email verified successfully.',
+      user: formatUserProfile(user),
+    });
+  } catch (error) {
+    console.error('Verify email code error:', error);
+    return res.status(500).json({ message: 'Failed to verify email.' });
+  }
 });
 
 module.exports = router;
