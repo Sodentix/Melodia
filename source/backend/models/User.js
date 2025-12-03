@@ -78,6 +78,11 @@ const userSchema = new mongoose.Schema(
       type: Date,
       required: false,
     },
+    avatarUrl: {
+      type: String,
+      required: false,
+      trim: true,
+    },
     loginDevices: {
       type: [
         {

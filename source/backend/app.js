@@ -47,6 +47,7 @@ app.use(express.json());
 // Static clips (fallback audio) served at /clips
 // Must handle CORS and range requests for audio streaming
 const clipsDir = path.join(__dirname, 'assets', 'clips');
+const avatarsDir = path.join(__dirname, 'assets', 'avatars');
 
 // CORS middleware for clips (runs before static file serving)
 app.use('/clips', (req, res, next) => {
@@ -106,6 +107,11 @@ app.use('/clips', express.static(clipsDir, {
     // Enable range requests for audio streaming
     res.setHeader('Accept-Ranges', 'bytes');
   },
+}));
+
+app.use('/avatars', express.static(avatarsDir, {
+  fallthrough: true,
+  maxAge: '1h',
 }));
 
 // Routes

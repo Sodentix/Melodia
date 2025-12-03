@@ -10,6 +10,7 @@ const apiRoot = import.meta.env.VITE_API_URL
   ? import.meta.env.VITE_API_URL.replace(/\/$/, '')
   : '';
 const usersBase = apiRoot.endsWith('/users') ? apiRoot : `${apiRoot}/users`;
+const apiBase = apiRoot.replace(/\/users$/, '');
 
 const loading = ref(true);
 const error = ref(null);
@@ -19,6 +20,9 @@ const isOwnProfile = ref(false);
 const neverPlayed = ref(false);
 
 const isEditingInline = ref(false);
+const avatarEditHintShown = ref(false);
+const avatarUploading = ref(false);
+const avatarUploadError = ref(null);
 const currentPassword = ref('');
 const editSaving = ref(false);
 const editFeedback = ref(null);
@@ -26,9 +30,18 @@ const editFieldError = ref(null);
 const pendingEmailVerification = ref(false);
 
 const storedUser = ref(null);
+const avatarInputRef = ref(null);
 
 const viewingUsername = computed(() => {
   return route.params.username || storedUser.value?.username || null;
+});
+
+const avatarSrc = computed(() => {
+  if (!profile.value?.avatarUrl) return null;
+  if (profile.value.avatarUrl.startsWith('http')) {
+    return profile.value.avatarUrl;
+  }
+  return `${apiBase}${profile.value.avatarUrl}`;
 });
 
 const formattedJoined = computed(() => {
@@ -152,6 +165,7 @@ async function fetchProfile() {
         lastName: data.lastname ?? data.lastName,
         email: data.email,
         createdAt: data.createdAt,
+        avatarUrl: data.avatarUrl,
       };
       stats.value = normalizeStats(data.stats);
       isOwnProfile.value = true;
@@ -190,6 +204,7 @@ async function fetchProfile() {
       username: data.displayName || usernameParam,
       firstName: data.firstname ?? data.firstName,
       createdAt: data.createdAt,
+      avatarUrl: data.avatarUrl,
     };
     stats.value = normalizeStats(data.stats);
 
@@ -227,6 +242,93 @@ function closeEditProfile() {
   if (editSaving.value) return;
   currentPassword.value = '';
   isEditingInline.value = false;
+}
+
+function handleAvatarClick() {
+  if (!isOwnProfile.value || !profile.value) return;
+
+  if (!isEditingInline.value) {
+    openEditProfile();
+  }
+
+  if (!avatarEditHintShown.value) {
+    avatarEditHintShown.value = true;
+    return;
+  }
+
+  if (avatarInputRef.value) {
+    avatarInputRef.value.click();
+  }
+}
+
+async function handleAvatarSelected(event) {
+  const files = event.target?.files;
+  if (!files || !files[0] || !usersBase) return;
+
+  const file = files[0];
+  avatarUploadError.value = null;
+
+  const token =
+    localStorage.getItem('melodia_token') || localStorage.getItem('token') || '';
+
+  if (!token) {
+    avatarUploadError.value = 'Bitte melde dich erneut an.';
+    return;
+  }
+
+  const formData = new FormData();
+  formData.append('avatar', file);
+
+  avatarUploading.value = true;
+
+  try {
+    const res = await fetch(`${usersBase}/me/avatar`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      body: formData,
+      credentials: 'include',
+    });
+
+    const data = await res.json().catch(() => ({}));
+
+    if (!res.ok) {
+      avatarUploadError.value =
+        data.message || 'Profilbild konnte nicht aktualisiert werden.';
+      return;
+    }
+
+    if (data.avatarUrl) {
+      profile.value = {
+        ...profile.value,
+        avatarUrl: data.avatarUrl,
+      };
+
+      try {
+        const stored = localStorage.getItem('melodia_user');
+        const parsed = stored ? JSON.parse(stored) : null;
+        const updatedUser = parsed ? { ...parsed, avatarUrl: data.avatarUrl } : null;
+        if (updatedUser) {
+          localStorage.setItem('melodia_user', JSON.stringify(updatedUser));
+        }
+      } catch {
+        // ignore storage errors
+      }
+    }
+
+    avatarEditHintShown.value = false;
+  } catch (err) {
+    console.error('Avatar upload failed:', err);
+    avatarUploadError.value = 'Es ist ein Fehler beim Hochladen des Profilbilds aufgetreten.';
+  } finally {
+    avatarUploading.value = false;
+    if (event?.target) {
+      // reset input so same file can be selected again
+      // eslint-disable-next-line no-param-reassign
+      event.target.value = '';
+    }
+  }
 }
 
 async function saveProfileChanges(updated) {
@@ -289,6 +391,7 @@ async function saveProfileChanges(updated) {
         firstName: data.user.firstName,
         lastName: data.user.lastName,
         email: data.user.email,
+        avatarUrl: data.user.avatarUrl ?? profile.value.avatarUrl,
       };
 
       try {
@@ -367,6 +470,62 @@ async function verifyEmailCode(code) {
     editSaving.value = false;
   }
 }
+
+async function resetAvatar() {
+  if (!isOwnProfile.value || !usersBase) return;
+
+  const token =
+    localStorage.getItem('melodia_token') || localStorage.getItem('token') || '';
+
+  if (!token) {
+    avatarUploadError.value = 'Bitte melde dich erneut an.';
+    return;
+  }
+
+  avatarUploading.value = true;
+  avatarUploadError.value = null;
+
+  try {
+    const res = await fetch(`${usersBase}/me/avatar`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      credentials: 'include',
+    });
+
+    const data = await res.json().catch(() => ({}));
+
+    if (!res.ok) {
+      avatarUploadError.value =
+        data.message || 'Profilbild konnte nicht entfernt werden.';
+      return;
+    }
+
+    profile.value = {
+      ...profile.value,
+      avatarUrl: null,
+    };
+
+    try {
+      const stored = localStorage.getItem('melodia_user');
+      const parsed = stored ? JSON.parse(stored) : null;
+      const updatedUser = parsed ? { ...parsed, avatarUrl: null } : null;
+      if (updatedUser) {
+        localStorage.setItem('melodia_user', JSON.stringify(updatedUser));
+      }
+    } catch {
+      // ignore
+    }
+
+    avatarEditHintShown.value = false;
+  } catch (err) {
+    console.error('Avatar reset failed:', err);
+    avatarUploadError.value = 'Es ist ein Fehler beim Entfernen des Profilbilds aufgetreten.';
+  } finally {
+    avatarUploading.value = false;
+  }
+}
 </script>
 
 <template>
@@ -384,14 +543,39 @@ async function verifyEmailCode(code) {
       <div class="profile-header" :class="{ 'profile-header--expanded': isEditingInline }">
         <div class="profile-header-top">
           <div class="identity">
-            <button
-              class="avatar-orb"
-              type="button"
-              :class="{ clickable: isOwnProfile }"
-              @click="openEditProfile"
-            >
-              <Icon icon="solar:user-bold-duotone" class="avatar-icon" />
-            </button>
+            <div class="avatar-wrapper">
+              <button
+                class="avatar-orb"
+                type="button"
+                :class="{ clickable: isOwnProfile }"
+                @click="handleAvatarClick"
+              >
+                <img
+                  v-if="avatarSrc"
+                  :src="avatarSrc"
+                  alt="Profilbild"
+                  class="avatar-image"
+                />
+                <Icon
+                  v-else
+                  icon="solar:user-bold-duotone"
+                  class="avatar-icon"
+                />
+                <div
+                  v-if="avatarEditHintShown"
+                  class="avatar-edit-indicator"
+                >
+                  <Icon icon="solar:pen-bold" class="avatar-edit-icon" />
+                </div>
+              </button>
+              <input
+                ref="avatarInputRef"
+                type="file"
+                class="avatar-file-input"
+                accept="image/png,image/jpeg,image/jpg,image/webp"
+                @change="handleAvatarSelected"
+              />
+            </div>
             <div class="identity-text">
               <p class="profile-eyebrow">
                 {{ isOwnProfile ? 'Dein Melodia Profil' : 'Melodia Spielerprofil' }}
@@ -479,24 +663,32 @@ async function verifyEmailCode(code) {
           </p>
 
           <div class="edit-actions">
-            <button
-              type="button"
-              class="btn ghost"
-              :disabled="editSaving"
-              @click="closeEditProfile"
+          <button
+            type="button"
+            class="btn ghost"
+            :disabled="editSaving || avatarUploading || !avatarSrc"
+            @click="resetAvatar"
+            >
+              Avatar zurücksetzen
+            </button>
+          <button
+            type="button"
+            class="btn ghost"
+            :disabled="editSaving"
+            @click="closeEditProfile"
             >
               Abbrechen
             </button>
             <button
               type="button"
               class="btn primary"
-              :disabled="editSaving"
-              @click="saveProfileChanges(profile)"
-            >
-              {{ editSaving ? 'Speichern...' : 'Änderungen speichern' }}
-            </button>
-          </div>
+            :disabled="editSaving"
+            @click="saveProfileChanges(profile)"
+          >
+            {{ editSaving ? 'Speichern...' : 'Änderungen speichern' }}
+          </button>
         </div>
+      </div>
       </div>
 
       <section class="stats-section" v-if="!isEditingInline">
@@ -648,6 +840,10 @@ async function verifyEmailCode(code) {
   gap: 2rem;
 }
 
+.avatar-wrapper {
+  position: relative;
+}
+
 .profile-edit-enter-active,
 .profile-edit-leave-active {
   transition: opacity 0.3s ease, transform 0.3s ease;
@@ -684,6 +880,7 @@ async function verifyEmailCode(code) {
     0 0 15px rgba(255, 0, 200, 0.8),
     0 0 28px rgba(5, 217, 255, 0.6);
   border: 1px solid rgba(255, 255, 255, 0.12);
+  overflow: hidden;
 }
 
 .avatar-orb.clickable {
@@ -691,17 +888,53 @@ async function verifyEmailCode(code) {
   transition: transform 0.22s ease, box-shadow 0.24s ease;
 }
 
+.avatar-wrapper:hover {
+  transform: translateY(2px);
+}
+
 .avatar-orb.clickable:hover {
-  transform: translateY(-2px);
   box-shadow:
     0 0 20px rgba(255, 0, 200, 0.75),
     0 0 32px rgba(0, 236, 255, 0.6),
-    0 0 50px rgba(61, 255, 140, 0.5);
+    0 0 50px rgba(61, 255, 140, 0.5); 
 }
 
 .avatar-icon {
   font-size: 40px;
   color: #ffffff;
+}
+
+.avatar-image {
+  width: 90%;
+  height: 90%;
+  object-fit: cover;
+  border-radius: 100%;
+}
+
+.avatar-edit-indicator {
+  position: absolute;
+  right: -4px;
+  bottom: -4px;
+  width: 32px;
+  height: 32px;
+  border-radius: 999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--gradient-accent);
+  box-shadow:
+    0 4px 14px rgba(255, 0, 200, 0.5),
+    0 0 20px rgba(5, 217, 255, 0.5);
+  pointer-events: none;
+}
+
+.avatar-edit-icon {
+  font-size: 26px;
+  color: #ffffff;
+}
+
+.avatar-file-input {
+  display: none;
 }
 
 .identity-text {

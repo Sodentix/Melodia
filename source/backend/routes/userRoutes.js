@@ -5,6 +5,9 @@ const Stats = require('../models/Stats');
 const auth = require('../middleware/auth');
 const { generateVerificationToken, sendVerificationEmail } = require('../services/emailService');
 const bcrypt = require('bcryptjs');
+const multer = require('multer');
+const fs = require('fs');
+const path = require('path');
 
 const USERNAME_PATTERN = /^[a-z0-9_.-]+$/;
 
@@ -36,6 +39,7 @@ function formatUserProfile(user) {
     username: user.username,
     firstName: user.firstName,
     lastName: user.lastName,
+    avatarUrl: user.avatarUrl,
     emailVerified: user.emailVerified,
     createdAt: user.createdAt,
     updatedAt: user.updatedAt,
@@ -46,6 +50,33 @@ async function verifyPasswordWithSalt(password, salt, hash) {
   const saltedPassword = password + salt;
   return bcrypt.compare(saltedPassword, hash);
 }
+
+const avatarsDir = path.join(__dirname, '..', 'assets', 'avatars');
+fs.mkdirSync(avatarsDir, { recursive: true });
+
+const avatarStorage = multer.diskStorage({
+  destination: (_req, _file, cb) => {
+    cb(null, avatarsDir);
+  },
+  filename: (req, file, cb) => {
+    const ext = path.extname(file.originalname || '').toLowerCase() || '.png';
+    cb(null, `${req.user.id}${ext}`);
+  },
+});
+
+const avatarUpload = multer({
+  storage: avatarStorage,
+  limits: {
+    fileSize: 2 * 1024 * 1024,
+  },
+  fileFilter: (_req, file, cb) => {
+    const allowed = ['image/png', 'image/jpeg', 'image/jpg', 'image/webp'];
+    if (!allowed.includes(file.mimetype)) {
+      return cb(new Error('Unsupported file type. Please upload a PNG or JPEG image.'));
+    }
+    cb(null, true);
+  },
+});
 
 // Public profile - accessible to everyone
 router.get('/profile/:username', auth(false, false), async (req, res) => {
@@ -63,6 +94,7 @@ router.get('/profile/:username', auth(false, false), async (req, res) => {
         const publicProfile = {
             firstname: user.firstName,
             displayName: user.username,
+            avatarUrl: user.avatarUrl,
             stats: stats ? {
                 totalGames: stats.averageTimeMs,
                 wins: stats.wins,
@@ -104,6 +136,7 @@ router.get('/me', auth(true, true), async (req, res) => {
           lastname: user.lastName,
           email: user.email,
           createdAt: user.createdAt,
+          avatarUrl: user.avatarUrl,
           // any other private fields you want to expose to the logged-in user
           stats: stats
             ? {
@@ -283,5 +316,61 @@ router.post('/verify-email-code', auth(true, true), async (req, res) => {
     return res.status(500).json({ message: 'Failed to verify email.' });
   }
 });
+
+router.post(
+  '/me/avatar',
+  auth(true, true),
+  avatarUpload.single('avatar'),
+  async (req, res) => {
+    try {
+      const user = await User.findById(req.user.id);
+
+      if (!user) {
+        return res.status(404).json({ message: 'User not found.' });
+      }
+
+      // Remove avatar when no file is provided
+      if (!req.file) {
+        if (user.avatarUrl) {
+          const existingPath = path.join(avatarsDir, path.basename(user.avatarUrl));
+          fs.unlink(existingPath, (err) => {
+            if (err && err.code !== 'ENOENT') {
+              console.error('Failed to remove old avatar:', err);
+            }
+          });
+        }
+
+        user.avatarUrl = undefined;
+        await user.save();
+
+        return res.json({
+          message: 'Avatar removed successfully.',
+          avatarUrl: null,
+        });
+      }
+
+      if (user.avatarUrl) {
+        const existingPath = path.join(avatarsDir, path.basename(user.avatarUrl));
+        fs.unlink(existingPath, (err) => {
+          if (err && err.code !== 'ENOENT') {
+            console.error('Failed to remove old avatar:', err);
+          }
+        });
+      }
+
+      const publicPath = `/avatars/${req.file.filename}`;
+      user.avatarUrl = publicPath;
+      await user.save();
+
+      return res.json({
+        message: 'Avatar updated successfully.',
+        avatarUrl: publicPath,
+      });
+    } catch (error) {
+      console.error('Avatar upload error:', error);
+      return res.status(500).json({ message: 'Failed to upload avatar.' });
+    }
+  }
+);
 
 module.exports = router;
