@@ -19,6 +19,7 @@ const isOwnProfile = ref(false);
 const neverPlayed = ref(false);
 
 const isEditingInline = ref(false);
+const currentPassword = ref('');
 const editSaving = ref(false);
 const editFeedback = ref(null);
 const editFieldError = ref(null);
@@ -218,11 +219,13 @@ function openEditProfile() {
   editFeedback.value = null;
   editFieldError.value = null;
   pendingEmailVerification.value = false;
+  currentPassword.value = '';
   isEditingInline.value = true;
 }
 
 function closeEditProfile() {
   if (editSaving.value) return;
+  currentPassword.value = '';
   isEditingInline.value = false;
 }
 
@@ -247,6 +250,7 @@ async function saveProfileChanges(updated) {
       lastName: (updated.lastName || '').trim(),
       username: (updated.username || '').trim().toLowerCase(),
       email: (updated.email || '').trim().toLowerCase(),
+      password: currentPassword.value || '',
     };
 
     const res = await fetch(`${usersBase}/me`, {
@@ -453,7 +457,13 @@ async function verifyEmailCode(code) {
           </div>
 
           <div class="edit-row">
-            <label for="password"></label>
+            <label for="password">Passwort (zur Bestätigung)</label>
+            <input
+              id="password"
+              type="password"
+              v-model="currentPassword"
+              placeholder="Gib dein aktuelles Passwort ein"
+            />
           </div>
 
           <p v-if="pendingEmailVerification" class="edit-hint">

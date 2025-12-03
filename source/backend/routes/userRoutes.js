@@ -4,6 +4,7 @@ const User = require('../models/User');
 const Stats = require('../models/Stats');
 const auth = require('../middleware/auth');
 const { generateVerificationToken, sendVerificationEmail } = require('../services/emailService');
+const bcrypt = require('bcryptjs');
 
 const USERNAME_PATTERN = /^[a-z0-9_.-]+$/;
 
@@ -39,6 +40,11 @@ function formatUserProfile(user) {
     createdAt: user.createdAt,
     updatedAt: user.updatedAt,
   };
+}
+
+async function verifyPasswordWithSalt(password, salt, hash) {
+  const saltedPassword = password + salt;
+  return bcrypt.compare(saltedPassword, hash);
 }
 
 // Public profile - accessible to everyone
@@ -126,9 +132,32 @@ router.get('/me', auth(true, true), async (req, res) => {
 router.put('/me', auth(true, true), async (req, res) => {
   try {
     const user = await User.findById(req.user.id);
+    const passwordGiven =
+      typeof req.body.password === 'string' ? req.body.password : '';
 
     if (!user) {
       return res.status(404).json({ message: 'User not found.' });
+    }
+
+    if (!passwordGiven) {
+      return res
+        .status(400)
+        .json({
+          field: 'password',
+          message: 'Password is required to update profile.',
+        });
+    }
+
+    const passwordValid = await verifyPasswordWithSalt(
+      passwordGiven,
+      user.salt,
+      user.passwordHash
+    );
+
+    if (!passwordValid) {
+      return res
+        .status(401)
+        .json({ field: 'password', message: 'Password is incorrect.' });
     }
 
     const updates = {};
