@@ -70,6 +70,7 @@ router.get('/category/:categoryId/tracks', auth(true, true), (req, res) => {
     const categoryId = req.params.categoryId || 'all';
     const base = `${req.protocol}://${req.get('host')}`;
     const tracks = listTracksByCategory(base, categoryId);
+    console.log(`[DEBUG] /category/${categoryId}/tracks returning ${tracks.length} tracks. First item:`, tracks[0]);
     return res.json({ tracks });
   } catch (err) {
     console.error('List category tracks error:', err);
@@ -114,7 +115,7 @@ router.post('/guess', auth(true, true), async (req, res) => {
 
     const round = rounds.get(roundId);
     if (!round) return res.status(404).json({ message: 'Round not found or expired' });
-    
+
     // Verify user owns this round (compare ObjectId values, not references)
     if (String(round.userId) !== String(req.user.id)) {
       return res.status(403).json({ message: 'Not authorized for this round' });
@@ -122,20 +123,20 @@ router.post('/guess', auth(true, true), async (req, res) => {
 
     const correct = isGuessCorrect(guess, round.track);
     const updatedRound = rounds.addGuess(roundId, guess, correct);
-    
+
     const correctGuesses = updatedRound.guesses.filter(g => g.correct).length;
     const wrongGuesses = updatedRound.guesses.filter(g => !g.correct).length;
-    
-    logDebug('guess_evaluated', { 
-      roundId, 
-      correct, 
-      guessLength: guess.length, 
+
+    logDebug('guess_evaluated', {
+      roundId,
+      correct,
+      guessLength: guess.length,
       trackId: round.track?.id,
       totalGuesses: updatedRound.guesses.length,
       correctGuesses,
       wrongGuesses,
     });
-    
+
     let points = 0;
     const mode = round.mode || 'competitive';
     let completionTimeMs = null;
@@ -144,7 +145,7 @@ router.post('/guess', auth(true, true), async (req, res) => {
       const correctIndex = updatedRound.guesses.findIndex(g => g.correct);
       points = mode === 'competitive' ? calculatePoints(updatedRound, correctIndex) : 0;
       completionTimeMs = updatedRound.guesses[correctIndex].timestamp - updatedRound.createdAt;
-      
+
       if (mode === 'competitive') {
         // Record game stats immediately when correct
         await Stats.recordGame({
@@ -158,15 +159,15 @@ router.post('/guess', auth(true, true), async (req, res) => {
           playedAt: new Date(),
         });
       }
-      
+
       // end the round when guessed correctly
       rounds.delete(roundId);
       logDebug('round_completed', { roundId, trackId: round.track?.id, points, timeMs: completionTimeMs });
     }
-    
+
     // Return result with points if correct
-    return res.json({ 
-      correct, 
+    return res.json({
+      correct,
       points: correct ? points : 0,
       totalGuesses: updatedRound.guesses.length,
       track: correct ? { id: round.track.id, name: round.track.name, artists: round.track.artists } : null,

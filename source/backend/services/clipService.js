@@ -40,31 +40,40 @@ function readTracksFile() {
 function readCategoryTracksFile(categoryId) {
   if (!categoryId) return [];
   const assetsDir = getAssetsPath();
-  const filePath = path.join(assetsDir, 'categories', `${categoryId}${CATEGORY_TRACK_SUFFIX}`);
+
+  // Map category IDs to filenames in assets/songData/
+  // Map category IDs to filenames in assets/songData/
+  // User requested category names to be file names.
+  // We expect {categoryId}.json to exist.
+  const filename = categoryId;
+
+  const filePath = path.join(assetsDir, 'songData', `${filename}.json`);
+
   try {
     if (!fs.existsSync(filePath)) {
+      logDebug('category_file_not_found', { categoryId, filePath });
       return [];
     }
     const raw = fs.readFileSync(filePath, 'utf8');
-    const parsed = JSON.parse(raw);
-    const tracks = Array.isArray(parsed)
-      ? parsed
-      : Array.isArray(parsed.tracks)
-        ? parsed.tracks
-        : [];
-    const meta = Array.isArray(parsed) ? {} : parsed;
-    const displayName =
-      meta.name ||
-      meta.categoryName ||
-      meta.category?.name ||
-      categoryId;
+    const tracks = JSON.parse(raw); // Expecting array directly: [{id, artist, title, url}, ...]
+
+    logDebug('category_file_read', { categoryId, trackCount: tracks.length });
+
+    if (!Array.isArray(tracks)) {
+      return [];
+    }
 
     return tracks
-      .filter((t) => t && t.file)
+      .filter((t) => t && t.url)
       .map((t) => ({
-        ...t,
-        categoryId: t.categoryId || categoryId,
-        categoryName: t.categoryName || displayName,
+        id: `deezer-${t.id}`, // Prefix to avoid collisions
+        name: t.title,
+        artists: [t.artist], // Convert string to array
+        file: t.url, // Remote URL
+        image: null,
+        duration_ms: 30000, // Default for previews
+        categoryId: categoryId,
+        categoryName: categoryId.charAt(0).toUpperCase() + categoryId.slice(1), // Simple capitalization
       }));
   } catch (err) {
     logDebug('category_tracks_read_failed', { categoryId, err: err.message });
@@ -73,13 +82,19 @@ function readCategoryTracksFile(categoryId) {
 }
 
 function simplifyClip(entry, baseUrl) {
+  let previewUrl = entry.file;
+  // If not a remote URL, prepend base URL
+  if (!previewUrl.startsWith('http')) {
+    previewUrl = `${baseUrl}/clips/${encodeURIComponent(entry.file)}`;
+  }
+
   return {
     id: entry.id,
     name: entry.name,
     artists: (entry.artists || []).map(n => ({ id: null, name: n })),
     album: null,
     image: entry.image || null,
-    preview_url: `${baseUrl}/clips/${encodeURIComponent(entry.file)}`,
+    preview_url: previewUrl,
     external_urls: {},
     duration_ms: entry.duration_ms || null,
     categoryId: entry.categoryId || 'all',
@@ -101,6 +116,18 @@ function filterByCategory(entries, categoryId) {
 function buildTrackPool(categoryId) {
   const assetsDir = getAssetsPath();
   const clipsDir = path.join(assetsDir, 'clips');
+
+  // 1. Try to load from new songData JSONs first (including 'all' -> 'all.json')
+  // This is the primary data source now.
+  const fileTracks = readCategoryTracksFile(categoryId || 'all');
+  const validRemoteTracks = fileTracks.filter(t => t.file.startsWith('http'));
+
+  if (validRemoteTracks.length > 0) {
+    return validRemoteTracks;
+  }
+
+  // 2. Fallback to local files (Legacy support)
+  // Only executed if no remote tracks are found.
   const tracks = readTracksFile();
   let existing = tracks
     .filter(t => t && t.file && fs.existsSync(path.join(clipsDir, t.file)))
@@ -109,17 +136,12 @@ function buildTrackPool(categoryId) {
       categoryId: entry.categoryId || 'all',
       categoryName: entry.categoryName || 'Hit Mix',
     }));
+
   if (existing.length === 0) {
     let files = [];
     try { files = fs.readdirSync(clipsDir); } catch (_) { /* ignore */ }
-    logDebug('no_local_clips_found', {
-      assetsDir,
-      clipsDir,
-      tracksCount: tracks.length,
-      filesInClipsDir: files,
-      tracksSample: tracks.slice(0, 3),
-    });
-    // Auto-index fallback: build entries from existing audio files if tracks.json is empty/outdated
+
+    // Auto-index fallback
     const audioExt = new Set(['.mp3', '.m4a', '.wav', '.ogg']);
     const auto = files
       .filter(f => audioExt.has(path.extname(f).toLowerCase()))
@@ -134,21 +156,12 @@ function buildTrackPool(categoryId) {
       }));
     existing = auto.filter(t => fs.existsSync(path.join(clipsDir, t.file)));
   }
-  if (existing.length === 0) {
-    throw new Error('No local clips available');
-  }
 
+  // Filter local clips by category if we fell back
   let pool = existing;
   if (categoryId && categoryId !== 'all') {
-    const fileTracks = readCategoryTracksFile(categoryId)
-      .filter(t => fs.existsSync(path.join(clipsDir, t.file)));
-
-    if (fileTracks.length > 0) {
-      pool = fileTracks;
-    } else {
-      const filtered = filterByCategory(existing, categoryId);
-      pool = filtered.length > 0 ? filtered : existing;
-    }
+    const filtered = filterByCategory(existing, categoryId);
+    pool = filtered.length > 0 ? filtered : existing;
   }
 
   if (pool.length === 0) {
@@ -227,7 +240,7 @@ function listTracksByCategory(baseUrl, categoryId) {
     artists: (entry.artists || []).map(n => ({ id: null, name: n })),
     categoryId: entry.categoryId || 'all',
     categoryName: entry.categoryName || 'Hit Mix',
-    preview_url: `${baseUrl}/clips/${encodeURIComponent(entry.file)}`,
+    preview_url: entry.file.startsWith('http') ? entry.file : `${baseUrl}/clips/${encodeURIComponent(entry.file)}`,
   }));
 }
 
@@ -238,5 +251,3 @@ module.exports = {
   searchClips,
   listTracksByCategory,
 };
-
-

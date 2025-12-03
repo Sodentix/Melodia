@@ -1,90 +1,148 @@
 /*
-Ein JSON pro Kategorie (pop.json, christmas.json, …)
-Mehrere Playlists pro Kategorie (Array in CATEGORIES)
-Keine Duplikate → anhand der Deezer-Track-ID
-Nur Tracks mit Preview werden gespeichert
-Zufällige Auswahl im Game möglich durch Math.random auf das JSON
-→ Alle 5 Minuten neues Komplett-Build
-→ Datei wird erst geschrieben, wenn ALLES gesammelt wurde
-*/
+ * Service to fetch song previews from Deezer API and save them as JSON files.
+ * Runs on startup and then every 5 minutes.
+ */
 
-import axios from "axios";
-import fs from "fs";
-import path from "path";
-import cron from "node-cron";
-import { fileURLToPath } from "url";
+const axios = require('axios');
+const fs = require('fs');
+const path = require('path');
+const cron = require('node-cron');
 
+// Mapping category IDs (from categories.json) to Deezer Playlist IDs and Metadata
 const categories = {
-  christmas: [8454338222],
-  pop: [1282483245, 8282573142]
+  all: {
+    playlistIds: [1282483245, 8282573142],
+    name: "Hit Mix",
+    description: "A mix of all available songs",
+    difficulty: "medium",
+    accent: "#FF0055"
+  },
+  holiday: {
+    playlistIds: [8454338222],
+    name: "Holiday Vibes",
+    description: "Festive tunes for the season",
+    difficulty: "easy",
+    accent: "#00FF55"
+  }
 };
 
-// __dirname für ES Modules
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+// Output directories
+const outputDir = path.join(__dirname, '../assets/songData');
+const categoriesDir = path.join(__dirname, '../assets/categories');
 
-// Pfad für die Speicherung
-const outputDir = path.join(__dirname, "../assets/songData");
-
-// Playlist abrufen → gefilterte Tracks zurückgeben
-async function fetchPlaylistPreviews(playlistId, minRank = 0) {
-  const url = `https://api.deezer.com/playlist/${playlistId}`;
-  const response = await axios.get(url);
-  const tracks = response.data.tracks.data;
-
-  return tracks
-    .filter(t => t.preview && t.rank >= minRank)
-    .map(t => ({
-      id: t.id,
-      artist: t.artist.name,
-      title: t.title,
-      url: t.preview
-    }));
+// Ensure output directories exist
+if (!fs.existsSync(outputDir)) {
+  fs.mkdirSync(outputDir, { recursive: true });
+}
+if (!fs.existsSync(categoriesDir)) {
+  fs.mkdirSync(categoriesDir, { recursive: true });
 }
 
-// Für jede Kategorie: alle Playlists laden → Tracks sammeln
-async function gatherAllCategoryData() {
-  const collected = {}; // { pop: [...], christmas: [...] }
+// Fetch tracks from a single playlist
+async function fetchPlaylistPreviews(playlistId, minRank = 0) {
+  try {
+    const url = `https://api.deezer.com/playlist/${playlistId}`;
+    const response = await axios.get(url);
 
-  for (const [category, playlistIds] of Object.entries(categories)) {
+    if (!response.data || !response.data.tracks || !response.data.tracks.data) {
+      console.warn(`⚠️ Playlist ${playlistId} returned no data.`);
+      return [];
+    }
+
+    const tracks = response.data.tracks.data;
+
+    return tracks
+      .filter(t => t.preview && t.rank >= minRank)
+      .map(t => ({
+        id: t.id,
+        artist: t.artist ? t.artist.name : 'Unknown Artist',
+        title: t.title,
+        url: t.preview
+      }));
+  } catch (error) {
+    console.error(`❌ Error fetching playlist ${playlistId}:`, error.message);
+    return [];
+  }
+}
+
+// Gather data for all categories
+async function gatherAllCategoryData() {
+  const collected = {};
+
+  for (const [category, data] of Object.entries(categories)) {
     collected[category] = [];
 
-    for (const playlistId of playlistIds) {
+    for (const playlistId of data.playlistIds) {
       const tracks = await fetchPlaylistPreviews(playlistId);
       collected[category].push(...tracks);
     }
 
-    // Duplikate entfernen → anhand der Track-ID
-    collected[category] = Array.from(
+    // Remove duplicates based on Track ID
+    const uniqueTracks = Array.from(
       new Map(collected[category].map(t => [t.id, t])).values()
     );
+
+    collected[category] = uniqueTracks;
   }
 
   return collected;
 }
 
-// Erst schreiben, wenn ALLES gesammelt wurde
+// Write data to JSON files
 function writeCategoryFiles(data) {
   for (const [category, tracks] of Object.entries(data)) {
     const outputFile = path.join(outputDir, `${category}.json`);
-    fs.writeFileSync(outputFile, JSON.stringify(tracks, null, 2));
-    console.log(`📁 ${tracks.length} Tracks gespeichert → ${outputFile}`);
+    try {
+      fs.writeFileSync(outputFile, JSON.stringify(tracks, null, 2));
+      console.log(`📁 ${category}: ${tracks.length} tracks saved to ${outputFile}`);
+    } catch (err) {
+      console.error(`❌ Error writing file ${outputFile}:`, err.message);
+    }
   }
 }
 
-async function updateAllCategories() {
-  console.log("🔄 Playlist-Update gestartet", new Date().toLocaleTimeString());
+// Generate categories.json file
+function generateCategoriesFile() {
+  const categoryList = Object.entries(categories).map(([id, data]) => ({
+    id: id,
+    name: data.name,
+    description: data.description,
+    difficulty: data.difficulty,
+    accent: data.accent
+  }));
 
-  const allData = await gatherAllCategoryData();
-  writeCategoryFiles(allData);
-
-  console.log("✅ Playlist-Update beendet\n");
+  const outputFile = path.join(categoriesDir, 'categories.json');
+  try {
+    fs.writeFileSync(outputFile, JSON.stringify(categoryList, null, 2));
+    console.log(`📁 Categories metadata saved to ${outputFile}`);
+  } catch (err) {
+    console.error(`❌ Error writing categories file:`, err.message);
+  }
 }
 
-// Initiales Update
-updateAllCategories();
+// Main update function
+async function updateAllCategories() {
+  console.log("🔄 [SongService] Starting playlist update...", new Date().toLocaleTimeString());
 
-// Alle 5 Minuten neu
-cron.schedule("*/5 * * * *", () => {
+  try {
+    const allData = await gatherAllCategoryData();
+    writeCategoryFiles(allData);
+    generateCategoriesFile(); // Generate categories.json
+    console.log("✅ [SongService] Playlist update completed.\n");
+  } catch (err) {
+    console.error("❌ [SongService] Update failed:", err);
+  }
+}
+
+// Service entry point
+function startSongGenerationService() {
+  // Run immediately on start
   updateAllCategories();
-});
+
+  // Schedule cron job (every 5 minutes)
+  cron.schedule('*/5 * * * *', () => {
+    updateAllCategories();
+  });
+}
+
+module.exports = { startSongGenerationService };
