@@ -15,7 +15,6 @@ router.get('/all', auth(true, true), (req, res) => {
   }
 });
 
-// Search local clips by name/artist (auth required)
 router.get('/search', auth(true, true), (req, res) => {
   try {
     const q = (req.query.q || '').toString();
