@@ -452,6 +452,10 @@ async function verifyEmailCode(code) {
             />
           </div>
 
+          <div class="edit-row">
+            <label for="password"></label>
+          </div>
+
           <p v-if="pendingEmailVerification" class="edit-hint">
             Wir haben dir einen Bestätigungscode per E‑Mail geschickt.
           </p>
@@ -869,6 +873,62 @@ async function verifyEmailCode(code) {
   margin-top: 0.4rem;
 }
 
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  background: rgba(255, 255, 255, 0.02);
+  color: #ffffff;
+  padding: 0.55rem 1.4rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  cursor: pointer;
+  transition:
+    transform 0.22s ease,
+    box-shadow 0.25s ease,
+    background 0.25s ease,
+    border-color 0.25s ease;
+  text-decoration: none;
+}
+
+.btn.primary {
+  border: none;
+  background: var(--gradient-accent);
+  box-shadow: 0 10px 28px rgba(255, 0, 200, 0.25);
+  color: #050505;
+}
+
+.btn.ghost {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow:
+    0 0 16px rgba(255, 0, 200, 0.45),
+    0 0 26px rgba(5, 217, 255, 0.45);
+  border-color: rgba(255, 255, 255, 0.4);
+}
+
+.btn.primary:hover:not(:disabled) {
+  box-shadow:
+    0 0 18px rgba(255, 0, 200, 0.65),
+    0 0 32px rgba(5, 217, 255, 0.6);
+}
+
+.btn:active:not(:disabled) {
+  transform: translateY(0);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.45);
+}
+
+.btn:disabled {
+  opacity: 0.6;
+  cursor: default;
+  box-shadow: none;
+}
+
 .game-label-small {
   display: none;
 }
@@ -923,6 +983,10 @@ async function verifyEmailCode(code) {
 
   .stats-grid {
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  }
+
+  .profile-header-edit {
+    width: 100%;
   }
 }
 
