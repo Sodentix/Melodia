@@ -42,19 +42,13 @@
 
       <!-- Audio Visualizer / Player Placeholder -->
       <div class="audio-visualizer">
-        <div class="visualizer-circle" :class="{ playing: currentRound && !currentRound.completed }">
-          <div class="wave"></div>
-          <div class="wave"></div>
-          <div class="wave"></div>
-          <div class="icon-container">
-            <span class="music-icon">♫</span>
-          </div>
-        </div>
+        <div ref="visualizerContainer" class="visualizer-container"></div>
         
         <div class="player-controls">
           <audio
             ref="audioPlayer"
             :src="currentRound?.preview_url"
+            crossorigin="anonymous"
             controls
             autoplay
             @ended="onAudioEnded"
@@ -134,6 +128,8 @@
 </template>
 
 <script>
+import AudioMotionAnalyzer from 'audiomotion-analyzer';
+
 export default {
   name: 'GameView',
   data() {
@@ -152,11 +148,18 @@ export default {
       selectedCategory: null,
       categoryTracks: [],
       authToken: null,
+      audioMotion: null,
     };
   },
   mounted() {
     this.loadGameContext();
     this.verifySession();
+    this.initVisualizer();
+  },
+  beforeUnmount() {
+    if (this.audioMotion) {
+      this.audioMotion.destroy();
+    }
   },
   watch: {
     '$route.query': {
@@ -528,6 +531,11 @@ export default {
             this.$refs.audioPlayer.play().catch(e => {
               console.warn('Auto-play prevented:', e);
             });
+            
+            // Resume AudioContext if suspended (browser policy)
+            if (this.audioMotion && this.audioMotion.audioCtx.state === 'suspended') {
+              this.audioMotion.audioCtx.resume();
+            }
           }
         });
       } catch (e) {
@@ -638,6 +646,55 @@ export default {
         }, 5000);
       }
     },
+
+    initVisualizer() {
+      this.$nextTick(() => {
+        const container = this.$refs.visualizerContainer;
+        const audioEl = this.$refs.audioPlayer;
+
+        if (container && audioEl) {
+          try {
+            this.audioMotion = new AudioMotionAnalyzer(container, {
+              source: audioEl,
+              mode: 2, // Octave bands
+              barSpace: 0.6,
+              ledBars: true,
+              radial: true, // Radial visualization
+              showScaleX: false,
+              showPeaks: false,
+              gradient: 'prism', // or custom gradient
+              overlay: true,
+              bgAlpha: 0, // Transparent background
+              spinSpeed: 1,
+              reflexRatio: 0.5,
+              reflexAlpha: 0.25,
+              alphaBars: false,
+              ansiBands: false,
+              channelLayout: 'single',
+              frequencyScale: 'log',
+              linearAmplitude: true,
+              linearBoost: 1.6,
+              lumiBars: false,
+              maxDecibels: -25,
+              minDecibels: -85,
+              mirror: 0,
+              noteLabels: false,
+              outlineBars: false,
+              showBgColor: false,
+              showFPS: false,
+              showScaleY: false,
+              smoothing: 0.7,
+              splitGradient: false,
+              startBox: false,
+              trueLeds: false,
+              weightingFilter: 'D',
+            });
+          } catch (e) {
+            console.error('Failed to init visualizer:', e);
+          }
+        }
+      });
+    },
   },
 };
 </script>
@@ -730,66 +787,65 @@ export default {
   gap: 2rem;
 }
 
-.visualizer-circle {
-  width: 180px;
-  height: 180px;
+.visualizer-container {
+  width: 450px;
+  height: 450px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
   border-radius: 50%;
   background: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05));
   border: 1px solid rgba(255, 255, 255, 0.1);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  position: relative;
   box-shadow: 0 0 50px rgba(0, 0, 0, 0.5);
-}
-
-.icon-container {
-  font-size: 3rem;
-  color: rgba(255, 255, 255, 0.8);
-  z-index: 2;
-}
-
-.wave {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 100%;
-  height: 100%;
-  border-radius: 50%;
-  border: 2px solid rgba(0, 236, 255, 0.3);
-  opacity: 0;
-}
-
-.visualizer-circle.playing .wave {
-  animation: ripple 2s infinite cubic-bezier(0, 0.2, 0.8, 1);
-}
-
-.visualizer-circle.playing .wave:nth-child(2) {
-  animation-delay: 0.6s;
-}
-
-.visualizer-circle.playing .wave:nth-child(3) {
-  animation-delay: 1.2s;
-}
-
-@keyframes ripple {
-  0% {
-    width: 100%;
-    height: 100%;
-    opacity: 0.8;
-    border-width: 2px;
-  }
-  100% {
-    width: 250%;
-    height: 250%;
-    opacity: 0;
-    border-width: 0px;
-  }
+  overflow: hidden; /* Ensure canvas doesn't overflow circle */
 }
 
 .hidden-audio {
   display: none; /* Hide default player */
+}
+
+/* Responsiveness */
+@media (max-width: 768px) {
+  .game-header {
+    padding: 1rem;
+  }
+
+  .game-stage {
+    gap: 2rem;
+    padding: 1rem;
+  }
+
+  .visualizer-container {
+    width: 350px;
+    height: 350px;
+  }
+
+  .hero-input {
+    font-size: 1.2rem;
+    padding: 1rem 1.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .visualizer-container {
+    width: 280px;
+    height: 280px;
+  }
+
+  .instruction-text {
+    font-size: 1rem;
+  }
+
+  .controls-wrapper {
+    width: 100%;
+    flex-direction: column-reverse;
+    gap: 1rem;
+  }
+
+  .control-btn {
+    width: 100%;
+    justify-content: center;
+  }
 }
 
 .instruction-text {

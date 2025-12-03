@@ -29,6 +29,7 @@ export default defineComponent({
             iconColor="purple"
             cardWidth="100%"
             cardHeight="12rem"
+            @click="$router.push({ name: 'game-select' })"
           />
         </div>
       </div>
@@ -104,6 +105,7 @@ p, h2 {
 
 .gamemodeCard {
   height: 100%;
+  cursor: pointer;
 }
 
 .leaderboardDiv {
