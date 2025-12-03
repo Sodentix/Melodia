@@ -2,7 +2,6 @@
 import { computed, onMounted, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { Icon } from '@iconify/vue';
-import ProfileEditModal from '@/components/ProfileEditModal.vue';
 
 const route = useRoute();
 const router = useRouter();
@@ -19,7 +18,7 @@ const stats = ref(null);
 const isOwnProfile = ref(false);
 const neverPlayed = ref(false);
 
-const showEditModal = ref(false);
+const isEditingInline = ref(false);
 const editSaving = ref(false);
 const editFeedback = ref(null);
 const editFieldError = ref(null);
@@ -219,12 +218,12 @@ function openEditProfile() {
   editFeedback.value = null;
   editFieldError.value = null;
   pendingEmailVerification.value = false;
-  showEditModal.value = true;
+  isEditingInline.value = true;
 }
 
 function closeEditProfile() {
   if (editSaving.value) return;
-  showEditModal.value = false;
+  isEditingInline.value = false;
 }
 
 async function saveProfileChanges(updated) {
@@ -303,9 +302,7 @@ async function saveProfileChanges(updated) {
         : 'Profil aktualisiert.');
 
     if (!pendingEmailVerification.value) {
-      showEditModal.value = false;
-    } else {
-      showEditModal.value = true;
+      isEditingInline.value = false;
     }
   } catch (err) {
     console.error('Save profile changes failed:', err);
@@ -380,40 +377,115 @@ async function verifyEmailCode(code) {
     </div>
 
     <div v-else-if="profile" class="profile-content">
-      <header class="profile-header">
-        <div class="identity">
-          <button
-            class="avatar-orb"
-            type="button"
-            :class="{ clickable: isOwnProfile }"
-            @click="openEditProfile"
-          >
-            <Icon icon="solar:user-bold-duotone" class="avatar-icon" />
-          </button>
-          <div class="identity-text">
-            <p class="profile-eyebrow">
-              {{ isOwnProfile ? 'Dein Melodia Profil' : 'Melodia Spielerprofil' }}
-            </p>
-            <h1 class="profile-name">
-              {{ profile.firstName || profile.username }}
-              <span v-if="profile.lastName"> {{ profile.lastName }}</span>
-            </h1>
-            <p class="profile-username">
-              @{{ profile.username }}
-            </p>
-            <p v-if="formattedJoined" class="profile-meta">
-              Dabei seit {{ formattedJoined }}
-            </p>
+      <div class="profile-header" :class="{ 'profile-header--expanded': isEditingInline }">
+        <div class="profile-header-top">
+          <div class="identity">
+            <button
+              class="avatar-orb"
+              type="button"
+              :class="{ clickable: isOwnProfile }"
+              @click="openEditProfile"
+            >
+              <Icon icon="solar:user-bold-duotone" class="avatar-icon" />
+            </button>
+            <div class="identity-text">
+              <p class="profile-eyebrow">
+                {{ isOwnProfile ? 'Dein Melodia Profil' : 'Melodia Spielerprofil' }}
+              </p>
+              <h1 class="profile-name">
+                {{ profile.firstName || profile.username }}
+                <span v-if="profile.lastName"> {{ profile.lastName }}</span>
+              </h1>
+              <p class="profile-username">
+                @{{ profile.username }}
+              </p>
+              <p v-if="formattedJoined" class="profile-meta">
+                Dabei seit {{ formattedJoined }}
+              </p>
+            </div>
+          </div>
+
+          <div v-if="isOwnProfile && profile.email" class="profile-side">
+            <p class="label">E-Mail</p>
+            <p class="value">{{ profile.email }}</p>
           </div>
         </div>
 
-        <div v-if="isOwnProfile && profile.email" class="profile-side">
-          <p class="label">E-Mail</p>
-          <p class="value">{{ profile.email }}</p>
-        </div>
-      </header>
+        <div
+          v-if="isOwnProfile && isEditingInline"
+          class="profile-header-edit"
+        >
+          <div class="edit-row">
+            <label for="edit-first-name">Vorname</label>
+            <input
+              id="edit-first-name"
+              type="text"
+              v-model="profile.firstName"
+              placeholder="Dein Vorname"
+            />
+          </div>
+          <div class="edit-row">
+            <label for="edit-last-name">Nachname</label>
+            <input
+              id="edit-last-name"
+              type="text"
+              v-model="profile.lastName"
+              placeholder="Dein Nachname"
+            />
+          </div>
+          <div class="edit-row">
+            <label for="edit-username">Benutzername</label>
+            <input
+              id="edit-username"
+              type="text"
+              v-model="profile.username"
+              placeholder="Dein Benutzername"
+            />
+          </div>
+          <div class="edit-row">
+            <label for="edit-email">E-Mail</label>
+            <input
+              id="edit-email"
+              type="email"
+              v-model="profile.email"
+              placeholder="Deine E-Mail-Adresse"
+            />
+          </div>
 
-      <section class="stats-section">
+          <p v-if="pendingEmailVerification" class="edit-hint">
+            Wir haben dir einen Bestätigungscode per E‑Mail geschickt.
+          </p>
+
+          <p
+            v-if="editFeedback"
+            class="edit-feedback"
+            :class="{ error: editFieldError }"
+          >
+            {{ editFeedback }}
+          </p>
+
+          <div class="edit-actions">
+            <button
+              type="button"
+              class="btn ghost"
+              :disabled="editSaving"
+              @click="closeEditProfile"
+            >
+              Abbrechen
+            </button>
+            <button
+              type="button"
+              class="btn primary"
+              :disabled="editSaving"
+              @click="saveProfileChanges(profile)"
+            >
+              {{ editSaving ? 'Speichern...' : 'Änderungen speichern' }}
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <section class="stats-section" v-if="!isEditingInline">
         <h2>Spielstatistiken</h2>
         <p class="stats-subtitle" v-if="neverPlayed">
           {{
@@ -484,18 +556,6 @@ async function verifyEmailCode(code) {
         </div>
       </section>
 
-      <ProfileEditModal
-        v-if="isOwnProfile"
-        v-model="showEditModal"
-        :profile="profile"
-        :saving="editSaving"
-        :feedback="editFeedback"
-        :verification-required="pendingEmailVerification"
-        :field-error="editFieldError"
-        @update:modelValue="(val) => (showEditModal = val)"
-        @save="saveProfileChanges"
-        @verifyCode="verifyEmailCode"
-      />
     </div>
   </div>
 </template>
@@ -551,8 +611,8 @@ async function verifyEmailCode(code) {
 
 .profile-header {
   display: flex;
-  justify-content: space-between;
-  gap: 2rem;
+  flex-direction: column;
+  gap: 1.6rem;
   padding: 2rem 2.4rem;
   border-radius: 26px;
   background:
@@ -562,6 +622,34 @@ async function verifyEmailCode(code) {
   box-shadow:
     0 18px 40px rgba(5, 217, 255, 0.18),
     0 10px 28px rgba(255, 0, 200, 0.24);
+}
+
+.profile-header--expanded {
+  padding-bottom: 2.4rem;
+}
+
+.profile-header-top {
+  display: flex;
+  justify-content: space-between;
+  gap: 2rem;
+}
+
+.profile-edit-enter-active,
+.profile-edit-leave-active {
+  transition: opacity 0.3s ease, transform 0.3s ease;
+  transform-origin: top center;
+}
+
+.profile-edit-enter-from,
+.profile-edit-leave-to {
+  opacity: 0;
+  transform: translateY(-12px) scale(0.9);
+}
+
+.profile-edit-enter-to,
+.profile-edit-leave-from {
+  opacity: 1;
+  transform: translateY(0) scale(1);
 }
 
 .identity {
@@ -722,6 +810,63 @@ async function verifyEmailCode(code) {
   font-size: 1rem;
   margin-left: 0.2rem;
   opacity: 0.8;
+}
+
+.profile-header-edit {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.14);
+  padding-top: 1.4rem;
+}
+
+.edit-row {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.edit-row label {
+  font-size: 0.8rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: rgba(234, 238, 255, 0.78);
+}
+
+.edit-row input {
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.24);
+  background: rgba(4, 6, 18, 0.9);
+  padding: 0.55rem 0.8rem;
+  color: #ffffff;
+  font-size: 0.95rem;
+}
+
+.edit-row input:focus {
+  outline: none;
+  border-color: var(--accent-cyan);
+  box-shadow: 0 0 0 1px rgba(5, 217, 255, 0.5);
+}
+
+.edit-hint {
+  font-size: 0.85rem;
+  color: rgba(234, 238, 255, 0.8);
+}
+
+.edit-feedback {
+  font-size: 0.9rem;
+  color: rgba(234, 238, 255, 0.9);
+}
+
+.edit-feedback.error {
+  color: #ff6b81;
+}
+
+.edit-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.8rem;
+  margin-top: 0.4rem;
 }
 
 .game-label-small {
