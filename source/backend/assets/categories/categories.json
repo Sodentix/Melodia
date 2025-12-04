@@ -2,23 +2,15 @@
   {
     "id": "all",
     "name": "Hit Mix",
-    "description": "Alle verfügbaren Clips im zufälligen Mix.",
-    "difficulty": "balanced",
-    "accent": "#8b5cf6"
+    "description": "A mix of all available songs",
+    "difficulty": "medium",
+    "accent": "#FF0055"
   },
   {
     "id": "holiday",
     "name": "Holiday Vibes",
-    "description": "Festliche Sounds mit hohem Nostalgie-Faktor.",
+    "description": "Festive tunes for the season",
     "difficulty": "easy",
-    "accent": "#f97316"
-  },
-  {
-    "id": "synthwave",
-    "name": "Synthwave Drive",
-    "description": "Retro-Beats und neonfarbene Basslines.",
-    "difficulty": "hard",
-    "accent": "#14b8a6"
+    "accent": "#00FF55"
   }
 ]
-

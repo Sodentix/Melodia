@@ -1,0 +1,6 @@
+{
+    "ignore": [
+        "assets/*",
+        "assets/songData/*"
+    ]
+}
