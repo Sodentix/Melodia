@@ -59,6 +59,12 @@ function closeMenu() {
   isMenuOpen.value = false;
 }
 
+// Code für das Abmelden
+function logout() {
+  localStorage.removeItem("melodia_token");
+  isAuthenticated.value = false;
+}
+
 // Code für die Wellenanimation
 function resizeCanvas() {
   if (!canvas || !ctx) {
@@ -214,11 +220,14 @@ onBeforeUnmount(() => {
           >
             Sign Up
           </router-link>
-          <router-link v-if="isAuthenticated" :to="{ name: 'profile' }" @click="closeMenu">
-            <div class="profile-orb">
-              <Icon icon="solar:user-bold-duotone" class="userIcon" />
-            </div>
-          </router-link>
+          <button v-if="isAuthenticated" popovertarget="profileMenu" class="profile-orb" id="profile-orb">
+            <Icon icon="solar:user-bold-duotone" class="userIcon" />
+          </button>
+
+          <div id="profileMenu" popover class="profile-popover" anchor="profile-orb">
+            <router-link :to="{ name: 'profile' }" class="profileLink">Profil</router-link>
+            <p class="logoutText" @click="logout()">Abmelden</p>
+          </div>
         </div>
       </nav>
     </div>
@@ -292,6 +301,7 @@ onBeforeUnmount(() => {
     display: flex;
     align-items: center;
     gap: 1rem;
+    position: relative;
 }
 
 :deep(.router-link-exact-active[href="/home"])::after {
@@ -429,6 +439,25 @@ canvas {
         0 0 50px rgba(61, 255, 140, 0.50);
 }
 
+/* Popover */
+.profile-popover {
+  color: var(--text);
+  position: absolute;
+  border: 1px solid rgba(255, 255, 255, 0.03);
+  border-radius: 12px;
+  background-color: var(--card);
+  color: var(--text);
+  margin-left: auto;
+  top: 5rem;
+  right: 2rem;
+  padding: 0.5rem;
+}
+
+.profileLink {
+  color: var(--text);
+  text-decoration: none;
+}
+
 /* Iconify-Icon */
 .profile-orb :deep(.userIcon) {
     font-size: 22px;
@@ -534,6 +563,7 @@ canvas {
         opacity: 0;
         transform: translateY(20px);
         transition: opacity 0.4s ease, transform 0.4s ease;
+        position: relative;
     }
 
     #primary-nav.is-open .nav-actions {
