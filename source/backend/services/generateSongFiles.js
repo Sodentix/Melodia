@@ -8,7 +8,6 @@ const fs = require('fs');
 const path = require('path');
 const cron = require('node-cron');
 
-// Mapping category IDs (from categories.json) to Deezer Playlist IDs and Metadata
 const categories = {
   all: {
     playlistIds: [1282483245, 8282573142],
@@ -44,9 +43,9 @@ async function fetchPlaylistPreviews(playlistId, minRank = 0) {
     const url = `https://api.deezer.com/playlist/${playlistId}`;
     const response = await axios.get(url);
 
-    if (!response.data || !response.data.tracks || !response.data.tracks.data) {
-      console.warn(`⚠️ Playlist ${playlistId} returned no data.`);
-      return [];
+    if(!response.data || !response.data.tracks || !response.data.tracks.data){
+        console.warn("⚠️ Playlist mit der ID " + playlistId + " ist ungültig")
+        return []
     }
 
     const tracks = response.data.tracks.data;
