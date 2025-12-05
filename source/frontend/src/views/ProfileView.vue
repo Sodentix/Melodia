@@ -794,9 +794,9 @@ async function resetAvatar() {
 </template>
 
 <style scoped>
-:root {
+/*:root {
   --the-background-color: rbg(39, 39, 39);
-}
+}*/
 
 .profile-page {
   min-height: calc(100vh - 5rem);
