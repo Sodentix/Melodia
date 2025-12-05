@@ -17,7 +17,9 @@
                         <div class="podiumItem second">
                             <p class="textType1">2</p>
                             <p class="textType2 username" :title="leaderboard[1]?.username">
-                            {{ leaderboard[1]?.username || "–" }}
+                              <a :href="`/profile/${leaderboard[1]?.username}`">
+                                {{ leaderboard[1]?.username || "–" }}
+                              </a>
                             </p>
                             <p class="textType2">{{ leaderboard[1]?.totalPoints.toLocaleString() }}</p>
                         </div>
@@ -26,15 +28,18 @@
                             <Icon class="crown" icon="mdi:crown"/>
                             <p class="textType1">1</p>
                             <p class="textType2 username" :title="leaderboard[0]?.username">
+                              <a :href="`/profile/${leaderboard[0]?.username}`">
                                 {{ leaderboard[0]?.username || "–" }}
-                            </p>
+                              </a>                              </p>
                             <p class="textType2">{{ leaderboard[0]?.totalPoints.toLocaleString() }}</p>
                         </div>
 
                         <div class="podiumItem third">
                             <p class="textType1">3</p>
                             <p class="textType2 username" :title="leaderboard[2]?.username">
+                              <a :href="`/profile/${leaderboard[2]?.username}`">
                                 {{ leaderboard[2]?.username || "–" }}
+                              </a>
                             </p>
                             <p class="textType2">{{ leaderboard[2]?.totalPoints.toLocaleString() }}</p>
                         </div>
@@ -52,7 +57,7 @@
                             <tbody>
                                 <tr v-for="player in leaderboard.slice(3)" :key="player.username">
                                 <td>#{{ player.rank }}</td>
-                                <td>{{ player.username }}</td>
+                                  <td><a :href="`/profile/${player.username}`">{{ player.username }}</a></td>
                                 <td>{{ player.totalPoints.toLocaleString() }}</td>
                                 </tr>
                             </tbody>
@@ -68,12 +73,14 @@
 import { ref, onMounted } from 'vue'
 import axios from "axios";
 import { Icon } from '@iconify/vue';
-
 const leaderboard = ref([]);
+const apiRoot = import.meta.env.VITE_API_URL
+    ? import.meta.env.VITE_API_URL.replace(/\/$/, '')
+    : '';
 
 onMounted(async () => {
   try {
-    const { data } = await axios.get("http://localhost:5000/stats/leaderboard");
+    const { data } = await axios.get(apiRoot + "/stats/leaderboard");
     console.log(data);
     leaderboard.value = data.leaderboard || [];
   } catch (err) {
@@ -84,6 +91,10 @@ onMounted(async () => {
 
 
 <style scoped>
+a {
+  text-decoration: none;
+  color: inherit;
+}
 .leaderboard {
     background-color: var(--card);
     width: min(100%, 40rem);
@@ -146,10 +157,12 @@ onMounted(async () => {
 
 .podiumItem.second {
     transform: translateY(-0.7rem);
+    box-shadow: 0 0 20px 2px #9a9a9a;
 }
 
 .podiumItem.third {
     transform: translateY(0);
+    box-shadow: 0 0 20px 2px #c37300;
 }
 
 .leaderboard-list {
