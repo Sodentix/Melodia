@@ -11,3 +11,7 @@
     --text: rgba(255,255,255,0.78);
     --card: rgba(255,255,255,0.03);
 }
+
+::-webkit-scrollbar {
+  display: none;
+}
