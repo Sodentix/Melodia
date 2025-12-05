@@ -65,6 +65,13 @@ function logout() {
   isAuthenticated.value = false;
 }
 
+// Code um das Popover zu schließen
+function closePopover() {
+  const popoverElement = document.getElementById("profileMenu");
+  if (popoverElement?.hidePopover) popoverElement.hidePopover();
+}
+
+
 // Code für die Wellenanimation
 function resizeCanvas() {
   if (!canvas || !ctx) {
@@ -225,8 +232,8 @@ onBeforeUnmount(() => {
           </button>
 
           <div id="profileMenu" popover class="profile-popover" anchor="profile-orb">
-            <router-link :to="{ name: 'profile' }" class="profileLink">Profil</router-link>
-            <p class="logoutText" @click="logout()">Abmelden</p>
+            <router-link :to="{ name: 'profile' }" class="dropdownOption" @click="closePopover()">Profil</router-link>
+            <p class="dropdownOption" @click="logout(), closePopover()">Abmelden</p>
           </div>
         </div>
       </nav>
@@ -453,9 +460,14 @@ canvas {
   padding: 0.5rem;
 }
 
-.profileLink {
+.dropdownOption {
   color: var(--text);
   text-decoration: none;
+  cursor: pointer;
+}
+
+.dropdownOption:hover {
+  color: #ffffff;
 }
 
 /* Iconify-Icon */

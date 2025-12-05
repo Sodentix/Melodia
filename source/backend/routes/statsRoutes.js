@@ -65,14 +65,14 @@ router.get('/leaderboard', async (req, res) => {
   try {
     const limit = Math.min(Number(req.query.limit) || 10, 100);
     const skip = Math.max(Number(req.query.skip) || 0, 0);
-    
+
     const leaderboard = await Stats.find({ totalPoints: { $gt: 0 } })
       .sort({ totalPoints: -1 })
       .limit(limit)
       .skip(skip)
       .populate('user', 'username email firstName lastName')
       .lean();
-    
+
     const formatted = leaderboard.map((stat, index) => ({
       rank: skip + index + 1,
       username: stat.user?.username || 'Unknown',
@@ -84,7 +84,7 @@ router.get('/leaderboard', async (req, res) => {
       correctGuesses: stat.correctGuesses || 0,
       bestStreak: stat.bestStreak || 0,
     }));
-    
+
     return res.json({ leaderboard: formatted });
   } catch (err) {
     console.error('Leaderboard error:', err);

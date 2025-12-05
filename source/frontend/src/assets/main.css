@@ -10,4 +10,9 @@
     --stroke: rgba(255,255,255,0.08);
     --text: rgba(255,255,255,0.78);
     --card: rgba(255,255,255,0.03);
+    --the-background-color: rgb(39, 39, 39);
+}
+
+::-webkit-scrollbar {
+  display: none;
 }
