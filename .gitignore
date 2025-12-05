@@ -130,3 +130,5 @@ dist
 .yarn/install-state.gz
 .pnp.*
 
+source/backend/assets/categories/categories.json
+source/backend/assets/songData/all.json
