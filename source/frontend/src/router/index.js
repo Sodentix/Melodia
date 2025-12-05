@@ -35,6 +35,7 @@ const router = createRouter({
     }
   ],
 
+
   scrollBehavior(to, from, savedPosition) {
     // Wenn es eine gespeicherte Position gibt (z. B. beim "Zurück"-Button)
     if (savedPosition) {
