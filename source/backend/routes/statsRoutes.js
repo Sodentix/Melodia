@@ -61,31 +61,69 @@ router.get('/me', auth(true, true), async (req, res) => {
 });
 
 // Leaderboard endpoint (top N users by points)
-router.get('/leaderboard', async (req, res) => {
+router.get('/leaderboard', auth(false), async (req, res) => {
   try {
     const limit = Math.min(Number(req.query.limit) || 10, 100);
     const skip = Math.max(Number(req.query.skip) || 0, 0);
 
     const leaderboard = await Stats.find({ totalPoints: { $gt: 0 } })
-      .sort({ totalPoints: -1 })
+      .sort({ totalPoints: -1, totalWins: -1, bestStreak: -1, bestTimeMs: 1 })
       .limit(limit)
       .skip(skip)
       .populate('user', 'username email firstName lastName')
       .lean();
 
-    const formatted = leaderboard.map((stat, index) => ({
-      rank: skip + index + 1,
-      username: stat.user?.username || 'Unknown',
-      firstName: stat.user?.firstName,
-      lastName: stat.user?.lastName,
-      totalPoints: stat.totalPoints || 0,
-      totalWins: stat.totalWins || 0,
-      totalPlayed: stat.totalPlayed || 0,
-      correctGuesses: stat.correctGuesses || 0,
-      bestStreak: stat.bestStreak || 0,
-    }));
+    const formatted = leaderboard.map((stat, index) => {
+      const played = stat.totalPlayed || 0;
+      const wins = stat.totalWins || 0;
+      const winRate = played > 0 ? ((wins / played) * 100).toFixed(1) : '0.0';
 
-    return res.json({ leaderboard: formatted });
+      return {
+        rank: skip + index + 1,
+        username: stat.user?.username || 'Unknown',
+        firstName: stat.user?.firstName,
+        lastName: stat.user?.lastName,
+        totalPoints: stat.totalPoints || 0,
+        totalWins: wins,
+        totalPlayed: played,
+        winRate: winRate,
+        correctGuesses: stat.correctGuesses || 0,
+        bestStreak: stat.bestStreak || 0,
+        averageTimeMs: stat.averageTimeMs ? Math.round(stat.averageTimeMs) : null,
+      };
+    });
+
+    let userRank = null;
+    let userStats = null;
+    let currentUsername = null;
+
+    console.log('Leaderboard request user:', req.user);
+
+    if (req.user) {
+      const userStatDoc = await Stats.findOne({ user: req.user.id }).populate('user', 'username');
+      console.log('User stats doc found:', !!userStatDoc);
+      if (userStatDoc) {
+        const count = await Stats.countDocuments({
+          $or: [
+            { totalPoints: { $gt: userStatDoc.totalPoints } },
+            { totalPoints: userStatDoc.totalPoints, totalWins: { $gt: userStatDoc.totalWins } },
+            { totalPoints: userStatDoc.totalPoints, totalWins: userStatDoc.totalWins, bestStreak: { $gt: userStatDoc.bestStreak } },
+            { totalPoints: userStatDoc.totalPoints, totalWins: userStatDoc.totalWins, bestStreak: userStatDoc.bestStreak, bestTimeMs: { $lt: userStatDoc.bestTimeMs } }
+          ]
+        });
+        userRank = count + 1;
+        userStats = userStatDoc.toObject();
+        currentUsername = userStatDoc.user?.username;
+        console.log('Calculated rank:', userRank, 'Username:', currentUsername);
+      }
+    }
+
+    return res.json({
+      leaderboard: formatted,
+      userRank,
+      userStats,
+      currentUsername
+    });
   } catch (err) {
     console.error('Leaderboard error:', err);
     return res.status(500).json({ message: 'Failed to fetch leaderboard' });
