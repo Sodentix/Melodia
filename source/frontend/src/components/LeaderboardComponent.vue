@@ -9,12 +9,12 @@
                     </div>
                     <div>
                         <p class="textType1">Your rank</p>
-                        <p class="textType2">#12</p>
+                        <p class="textType2">{{ userRank ? `#${userRank}` : '–' }}</p>
                     </div>
                 </div>
                 <div class="ranking">
                     <div class="podium">
-                        <div class="podiumItem second">
+                        <div class="podiumItem second" :class="{ highlight: leaderboard[1]?.username === currentUsername }">
                             <p class="textType1">2</p>
                             <p class="textType2 username" :title="leaderboard[1]?.username">
                               <a :href="`/profile/${leaderboard[1]?.username}`">
@@ -24,7 +24,7 @@
                             <p class="textType2">{{ leaderboard[1]?.totalPoints.toLocaleString() }}</p>
                         </div>
 
-                        <div class="podiumItem first">
+                        <div class="podiumItem first" :class="{ highlight: leaderboard[0]?.username === currentUsername }">
                             <Icon class="crown" icon="mdi:crown"/>
                             <p class="textType1">1</p>
                             <p class="textType2 username" :title="leaderboard[0]?.username">
@@ -34,7 +34,7 @@
                             <p class="textType2">{{ leaderboard[0]?.totalPoints.toLocaleString() }}</p>
                         </div>
 
-                        <div class="podiumItem third">
+                        <div class="podiumItem third" :class="{ highlight: leaderboard[2]?.username === currentUsername }">
                             <p class="textType1">3</p>
                             <p class="textType2 username" :title="leaderboard[2]?.username">
                               <a :href="`/profile/${leaderboard[2]?.username}`">
@@ -51,13 +51,17 @@
                                 <tr>
                                 <th>Rank</th>
                                 <th>Player</th>
+                                <th class="hide-mobile">Win Rate</th>
+                                <th class="hide-mobile">Streak</th>
                                 <th>Score</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr v-for="player in leaderboard.slice(3)" :key="player.username">
+                                <tr v-for="player in leaderboard.slice(3)" :key="player.username" :class="{ highlight: player.username === currentUsername }">
                                 <td>#{{ player.rank }}</td>
                                   <td><a :href="`/profile/${player.username}`">{{ player.username }}</a></td>
+                                  <td class="hide-mobile">{{ player.winRate }}%</td>
+                                  <td class="hide-mobile">{{ player.bestStreak }}</td>
                                 <td>{{ player.totalPoints.toLocaleString() }}</td>
                                 </tr>
                             </tbody>
@@ -74,15 +78,23 @@ import { ref, onMounted } from 'vue'
 import axios from "axios";
 import { Icon } from '@iconify/vue';
 const leaderboard = ref([]);
+const userRank = ref(null);
+const currentUsername = ref(null);
 const apiRoot = import.meta.env.VITE_API_URL
     ? import.meta.env.VITE_API_URL.replace(/\/$/, '')
     : '';
 
 onMounted(async () => {
   try {
-    const { data } = await axios.get(apiRoot + "/stats/leaderboard");
+    const { data } = await axios.get(apiRoot + "/stats/leaderboard", {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem('melodia_token')}`
+      }
+    });
     console.log(data);
     leaderboard.value = data.leaderboard || [];
+    userRank.value = data.userRank;
+    currentUsername.value = data.currentUsername;
   } catch (err) {
     console.error("Fehler:", err);
   }
@@ -243,6 +255,10 @@ td {
     min-width: 8rem;
   }
 
+  .hide-mobile {
+    display: none;
+  }
+
   table {
     font-size: 0.9rem;
   }
@@ -273,5 +289,10 @@ td {
   .podiumItem.third {
     transform: none;
   }
+}
+
+.highlight {
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  background-color: rgba(255, 255, 255, 0.1) !important;
 }
 </style>
