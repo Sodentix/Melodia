@@ -18,7 +18,11 @@ function generateVerificationToken() {
 
 // Send verification email
 async function sendVerificationEmail(email, verificationToken) {
-  const verificationUrl = `${process.env.BACKEND_URL || 'http://localhost:3000'}/auth/verify-email?token=${verificationToken}`;
+  const baseUrl = process.env.BACKEND_URL;
+  if (!baseUrl) {
+    throw new Error('BACKEND_URL is not set. Please configure it in your environment (.env or docker-compose).');
+  }
+  const verificationUrl = `${baseUrl}/auth/verify-email?token=${verificationToken}`;
   
   const mailOptions = {
     from: process.env.EMAIL_USER,
@@ -63,7 +67,11 @@ async function sendVerificationEmail(email, verificationToken) {
 
 // Send password reset email (bonus feature)
 async function sendPasswordResetEmail(email, resetToken) {
-  const resetUrl = `${process.env.BACKEND_URL || 'http://localhost:3000'}/auth/reset-password?token=${resetToken}`;
+  const baseUrl = process.env.BACKEND_URL;
+  if (!baseUrl) {
+    throw new Error('BACKEND_URL is not set. Please configure it in your environment (.env or docker-compose).');
+  }
+  const resetUrl = `${baseUrl}/auth/reset-password?token=${resetToken}`;
   
   const mailOptions = {
     from: process.env.EMAIL_USER,

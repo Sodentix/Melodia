@@ -33,14 +33,18 @@ describe('GameRoundStore metadata', () => {
 
 describe('clipService category filter', () => {
   test('returns clip matching requested category', async () => {
-    const clip = await fetchRandomClip('http://localhost:3000', { categoryId: 'holiday' });
+    const baseUrl = process.env.BACKEND_URL;
+    if (!baseUrl) throw new Error('BACKEND_URL must be set for tests.');
+    const clip = await fetchRandomClip(baseUrl, { categoryId: 'holiday' });
     expect(clip).toBeTruthy();
     expect(clip.categoryId).toBe('holiday');
     expect(clip.categoryName).toBeTruthy();
   });
 
   test('falls back to all when category not provided', async () => {
-    const clip = await fetchRandomClip('http://localhost:3000');
+    const baseUrl = process.env.BACKEND_URL;
+    if (!baseUrl) throw new Error('BACKEND_URL must be set for tests.');
+    const clip = await fetchRandomClip(baseUrl);
     expect(clip).toBeTruthy();
     expect(clip.categoryId).toBeTruthy();
   });
