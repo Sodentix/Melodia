@@ -121,7 +121,7 @@ onMounted(() => {
   }
 
     const colors = [
-    'rgba(255,0,200,0.6)',  
+    'rgba(255,0,200,0.6)',
     'rgba(0,236,255,0.5)',
     'rgba(61,255,140,0.45)',
     'rgba(255,255,255,0.35)'
@@ -312,25 +312,25 @@ onBeforeUnmount(() => {
 }
 
 :deep(.router-link-exact-active[href="/home"])::after {
-  transform: scaleX(1);
+    transform: scaleX(1);
 }
 
 .nav-link::after {
-  content: "";
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: -10px;
-  height: 2px;
-  border-radius: 999px;
-  background: var(--gradient-accent);
-  transform: scaleX(0);                
-  transform-origin: left;
-  transition: transform 0.25s ease;
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: -10px;
+    height: 2px;
+    border-radius: 999px;
+    background: var(--gradient-accent);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.25s ease;
 }
 
 .nav-link:hover::after {
-  transform: scaleX(1);
+    transform: scaleX(1);
 }
 
 .nav-link:hover {
@@ -433,8 +433,8 @@ canvas {
     backdrop-filter: blur(4px);
     border: 1px solid rgba(255, 255, 255, 0.12);
 
-    transition: 
-        transform 0.22s ease, 
+    transition:
+        transform 0.22s ease,
         box-shadow 0.24s ease;
 }
 
@@ -448,26 +448,55 @@ canvas {
 
 /* Popover */
 .profile-popover {
-  color: var(--text);
-  position: absolute;
-  border: 1px solid rgba(255, 255, 255, 0.03);
-  border-radius: 12px;
-  background-color: var(--card);
-  color: var(--text);
-  margin-left: auto;
-  top: 5rem;
-  right: 2rem;
-  padding: 0.5rem;
+    color: var(--text);
+    position: relative; 
+    border: 1px solid rgba(255, 255, 255, 0.03);
+    border-radius: 12px;
+    background-color: var(--card);
+    color: var(--text);
+    margin-left: auto;
+    padding: 0.5rem;
+    overflow: visible; 
+    margin-top: 5rem; 
 }
 
+.profile-popover::before {
+    content: '';
+    position: absolute;
+    top: -12px;
+    right: 18px;
+
+    /* Dreieck mit der Border */
+    border-width: 0 12px 12px 12px;
+    border-style: solid;
+    border-color: transparent transparent var(--card) transparent;
+    filter: drop-shadow(0 -1px 1px rgba(0, 0, 0, 0.1));
+    z-index: 10; 
+}
+
+/* Optional: Pfeil-Kante (um den Border des Popovers fortzusetzen) */
+.profile-popover::after {
+    content: '';
+    position: absolute;
+    top: -13px; /* 1px höher, um den Rand zu simulieren */
+    right: 18px;
+
+    border-width: 0 12px 12px 12px;
+    border-style: solid;
+    /* Die Farbe des Dreiecks entspricht der Randfarbe des Popovers */
+    border-color: transparent transparent rgba(255, 255, 255, 0.03) transparent;
+    z-index: 5;
+}
+
+
 .dropdownOption {
-  color: var(--text);
-  text-decoration: none;
-  cursor: pointer;
+    color: var(--text);
+    text-decoration: none;
+    cursor: pointer;
 }
 
 .dropdownOption:hover {
-  color: #ffffff;
+    color: #ffffff;
 }
 
 /* Iconify-Icon */
@@ -520,7 +549,7 @@ canvas {
         margin-left: 0;
         gap: 2.5rem;
         z-index: 1000;
-        
+
         /* Transition states */
         opacity: 0;
         visibility: hidden;
@@ -563,7 +592,7 @@ canvas {
         transform: translateY(0);
         transition-delay: 0.1s;
     }
-    
+
     #primary-nav.is-open .nav-list li:nth-child(1) .nav-link { transition-delay: 0.1s; }
     #primary-nav.is-open .nav-list li:nth-child(2) .nav-link { transition-delay: 0.2s; }
 
@@ -584,5 +613,4 @@ canvas {
         transition-delay: 0.3s;
     }
 }
-
 </style>
