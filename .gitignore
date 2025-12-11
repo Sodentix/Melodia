@@ -132,3 +132,4 @@ dist
 
 source/backend/assets/categories/categories.json
 source/backend/assets/songData/all.json
+source/backend/assets/songData/holiday.json

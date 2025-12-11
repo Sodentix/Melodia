@@ -10,7 +10,7 @@ const cron = require('node-cron');
 
 const categories = {
   all: {
-    playlistIds: [1282483245, 8282573142],
+    playlistIds: [1282483245, 8282573142, 2159765062, 8074581462],
     name: "Hit Mix",
     description: "A mix of all available songs",
     difficulty: "medium",
