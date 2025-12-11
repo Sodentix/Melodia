@@ -33,8 +33,8 @@ export default defineConfig({
   use: {
     /* Maximum time each action such as `click()` can take. Defaults to 0 (no limit). */
     actionTimeout: 0,
-    /* Base URL to use in actions like `await page.goto('/')`. */
-    baseURL: process.env.CI ? 'http://localhost:4173' : 'http://localhost:5173',
+    /* Base URL to use in actions like `await page.goto('/')`. Must be provided by env (e.g. PLAYWRIGHT_BASE_URL). */
+    baseURL: process.env.PLAYWRIGHT_BASE_URL,
 
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
     trace: 'on-first-retry',

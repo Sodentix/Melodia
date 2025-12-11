@@ -3,14 +3,25 @@ const mongoose = require('mongoose');
 const connectDB = async () => {
   try {
     const mongoURI = process.env.MONGODB_URI || 'mongodb://localhost:27017/melodia';
-    
-    const conn = await mongoose.connect(mongoURI, {
+
+    // Config options
+    const options = {
       useNewUrlParser: true,
       useUnifiedTopology: true,
-    });
+      serverSelectionTimeoutMS: 5000, // Fail fast to try fallback
+    };
 
-    console.log(`MongoDB Connected: ${conn.connection.host}`);
-    
+    try {
+      const conn = await mongoose.connect(mongoURI, options);
+      console.log(`MongoDB Connected: ${conn.connection.host}`);
+    } catch (err) {
+      console.error(`Failed to connect to primary URI (${mongoURI}): ${err.message}`);
+      console.log('Attempting fallback to localhost...');
+      const localhostURI = 'mongodb://localhost:27017/melodia';
+      const conn = await mongoose.connect(localhostURI, options);
+      console.log(`MongoDB Connected (Fallback): ${conn.connection.host}`);
+    }
+
     // Handle connection events
     mongoose.connection.on('error', (err) => {
       console.error('MongoDB connection error:', err);
