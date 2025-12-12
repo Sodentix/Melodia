@@ -232,6 +232,8 @@ onBeforeUnmount(() => {
           </button>
 
           <div id="profileMenu" popover class="profile-popover" anchor="profile-orb">
+            <div class="popover-arrow"></div> 
+
             <router-link :to="{ name: 'profile' }" class="dropdownOption" @click="closePopover()">Profil</router-link>
             <p class="dropdownOption" @click="logout(), closePopover()">Abmelden</p>
           </div>
@@ -369,10 +371,10 @@ canvas {
 }
 
 .wave-layer {
-  position: absolute;
-  inset: 0;
-  z-index: -1;
-  pointer-events: none;
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
 }
 
 
@@ -457,37 +459,22 @@ canvas {
     margin-left: auto;
     padding: 0.5rem;
     overflow: visible; 
-    margin-top: 5rem; 
+    margin-top: 5rem;
+    margin-right: 1.5rem;
 }
 
-.profile-popover::before {
-    content: '';
+.popover-arrow {
     position: absolute;
     top: -12px;
-    right: 18px;
-
-    /* Dreieck mit der Border */
-    border-width: 0 12px 12px 12px;
-    border-style: solid;
-    border-color: transparent transparent var(--card) transparent;
-    filter: drop-shadow(0 -1px 1px rgba(0, 0, 0, 0.1));
-    z-index: 10; 
+    right: 8px;
+    width: 24px;
+    height: 12px;
+    background-color: var(--card); 
+    clip-path: polygon(0% 100%, 50% 0%, 100% 100%);
+    border: 1px solid rgba(255, 255, 255, 0.03); 
+    filter: brightness(150%);
+    z-index: 10;
 }
-
-/* Optional: Pfeil-Kante (um den Border des Popovers fortzusetzen) */
-.profile-popover::after {
-    content: '';
-    position: absolute;
-    top: -13px; /* 1px höher, um den Rand zu simulieren */
-    right: 18px;
-
-    border-width: 0 12px 12px 12px;
-    border-style: solid;
-    /* Die Farbe des Dreiecks entspricht der Randfarbe des Popovers */
-    border-color: transparent transparent rgba(255, 255, 255, 0.03) transparent;
-    z-index: 5;
-}
-
 
 .dropdownOption {
     color: var(--text);
