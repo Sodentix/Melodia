@@ -4,6 +4,12 @@ import { Icon } from '@iconify/vue';
 
 // Der Status, ob bearbeitet wird (später via Props)
 const isBeingChanged = ref(false);
+
+const isOrbActive = ref(false);
+
+const toggleOrb = () => {
+  isOrbActive.value = !isOrbActive.value;
+}
 </script>
 
 <template>
@@ -11,7 +17,11 @@ const isBeingChanged = ref(false);
     
     <div class="orb-container">
       
-      <div class="profile-orb">
+      <div 
+        class="profile-orb" 
+        :class="{ 'is-active': isOrbActive }"
+        @click="toggleOrb"
+      >
         <Icon icon="solar:user-bold-duotone" class="userIcon" />
       </div>
 
@@ -22,14 +32,13 @@ const isBeingChanged = ref(false);
     </div>
 
     <button class="toggle-btn" @click="isBeingChanged = !isBeingChanged">
-      Toggle Edit: {{ isBeingChanged }}
+      Toggle Edit Badge
     </button>
 
   </div>
 </template>
 
 <style scoped>
-/* Layout für die Demo: Orb links, Button rechts */
 .demo-layout {
   display: flex;
   align-items: center;
@@ -37,13 +46,11 @@ const isBeingChanged = ref(false);
   padding: 2rem;
 }
 
-/* WICHTIG: position: relative, damit der Stift absolut dazu positioniert werden kann */
 .orb-container {
   position: relative;
   width: max-content;
 }
 
-/* --- Profile Orb Styles (Original) --- */
 .profile-orb {
   width: 42px;
   height: 42px;
@@ -71,7 +78,12 @@ const isBeingChanged = ref(false);
   transition: transform 0.22s ease, box-shadow 0.24s ease;
 }
 
-.profile-orb:hover {
+/* WICHTIG: Hier fügen wir die Klasse .is-active hinzu.
+   Das Komma bedeutet "ODER". 
+   Die Styles greifen also bei Hover ODER bei Klick (is-active).
+*/
+.profile-orb:hover,
+.profile-orb.is-active {
   transform: translateY(-2px);
   box-shadow:
     0 0 20px rgba(255, 0, 200, 0.75),
@@ -85,28 +97,23 @@ const isBeingChanged = ref(false);
   filter: drop-shadow(0 0 4px rgba(255, 255, 255, 0.7));
 }
 
-/* --- Der Stift (Edit Badge) --- */
+/* Stift Badge Styles bleiben gleich... */
 .edit-badge {
   position: absolute;
-  bottom: -4px; /* Überlappt den unteren Rand */
-  right: -4px;  /* Überlappt den rechten Rand */
-  
+  bottom: -4px;
+  right: -4px;
   width: 20px;
   height: 20px;
   border-radius: 50%;
-  
-  /* Dunkler Hintergrund oder Akzentfarbe für Kontrast */
   background: rgba(20, 20, 30, 0.2);
   border: 1px solid rgba(255, 255, 255, 0.3);
   box-shadow: 0 2px 5px rgba(0,0,0,0.5);
-
-  
   display: flex;
   align-items: center;
   justify-content: center;
-  
-  /* Animation beim Erscheinen */
   animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  /* Damit Klicks auf den Stift nicht den Orb auslösen (optional) */
+  pointer-events: none; 
 }
 
 .edit-badge :deep(.editIcon) {
@@ -119,7 +126,6 @@ const isBeingChanged = ref(false);
   to { transform: scale(1); opacity: 1; }
 }
 
-/* --- Nur für den Test-Button --- */
 .toggle-btn {
   padding: 8px 16px;
   background: #333;
