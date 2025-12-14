@@ -54,18 +54,20 @@
             @ended="onAudioEnded"
             class="hidden-audio"
           />
+          <!-- 
           <p v-if="currentRound" class="instruction-text">
             {{ currentRound.completed ? 'Round finished' : 'Listen and guess...' }}
           </p>
           <p v-else class="instruction-text idle">
             Ready for the next beat?
           </p>
+          -->
         </div>
       </div>
 
       <!-- Input Area -->
       <div class="input-area">
-        <div class="input-wrapper">
+        <div class="input-wrapper" v-click-outside="closeSuggestions">
           <input
             v-model="guessInput"
             @input="onGuessInput"
@@ -726,6 +728,8 @@ export default {
   align-items: center;
   padding: 1.5rem 2rem;
   z-index: 10;
+  position: absolute;
+  width: 100%;
 }
 
 .header-left {
@@ -773,7 +777,7 @@ export default {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 4rem;
+  gap: 1rem;
   padding: 2rem;
   position: relative;
 }
@@ -1004,7 +1008,7 @@ export default {
 
 /* Controls */
 .game-controls {
-  padding: 2rem;
+  padding: 1.5rem;
   display: flex;
   justify-content: center;
 }
