@@ -630,7 +630,13 @@ export default {
 
     onAudioEnded() {
       // Audio preview ended - can still make guesses
-      if (this.currentRound && !this.currentRound.completed) {
+      const audio = this.$refs.audioPlayer;
+      if ((this.currentRound && !this.currentRound.completed) && this.gameMode == 'freeplay') {
+        this.showMessage('info', 'Audio replaying in 3 seconds!');
+        setTimeout(() => {
+        audio.play()
+      }, 3000)
+      } else if (this.currentRound && !this.currentRound.completed) {
         this.showMessage('info', 'Preview ended. You can still make guesses!');
       }
     },
