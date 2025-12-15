@@ -1,9 +1,7 @@
 <script setup>
 import { ref } from 'vue';
 import ProfilePictureDebug from '@/components/ProfilePictureDebug.vue';
-import testProfilePicture from '@/components/1.jpg';
 
-const imageSrc = ref(testProfilePicture);
 const canToggle = ref(true);
 const isEditable = ref(true);
 </script>
@@ -13,7 +11,6 @@ const isEditable = ref(true);
     <h1 class="debug-title">Profile Picture Debug</h1>
 
     <ProfilePictureDebug
-      :image-src="imageSrc"
       :can-toggle="canToggle"
       :is-editable="isEditable"
     />

@@ -1,46 +1,80 @@
 <script setup>
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
 import { Icon } from '@iconify/vue';
 
-// Definition der Props, die von außen reinkommen
 const props = defineProps({
-  // 1. Das Bild: Ist es leer, wird das Icon gezeigt. Kein Import-Crash mehr.
-  imageSrc: {
-    type: String,
-    default: null
-  },
-  // 2. Der "Modus": Darf man klicken? (True/False)
   canToggle: {
     type: Boolean,
-    default: true
+    default: true,
   },
-  // 3. Edit Mode (optional, falls du den Stift von außen steuern willst)
   isEditable: {
     type: Boolean,
-    default: false
-  }
+    default: false,
+  },
+  size: {
+    type: Number,
+    default: 72,
+  },
 });
 
 const isOrbActive = ref(false);
+const imageSrc = ref(null);
+
+const fetchAvatar = async () => {
+  try {
+    const baseUrl =
+      import.meta.env.VITE_API_BASE || import.meta.env.VITE_API_URL || '';
+
+    const token =
+      localStorage.getItem('melodia_token') || localStorage.getItem('token') || '';
+
+    const response = await fetch(`${baseUrl}/users/me`, {
+      headers: {
+        Authorization: token ? `Bearer ${token}` : '',
+        Accept: 'application/json',
+      },
+      credentials: 'include',
+    });
+
+    if (!response.ok) {
+      return;
+    }
+
+    const data = await response.json();
+    const avatarPath = data?.avatarUrl || data?.avatar || null;
+
+    if (avatarPath) {
+      imageSrc.value = avatarPath.startsWith('http')
+        ? avatarPath
+        : `${baseUrl}${avatarPath}`;
+    } else {
+      imageSrc.value = null;
+    }
+  } catch (error) {
+    console.error('Failed to fetch avatar:', error);
+  }
+};
 
 const handleOrbClick = () => {
-  // Wenn canToggle FALSE ist, brechen wir hier sofort ab.
-  // Es passiert also nichts (kein active State).
   if (!props.canToggle) return;
 
   isOrbActive.value = !isOrbActive.value;
-}
+};
+
+onMounted(() => {
+  fetchAvatar();
+});
 </script>
 
 <template>
   <div class="orb-wrapper">
-    
-    <div 
-      class="profile-orb" 
-      :class="{ 
-        'is-active': isOrbActive, 
-        'is-clickable': canToggle 
+    <div
+      class="profile-orb"
+      :class="{
+        'is-active': isOrbActive,
+        'is-clickable': canToggle,
       }"
+      :style="{ width: size + 'px', height: size + 'px' }"
       @click="handleOrbClick"
     >
       <img
@@ -56,10 +90,20 @@ const handleOrbClick = () => {
       />
     </div>
 
-    <div v-if="isEditable" class="edit-badge">
-      <Icon icon="solar:pen-2-bold" class="editIcon" />
+    <div
+      v-if="isEditable"
+      class="edit-badge"
+      :style="{
+        width: size * 0.4 + 'px',
+        height: size * 0.4 + 'px',
+      }"
+    >
+      <Icon
+        icon="solar:pen-2-bold"
+        class="editIcon"
+        :style="{ fontSize: size * 0.22 + 'px' }"
+      />
     </div>
-
   </div>
 </template>
 
@@ -76,15 +120,13 @@ const handleOrbClick = () => {
   display: flex;
   align-items: center;
   justify-content: center;
-  
-  /* DEFAULT: Cursor ist normal (keine Hand), da wir nur Hover haben */
-  cursor: default; 
-  overflow: hidden; /* Wichtig für runde Bilder */
+  cursor: default;
+  overflow: hidden;
 
   background: radial-gradient(
     circle at 30% 30%,
     rgba(255, 0, 200, 0.55),
-    rgba(0, 236, 255, 0.50),
+    rgba(0, 236, 255, 0.5),
     rgba(61, 255, 140, 0.45)
   );
 
@@ -96,28 +138,22 @@ const handleOrbClick = () => {
   backdrop-filter: blur(4px);
   border: 1px solid rgba(255, 255, 255, 0.12);
 
-  transition: transform 0.22s ease, box-shadow 0.24s ease;
+  transition:
+    transform 0.22s ease,
+    box-shadow 0.24s ease;
 }
 
-/* LOGIK FÜR DEN MAUSZEIGER:
-   Nur wenn die Klasse .is-clickable drauf ist (via Prop),
-   wird der Cursor zur Hand (Pointer).
-*/
 .profile-orb.is-clickable {
   cursor: pointer;
 }
 
-/* HOVER & ACTIVE EFFEKT:
-   Passiert immer beim Hovern.
-   Passiert dauerhaft, wenn .is-active gesetzt ist.
-*/
 .profile-orb:hover,
 .profile-orb.is-active {
   transform: translateY(-2px);
   box-shadow:
     0 0 20px rgba(255, 0, 200, 0.75),
-    0 0 32px rgba(0, 236, 255, 0.60),
-    0 0 50px rgba(61, 255, 140, 0.50);
+    0 0 32px rgba(0, 236, 255, 0.6),
+    0 0 50px rgba(61, 255, 140, 0.5);
 }
 
 .profile-image {
@@ -142,7 +178,7 @@ const handleOrbClick = () => {
   border-radius: 50%;
   background: rgba(20, 20, 30, 0.2);
   border: 1px solid rgba(255, 255, 255, 0.3);
-  box-shadow: 0 2px 5px rgba(0,0,0,0.5);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -157,7 +193,13 @@ const handleOrbClick = () => {
 }
 
 @keyframes popIn {
-  from { transform: scale(0); opacity: 0; }
-  to { transform: scale(1); opacity: 1; }
+  from {
+    transform: scale(0);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
 }
 </style>

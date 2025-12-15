@@ -2,6 +2,7 @@
 import { computed, onMounted, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { Icon } from '@iconify/vue';
+import ProfilePictureDebug from '@/components/ProfilePictureDebug.vue';
 
 const route = useRoute();
 const router = useRouter();
@@ -25,6 +26,10 @@ const editSaving = ref(false);
 const editFeedback = ref(null);
 const editFieldError = ref(null);
 const pendingEmailVerification = ref(false);
+
+const avatarUploading = ref(false);
+const avatarError = ref(null);
+const avatarRefreshKey = ref(0);
 
 const storedUser = ref(null);
 
@@ -317,6 +322,99 @@ async function saveProfileChanges(updated) {
   }
 }
 
+async function handleAvatarSelected(event) {
+  if (!isOwnProfile.value || !usersBase) return;
+
+  const file = event?.target?.files?.[0];
+  if (!file) return;
+
+  const token =
+    localStorage.getItem('melodia_token') || localStorage.getItem('token') || '';
+
+  if (!token) {
+    avatarError.value = 'Bitte melde dich erneut an.';
+    return;
+  }
+
+  avatarUploading.value = true;
+  avatarError.value = null;
+
+  try {
+    const formData = new FormData();
+    formData.append('avatar', file);
+
+    const res = await fetch(`${usersBase}/me/avatar`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      body: formData,
+      credentials: 'include',
+    });
+
+    const data = await res.json().catch(() => ({}));
+
+    if (!res.ok) {
+      avatarError.value =
+        data.message || 'Avatar konnte nicht aktualisiert werden.';
+      return;
+    }
+
+    avatarRefreshKey.value += 1;
+  } catch (err) {
+    console.error('Upload avatar failed:', err);
+    avatarError.value = 'Es ist ein Fehler beim Hochladen aufgetreten.';
+  } finally {
+    avatarUploading.value = false;
+    if (event?.target) {
+      event.target.value = '';
+    }
+  }
+}
+
+async function resetAvatar() {
+  if (!isOwnProfile.value || !usersBase) return;
+
+  const token =
+    localStorage.getItem('melodia_token') || localStorage.getItem('token') || '';
+
+  if (!token) {
+    avatarError.value = 'Bitte melde dich erneut an.';
+    return;
+  }
+
+  avatarUploading.value = true;
+  avatarError.value = null;
+
+  try {
+    const formData = new FormData();
+
+    const res = await fetch(`${usersBase}/me/avatar`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      body: formData,
+      credentials: 'include',
+    });
+
+    const data = await res.json().catch(() => ({}));
+
+    if (!res.ok) {
+      avatarError.value =
+        data.message || 'Avatar konnte nicht zurückgesetzt werden.';
+      return;
+    }
+
+    avatarRefreshKey.value += 1;
+  } catch (err) {
+    console.error('Reset avatar failed:', err);
+    avatarError.value = 'Es ist ein Fehler beim Zurücksetzen aufgetreten.';
+  } finally {
+    avatarUploading.value = false;
+  }
+}
+
 async function verifyEmailCode(code) {
   if (!usersBase) return;
 
@@ -386,6 +484,24 @@ async function verifyEmailCode(code) {
       <div class="profile-header" :class="{ 'profile-header--expanded': isEditingInline }">
         <div class="profile-header-top">
           <div class="identity">
+            <div
+              v-if="isOwnProfile"
+              class="profile-avatar-block"
+            >
+              <ProfilePictureDebug
+                :key="avatarRefreshKey"
+                :can-toggle="false"
+                :is-editable="true"
+              />
+
+              <p
+                v-if="avatarError"
+                class="avatar-error"
+              >
+                {{ avatarError }}
+              </p>
+            </div>
+
             <div class="identity-text">
               <p class="profile-eyebrow">
                 {{ isOwnProfile ? 'Dein Melodia Profil' : 'Melodia Spielerprofil' }}
@@ -976,5 +1092,53 @@ async function verifyEmailCode(code) {
   }
 }
 
+.profile-avatar-block {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.6rem;
+  margin-right: 20px;
+}
+
+.avatar-upload-btn {
+  position: relative;
+  overflow: hidden;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.4rem 0.9rem;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  background: rgba(0, 0, 0, 0.25);
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+
+.avatar-upload-btn input[type='file'] {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.avatar-reset-link {
+  border: none;
+  background: none;
+  color: rgba(234, 238, 255, 0.78);
+  font-size: 0.8rem;
+  padding: 0;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.avatar-reset-link:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.avatar-error {
+  font-size: 0.8rem;
+  color: #ff6b81;
+}
 
 </style>
