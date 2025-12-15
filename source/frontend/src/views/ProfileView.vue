@@ -30,6 +30,7 @@ const pendingEmailVerification = ref(false);
 const avatarUploading = ref(false);
 const avatarError = ref(null);
 const avatarRefreshKey = ref(0);
+const avatarFileInput = ref(null);
 
 const storedUser = ref(null);
 
@@ -232,6 +233,7 @@ function openEditProfile() {
 function closeEditProfile() {
   if (editSaving.value) return;
   currentPassword.value = '';
+  avatarError.value = null;
   isEditingInline.value = false;
 }
 
@@ -415,6 +417,15 @@ async function resetAvatar() {
   }
 }
 
+function handleAvatarClick() {
+  if (!isOwnProfile.value || !isEditingInline.value || avatarUploading.value) return;
+  avatarError.value = null;
+  const input = avatarFileInput.value;
+  if (input) {
+    input.click();
+  }
+}
+
 async function verifyEmailCode(code) {
   if (!usersBase) return;
 
@@ -488,10 +499,25 @@ async function verifyEmailCode(code) {
               v-if="isOwnProfile"
               class="profile-avatar-block"
             >
-              <ProfilePictureDebug
-                :key="avatarRefreshKey"
-                :can-toggle="false"
-                :is-editable="true"
+              <button
+                type="button"
+                class="avatar-orb-button"
+                :class="{ 'avatar-orb-button--editable': isEditingInline }"
+                @click="handleAvatarClick"
+              >
+                <ProfilePictureDebug
+                  :key="avatarRefreshKey"
+                  :can-toggle="false"
+                  :is-editable="isEditingInline"
+                />
+              </button>
+
+              <input
+                ref="avatarFileInput"
+                type="file"
+                accept="image/*"
+                class="avatar-file-input"
+                @change="handleAvatarSelected"
               />
 
               <p
@@ -522,6 +548,18 @@ async function verifyEmailCode(code) {
           <div v-if="isOwnProfile && profile.email" class="profile-side">
             <p class="label">E-Mail</p>
             <p class="value">{{ profile.email }}</p>
+
+            <button
+              type="button"
+              class="btn ghost profile-edit-toggle"
+              @click="isEditingInline ? closeEditProfile() : openEditProfile()"
+            >
+              <Icon
+                :icon="isEditingInline ? 'solar:check-read-line-duotone' : 'solar:pen-2-bold-duotone'"
+                style="margin-right: 0.4rem; font-size: 1rem"
+              />
+              {{ isEditingInline ? 'Fertig' : 'Bearbeiten' }}
+            </button>
           </div>
         </div>
 
@@ -1100,24 +1138,18 @@ async function verifyEmailCode(code) {
   margin-right: 20px;
 }
 
-.avatar-upload-btn {
-  position: relative;
-  overflow: hidden;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0.4rem 0.9rem;
-  border-radius: 999px;
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  background: rgba(0, 0, 0, 0.25);
-  font-size: 0.8rem;
-  cursor: pointer;
+.avatar-file-input {
+  display: none;
 }
 
-.avatar-upload-btn input[type='file'] {
-  position: absolute;
-  inset: 0;
-  opacity: 0;
+.avatar-orb-button {
+  padding: 0;
+  border: none;
+  background: none;
+  cursor: default;
+}
+
+.avatar-orb-button--editable {
   cursor: pointer;
 }
 
