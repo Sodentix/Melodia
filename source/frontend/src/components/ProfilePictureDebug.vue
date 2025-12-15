@@ -2,51 +2,69 @@
 import { ref } from 'vue';
 import { Icon } from '@iconify/vue';
 
-// Der Status, ob bearbeitet wird (später via Props)
-const isBeingChanged = ref(false);
+// Definition der Props, die von außen reinkommen
+const props = defineProps({
+  // 1. Das Bild: Ist es leer, wird das Icon gezeigt. Kein Import-Crash mehr.
+  imageSrc: {
+    type: String,
+    default: null
+  },
+  // 2. Der "Modus": Darf man klicken? (True/False)
+  canToggle: {
+    type: Boolean,
+    default: true
+  },
+  // 3. Edit Mode (optional, falls du den Stift von außen steuern willst)
+  isEditable: {
+    type: Boolean,
+    default: false
+  }
+});
 
 const isOrbActive = ref(false);
 
-const toggleOrb = () => {
+const handleOrbClick = () => {
+  // Wenn canToggle FALSE ist, brechen wir hier sofort ab.
+  // Es passiert also nichts (kein active State).
+  if (!props.canToggle) return;
+
   isOrbActive.value = !isOrbActive.value;
 }
 </script>
 
 <template>
-  <div class="demo-layout">
+  <div class="orb-wrapper">
     
-    <div class="orb-container">
-      
-      <div 
-        class="profile-orb" 
-        :class="{ 'is-active': isOrbActive }"
-        @click="toggleOrb"
-      >
-        <Icon icon="solar:user-bold-duotone" class="userIcon" />
-      </div>
-
-      <div v-if="isBeingChanged" class="edit-badge">
-        <Icon icon="solar:pen-2-bold" class="editIcon" />
-      </div>
-
+    <div 
+      class="profile-orb" 
+      :class="{ 
+        'is-active': isOrbActive, 
+        'is-clickable': canToggle 
+      }"
+      @click="handleOrbClick"
+    >
+      <img
+        v-if="imageSrc"
+        :src="imageSrc"
+        alt="Profile"
+        class="profile-image"
+      />
+      <Icon
+        v-else
+        icon="solar:user-bold-duotone"
+        class="userIcon"
+      />
     </div>
 
-    <button class="toggle-btn" @click="isBeingChanged = !isBeingChanged">
-      Toggle Edit Badge
-    </button>
+    <div v-if="isEditable" class="edit-badge">
+      <Icon icon="solar:pen-2-bold" class="editIcon" />
+    </div>
 
   </div>
 </template>
 
 <style scoped>
-.demo-layout {
-  display: flex;
-  align-items: center;
-  gap: 2rem;
-  padding: 2rem;
-}
-
-.orb-container {
+.orb-wrapper {
   position: relative;
   width: max-content;
 }
@@ -58,7 +76,10 @@ const toggleOrb = () => {
   display: flex;
   align-items: center;
   justify-content: center;
-  cursor: pointer;
+  
+  /* DEFAULT: Cursor ist normal (keine Hand), da wir nur Hover haben */
+  cursor: default; 
+  overflow: hidden; /* Wichtig für runde Bilder */
 
   background: radial-gradient(
     circle at 30% 30%,
@@ -78,9 +99,17 @@ const toggleOrb = () => {
   transition: transform 0.22s ease, box-shadow 0.24s ease;
 }
 
-/* WICHTIG: Hier fügen wir die Klasse .is-active hinzu.
-   Das Komma bedeutet "ODER". 
-   Die Styles greifen also bei Hover ODER bei Klick (is-active).
+/* LOGIK FÜR DEN MAUSZEIGER:
+   Nur wenn die Klasse .is-clickable drauf ist (via Prop),
+   wird der Cursor zur Hand (Pointer).
+*/
+.profile-orb.is-clickable {
+  cursor: pointer;
+}
+
+/* HOVER & ACTIVE EFFEKT:
+   Passiert immer beim Hovern.
+   Passiert dauerhaft, wenn .is-active gesetzt ist.
 */
 .profile-orb:hover,
 .profile-orb.is-active {
@@ -91,13 +120,19 @@ const toggleOrb = () => {
     0 0 50px rgba(61, 255, 140, 0.50);
 }
 
+.profile-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
 .profile-orb :deep(.userIcon) {
   font-size: 22px;
   color: white;
   filter: drop-shadow(0 0 4px rgba(255, 255, 255, 0.7));
 }
 
-/* Stift Badge Styles bleiben gleich... */
 .edit-badge {
   position: absolute;
   bottom: -4px;
@@ -112,8 +147,8 @@ const toggleOrb = () => {
   align-items: center;
   justify-content: center;
   animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-  /* Damit Klicks auf den Stift nicht den Orb auslösen (optional) */
-  pointer-events: none; 
+  pointer-events: none;
+  z-index: 10;
 }
 
 .edit-badge :deep(.editIcon) {
@@ -124,17 +159,5 @@ const toggleOrb = () => {
 @keyframes popIn {
   from { transform: scale(0); opacity: 0; }
   to { transform: scale(1); opacity: 1; }
-}
-
-.toggle-btn {
-  padding: 8px 16px;
-  background: #333;
-  color: white;
-  border: 1px solid #555;
-  border-radius: 6px;
-  cursor: pointer;
-}
-.toggle-btn:hover {
-  background: #444;
 }
 </style>
