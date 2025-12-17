@@ -31,6 +31,8 @@ const avatarUploading = ref(false);
 const avatarError = ref(null);
 const avatarRefreshKey = ref(0);
 const avatarFileInput = ref(null);
+const avatarPreviewUrl = ref(null);
+const avatarPendingFile = ref(null);
 
 const storedUser = ref(null);
 
@@ -234,6 +236,15 @@ function closeEditProfile() {
   if (editSaving.value) return;
   currentPassword.value = '';
   avatarError.value = null;
+  if (avatarPreviewUrl.value) {
+    try {
+      URL.revokeObjectURL(avatarPreviewUrl.value);
+    } catch {
+      // ignore
+    }
+  }
+  avatarPreviewUrl.value = null;
+  avatarPendingFile.value = null;
   isEditingInline.value = false;
 }
 
@@ -290,6 +301,24 @@ async function saveProfileChanges(updated) {
       return;
     }
 
+    // Avatar-Änderungen (Upload oder Reset) erst nach erfolgreicher Passwort-Bestätigung anwenden
+    try {
+      if (avatarPendingFile.value) {
+        const avatarSaved = await uploadAvatarAfterProfile(avatarPendingFile.value);
+        if (!avatarSaved) {
+          console.error('Avatar upload after profile save failed');
+        }
+        avatarResetRequested.value = false;
+      } else if (avatarResetRequested.value) {
+        const resetOk = await applyAvatarResetAfterProfile();
+        if (!resetOk) {
+          console.error('Avatar reset after profile save failed');
+        }
+      }
+    } catch (err) {
+      console.error('Avatar operation after profile save threw:', err);
+    }
+
     if (data.user) {
       profile.value = {
         ...profile.value,
@@ -333,44 +362,21 @@ async function handleAvatarSelected(event) {
   const token =
     localStorage.getItem('melodia_token') || localStorage.getItem('token') || '';
 
-  if (!token) {
-    avatarError.value = 'Bitte melde dich erneut an.';
-    return;
-  }
-
-  avatarUploading.value = true;
+  // Nur lokal merken und Preview anzeigen – noch nicht hochladen
   avatarError.value = null;
+  avatarPendingFile.value = file;
 
-  try {
-    const formData = new FormData();
-    formData.append('avatar', file);
-
-    const res = await fetch(`${usersBase}/me/avatar`, {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-      body: formData,
-      credentials: 'include',
-    });
-
-    const data = await res.json().catch(() => ({}));
-
-    if (!res.ok) {
-      avatarError.value =
-        data.message || 'Avatar konnte nicht aktualisiert werden.';
-      return;
+  if (avatarPreviewUrl.value) {
+    try {
+      URL.revokeObjectURL(avatarPreviewUrl.value);
+    } catch {
+      // ignore
     }
+  }
+  avatarPreviewUrl.value = URL.createObjectURL(file);
 
-    avatarRefreshKey.value += 1;
-  } catch (err) {
-    console.error('Upload avatar failed:', err);
-    avatarError.value = 'Es ist ein Fehler beim Hochladen aufgetreten.';
-  } finally {
-    avatarUploading.value = false;
-    if (event?.target) {
-      event.target.value = '';
-    }
+  if (event?.target) {
+    event.target.value = '';
   }
 }
 
@@ -380,6 +386,11 @@ async function resetAvatar() {
   const token =
     localStorage.getItem('melodia_token') || localStorage.getItem('token') || '';
 
+  if (!currentPassword.value) {
+    avatarError.value = 'Bitte gib dein Passwort ein, um den Avatar zurückzusetzen.';
+    return;
+  }
+
   if (!token) {
     avatarError.value = 'Bitte melde dich erneut an.';
     return;
@@ -390,6 +401,7 @@ async function resetAvatar() {
 
   try {
     const formData = new FormData();
+    formData.append('password', currentPassword.value || '');
 
     const res = await fetch(`${usersBase}/me/avatar`, {
       method: 'POST',
@@ -408,10 +420,79 @@ async function resetAvatar() {
       return;
     }
 
+    // Lokale Preview zurücksetzen
+    if (avatarPreviewUrl.value) {
+      try {
+        URL.revokeObjectURL(avatarPreviewUrl.value);
+      } catch {
+        // ignore
+      }
+    }
+    avatarPreviewUrl.value = null;
+    avatarPendingFile.value = null;
+
     avatarRefreshKey.value += 1;
   } catch (err) {
     console.error('Reset avatar failed:', err);
     avatarError.value = 'Es ist ein Fehler beim Zurücksetzen aufgetreten.';
+  } finally {
+    avatarUploading.value = false;
+  }
+}
+
+async function uploadAvatarAfterProfile(file) {
+  if (!file || !usersBase) return false;
+
+  const token =
+    localStorage.getItem('melodia_token') || localStorage.getItem('token') || '';
+
+  if (!token) {
+    avatarError.value = 'Bitte melde dich erneut an.';
+    return false;
+  }
+
+  avatarUploading.value = true;
+  avatarError.value = null;
+
+  try {
+    const formData = new FormData();
+    formData.append('avatar', file);
+    formData.append('password', currentPassword.value || '');
+
+    const res = await fetch(`${usersBase}/me/avatar`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      body: formData,
+      credentials: 'include',
+    });
+
+    const data = await res.json().catch(() => ({}));
+
+    if (!res.ok) {
+      avatarError.value =
+        data.message || 'Avatar konnte nicht aktualisiert werden.';
+      return false;
+    }
+
+    // Preview und Pending-File aufräumen, Bild neu laden
+    if (avatarPreviewUrl.value) {
+      try {
+        URL.revokeObjectURL(avatarPreviewUrl.value);
+      } catch {
+        // ignore
+      }
+    }
+    avatarPreviewUrl.value = null;
+    avatarPendingFile.value = null;
+
+    avatarRefreshKey.value += 1;
+    return true;
+  } catch (err) {
+    console.error('Upload avatar after profile failed:', err);
+    avatarError.value = 'Es ist ein Fehler beim Hochladen aufgetreten.';
+    return false;
   } finally {
     avatarUploading.value = false;
   }
@@ -509,6 +590,7 @@ async function verifyEmailCode(code) {
                   :key="avatarRefreshKey"
                   :can-toggle="false"
                   :is-editable="isEditingInline"
+                  :preview-image="avatarPreviewUrl"
                 />
               </button>
 

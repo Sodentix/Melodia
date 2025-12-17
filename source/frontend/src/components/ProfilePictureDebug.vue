@@ -11,6 +11,10 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
+  previewImage: {
+    type: String,
+    default: null,
+  },
   size: {
     type: Number,
     default: 72,
@@ -78,8 +82,8 @@ onMounted(() => {
       @click="handleOrbClick"
     >
       <img
-        v-if="imageSrc"
-        :src="imageSrc"
+        v-if="previewImage || imageSrc"
+        :src="previewImage || imageSrc"
         alt="Profile"
         class="profile-image"
       />
