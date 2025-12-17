@@ -40,6 +40,21 @@
         </div>
       </transition>
 
+      <!-- Countdown Timer (Competitive Mode Only) -->
+      <div v-if="!isFreeplay && currentRound && !currentRound.completed" class="countdown-container">
+        <svg class="countdown-ring" viewBox="0 0 100 100">
+          <circle class="countdown-bg" cx="50" cy="50" r="45" />
+          <circle 
+            class="countdown-progress" 
+            cx="50" cy="50" r="45"
+            :style="{ strokeDashoffset: countdownOffset }"
+          />
+        </svg>
+        <div class="countdown-time" :class="{ warning: timeRemaining <= 10 }">
+          {{ timeRemaining }}
+        </div>
+      </div>
+
       <!-- Audio Visualizer / Player Placeholder -->
       <div class="audio-visualizer">
         <div ref="visualizerContainer" class="visualizer-container"></div>
@@ -52,18 +67,24 @@
             controls
             autoplay
             @ended="onAudioEnded"
+            @timeupdate="onTimeUpdate"
             class="hidden-audio"
           />
-          <!-- 
-          <p v-if="currentRound" class="instruction-text">
-            {{ currentRound.completed ? 'Round finished' : 'Listen and guess...' }}
-          </p>
-          <p v-else class="instruction-text idle">
-            Ready for the next beat?
-          </p>
-          -->
         </div>
       </div>
+
+      <!-- Revealed Track Info (shown after round ends) -->
+      <transition name="fade">
+        <div v-if="revealedTrack && currentRound?.completed" class="revealed-track">
+          <div class="revealed-label">{{ messageType === 'success' ? '🎉 Correct!' : '🎵 The song was:' }}</div>
+          <div class="revealed-name">{{ revealedTrack.name }}</div>
+          <div class="revealed-artist">
+            {{ Array.isArray(revealedTrack.artists) 
+                ? revealedTrack.artists.map(a => typeof a === 'string' ? a : a.name).join(', ')
+                : '' }}
+          </div>
+        </div>
+      </transition>
 
       <!-- Input Area -->
       <div class="input-area">
@@ -151,6 +172,10 @@ export default {
       categoryTracks: [],
       authToken: null,
       audioMotion: null,
+      playedTrackIds: [], // Track played song IDs to prevent repetition
+      revealedTrack: null, // Store revealed track info after round ends
+      timeRemaining: 30, // Countdown timer in seconds
+      audioDuration: 30, // Total audio duration
     };
   },
   mounted() {
@@ -180,6 +205,12 @@ export default {
     },
     categoryLabel() {
       return this.selectedCategory?.name || this.selectedCategory?.categoryName || 'Hit Mix';
+    },
+    countdownOffset() {
+      // Circle circumference = 2 * PI * radius = 2 * PI * 45 ≈ 283
+      const circumference = 2 * Math.PI * 45;
+      const progress = this.timeRemaining / this.audioDuration;
+      return circumference * (1 - progress);
     },
   },
   methods: {
@@ -495,6 +526,9 @@ export default {
       this.guessInput = '';
       this.suggestions = [];
       this.showSuggestions = false;
+      this.revealedTrack = null; // Clear revealed track from previous round
+      this.timeRemaining = 30; // Reset countdown timer
+      this.audioDuration = 30;
 
       try {
         const res = await fetch(`${base}/game/start`, {
@@ -509,6 +543,7 @@ export default {
               this.selectedCategory?.id ||
               this.selectedCategory?.categoryId ||
               'all',
+            excludeIds: this.playedTrackIds, // Send played track IDs to avoid repetition
           }),
         });
 
@@ -520,10 +555,16 @@ export default {
         const data = await res.json();
         this.currentRound = {
           roundId: data.roundId,
+          trackId: data.trackId, // Store track ID to add to played list later
           preview_url: data.preview_url,
           guessCount: 0,
           completed: false,
         };
+
+        // Add track ID to played list to prevent repetition
+        if (data.trackId && !this.playedTrackIds.includes(data.trackId)) {
+          this.playedTrackIds.push(data.trackId);
+        }
 
         this.showMessage('success', 'Round started! Listen and guess the song.');
         
@@ -590,6 +631,10 @@ export default {
           this.lastPoints = this.isFreeplay ? 0 : (data.points || 0);
           this.currentRound.completed = true;
           this.currentRound.guessCount = data.totalGuesses || 0;
+          // Store the revealed track info
+          if (data.track) {
+            this.revealedTrack = data.track;
+          }
           const successMessage = this.isFreeplay
             ? 'Correct! Freeplay run abgeschlossen.'
             : `Correct! You earned ${data.points} points!`;
@@ -620,8 +665,45 @@ export default {
         return;
       }
 
+      const base = import.meta.env.VITE_API_URL || '';
+      const token = localStorage.getItem('melodia_token') || localStorage.getItem('token');
+
+      this.isSubmitting = true;
+
+      try {
+        const res = await fetch(`${base}/game/giveup`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            roundId: this.currentRound.roundId,
+          }),
+        });
+
+        if (res.ok) {
+          const data = await res.json();
+          // Store revealed track info
+          this.revealedTrack = data.track;
+        }
+      } catch (e) {
+        console.error('Give up error:', e);
+      } finally {
+        this.isSubmitting = false;
+      }
+
       this.currentRound.completed = true;
-      this.showMessage('info', 'Round ended. Start a new round to continue playing.');
+      
+      // Show the song info if we got it
+      if (this.revealedTrack) {
+        const artistNames = Array.isArray(this.revealedTrack.artists)
+          ? this.revealedTrack.artists.map(a => typeof a === 'string' ? a : a.name).join(', ')
+          : '';
+        this.showMessage('info', `The song was: ${this.revealedTrack.name} - ${artistNames}`);
+      } else {
+        this.showMessage('info', 'Round ended. Start a new round to continue playing.');
+      }
       
       if (this.$refs.audioPlayer) {
         this.$refs.audioPlayer.pause();
@@ -629,15 +711,28 @@ export default {
     },
 
     onAudioEnded() {
-      // Audio preview ended - can still make guesses
+      // Audio preview ended
       const audio = this.$refs.audioPlayer;
-      if ((this.currentRound && !this.currentRound.completed) && this.gameMode == 'freeplay') {
+      if ((this.currentRound && !this.currentRound.completed) && this.gameMode === 'freeplay') {
+        // In freeplay mode, replay audio after 3 seconds
         this.showMessage('info', 'Audio replaying in 3 seconds!');
         setTimeout(() => {
-        audio.play()
-      }, 3000)
+          audio.play();
+        }, 3000);
       } else if (this.currentRound && !this.currentRound.completed) {
-        this.showMessage('info', 'Preview ended. You can still make guesses!');
+        // In competitive mode, time is up - end the round and reveal the song
+        this.giveUp();
+      }
+    },
+
+    onTimeUpdate() {
+      // Update countdown timer based on audio playback
+      const audio = this.$refs.audioPlayer;
+      if (audio && !this.isFreeplay && this.currentRound && !this.currentRound.completed) {
+        const duration = audio.duration || 30;
+        const currentTime = audio.currentTime || 0;
+        this.audioDuration = Math.ceil(duration);
+        this.timeRemaining = Math.max(0, Math.ceil(duration - currentTime));
       }
     },
 
@@ -788,6 +883,66 @@ export default {
   position: relative;
 }
 
+/* Countdown Timer */
+.countdown-container {
+  position: relative;
+  width: 80px;
+  height: 80px;
+  margin-bottom: 1rem;
+}
+
+.countdown-ring {
+  width: 100%;
+  height: 100%;
+  transform: rotate(-90deg);
+}
+
+.countdown-bg {
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.1);
+  stroke-width: 6;
+}
+
+.countdown-progress {
+  fill: none;
+  stroke: #00ecff;
+  stroke-width: 6;
+  stroke-linecap: round;
+  stroke-dasharray: 283; /* 2 * PI * 45 */
+  stroke-dashoffset: 0;
+  transition: stroke-dashoffset 0.3s ease, stroke 0.3s ease;
+}
+
+.countdown-time {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: white;
+  font-variant-numeric: tabular-nums;
+}
+
+.countdown-time.warning {
+  color: #ff6b6b;
+  animation: pulse 1s ease-in-out infinite;
+}
+
+.countdown-time.warning + .countdown-ring .countdown-progress,
+.countdown-container:has(.countdown-time.warning) .countdown-progress {
+  stroke: #ff6b6b;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: translate(-50%, -50%) scale(1);
+  }
+  50% {
+    transform: translate(-50%, -50%) scale(1.1);
+  }
+}
+
 /* Visualizer */
 .audio-visualizer {
   position: relative;
@@ -868,6 +1023,95 @@ export default {
 
 .instruction-text.idle {
   color: rgba(255, 255, 255, 0.5);
+}
+
+/* Revealed Track Info */
+.revealed-track {
+  text-align: center;
+  padding: 1.5rem 2rem;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  backdrop-filter: blur(10px);
+  max-width: 400px;
+  margin-top: 1rem;
+}
+
+.revealed-label {
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.6);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-bottom: 0.5rem;
+}
+
+.revealed-name {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: white;
+  margin-bottom: 0.25rem;
+}
+
+.revealed-artist {
+  font-size: 1.1rem;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+/* Fade transition */
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.3s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+
+/* Toast transition */
+.toast-enter-active,
+.toast-leave-active {
+  transition: all 0.3s ease;
+}
+
+.toast-enter-from,
+.toast-leave-to {
+  opacity: 0;
+  transform: translateX(-50%) translateY(-20px);
+}
+
+/* Pop transition */
+.pop-enter-active {
+  animation: pop-in 0.5s ease-out;
+}
+
+.pop-leave-active {
+  animation: pop-out 0.3s ease-in;
+}
+
+@keyframes pop-in {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.5);
+  }
+  70% {
+    transform: translate(-50%, -50%) scale(1.1);
+  }
+  100% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+
+@keyframes pop-out {
+  from {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.8);
+  }
 }
 
 /* Input Area */

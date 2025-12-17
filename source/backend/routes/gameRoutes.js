@@ -88,15 +88,21 @@ router.post('/start', auth(true, true), async (req, res) => {
     const rawCategory = typeof req.body.categoryId === 'string' ? req.body.categoryId.trim() : 'all';
     const category = findCategoryById(rawCategory) ? rawCategory : 'all';
 
+    // Parse excludeIds to prevent songs from repeating in a session
+    let excludeIds = [];
+    if (Array.isArray(req.body.excludeIds)) {
+      excludeIds = req.body.excludeIds.filter(id => typeof id === 'string' && id.trim());
+    }
+
     const base = `${req.protocol}://${req.get('host')}`;
-    const track = await fetchRandomClip(base, { categoryId: category });
+    const track = await fetchRandomClip(base, { categoryId: category, excludeIds });
     if (!track?.preview_url) {
       logDebug('start_no_preview', {});
       return res.status(503).json({ message: 'No preview available, try again' });
     }
     const { roundId } = rounds.create(track, req.user.id, { mode, categoryId: category });
-    logDebug('round_started', { roundId, trackId: track.id, source: 'local', userId: req.user.id, mode, category });
-    return res.json({ roundId, preview_url: track.preview_url, mode, categoryId: category });
+    logDebug('round_started', { roundId, trackId: track.id, source: 'local', userId: req.user.id, mode, category, excludedCount: excludeIds.length });
+    return res.json({ roundId, preview_url: track.preview_url, trackId: track.id, mode, categoryId: category });
   } catch (err) {
     console.error('Start round error:', err);
     const status = /No clips available/i.test(String(err.message || '')) ? 503 : 500;
@@ -177,6 +183,61 @@ router.post('/guess', auth(true, true), async (req, res) => {
   } catch (err) {
     console.error('Guess error:', err);
     const message = process.env.NODE_ENV === 'production' ? 'Failed to process guess' : String(err.message || err);
+    return res.status(500).json({ message });
+  }
+});
+
+// Give up on a round: reveals the answer and ends the round
+router.post('/giveup', auth(true, true), async (req, res) => {
+  try {
+    const roundId = (req.body.roundId || '').toString();
+    if (!roundId) return res.status(400).json({ message: 'roundId is required' });
+
+    const round = rounds.get(roundId);
+    if (!round) return res.status(404).json({ message: 'Round not found or expired' });
+
+    // Verify user owns this round
+    if (String(round.userId) !== String(req.user.id)) {
+      return res.status(403).json({ message: 'Not authorized for this round' });
+    }
+
+    const track = round.track;
+    const mode = round.mode || 'competitive';
+
+    // Record the loss in competitive mode
+    if (mode === 'competitive') {
+      const correctGuesses = round.guesses.filter(g => g.correct).length;
+      const wrongGuesses = round.guesses.filter(g => !g.correct).length;
+      await Stats.recordGame({
+        userId: req.user.id,
+        win: false,
+        correctGuesses,
+        wrongGuesses,
+        points: 0,
+        timeMs: Date.now() - round.createdAt,
+        mode,
+        playedAt: new Date(),
+      });
+    }
+
+    // Delete the round
+    rounds.delete(roundId);
+    logDebug('round_giveup', { roundId, trackId: track?.id });
+
+    // Return the track info so it can be displayed
+    return res.json({
+      track: {
+        id: track.id,
+        name: track.name,
+        artists: track.artists,
+        image: track.image || null,
+      },
+      mode,
+      categoryId: round.categoryId || 'all',
+    });
+  } catch (err) {
+    console.error('Give up error:', err);
+    const message = process.env.NODE_ENV === 'production' ? 'Failed to process give up' : String(err.message || err);
     return res.status(500).json({ message });
   }
 });

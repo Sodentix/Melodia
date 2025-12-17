@@ -172,8 +172,22 @@ function buildTrackPool(categoryId) {
 }
 
 async function fetchRandomClip(baseUrl, options = {}) {
-  const { categoryId } = options;
-  const pool = buildTrackPool(categoryId);
+  const { categoryId, excludeIds = [] } = options;
+  let pool = buildTrackPool(categoryId);
+  
+  // Filter out already played songs if excludeIds provided
+  if (excludeIds && excludeIds.length > 0) {
+    const excludeSet = new Set(excludeIds);
+    const filteredPool = pool.filter(track => !excludeSet.has(track.id));
+    // Only use filtered pool if we still have songs left
+    if (filteredPool.length > 0) {
+      pool = filteredPool;
+      logDebug('excluded_tracks', { excludedCount: excludeIds.length, remainingCount: filteredPool.length });
+    } else {
+      logDebug('exclude_reset', { reason: 'All tracks played, resetting pool' });
+    }
+  }
+  
   const chosen = pickRandom(pool);
   return simplifyClip(chosen, baseUrl);
 }
