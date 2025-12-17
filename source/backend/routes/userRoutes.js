@@ -56,11 +56,16 @@ fs.mkdirSync(avatarsDir, { recursive: true });
 
 const avatarStorage = multer.diskStorage({
   destination: (_req, _file, cb) => {
+    // Debug: ensure we know where avatars are stored
+    console.log('[avatarStorage] destination:', avatarsDir);
     cb(null, avatarsDir);
   },
   filename: (req, file, cb) => {
     const ext = path.extname(file.originalname || '').toLowerCase() || '.png';
-    cb(null, `${req.user.id}${ext}`);
+    const filename = `${req.user.id}${ext}`;
+    // Debug: log final avatar filename
+    console.log('[avatarStorage] filename for user', req.user?.id, '=>', filename);
+    cb(null, filename);
   },
 });
 
@@ -350,12 +355,18 @@ router.post(
       }
 
       if (user.avatarUrl) {
-        const existingPath = path.join(avatarsDir, path.basename(user.avatarUrl));
-        fs.unlink(existingPath, (err) => {
-          if (err && err.code !== 'ENOENT') {
-            console.error('Failed to remove old avatar:', err);
-          }
-        });
+        const existingFilename = path.basename(user.avatarUrl);
+        const newFilename = req.file.filename;
+
+        // Nur löschen, wenn sich der Dateiname wirklich ändert
+        if (existingFilename && existingFilename !== newFilename) {
+          const existingPath = path.join(avatarsDir, existingFilename);
+          fs.unlink(existingPath, (err) => {
+            if (err && err.code !== 'ENOENT') {
+              console.error('Failed to remove old avatar:', err);
+            }
+          });
+        }
       }
 
       const publicPath = `/avatars/${req.file.filename}`;

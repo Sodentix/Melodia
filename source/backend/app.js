@@ -111,7 +111,12 @@ app.use('/clips', express.static(clipsDir, {
 
 app.use('/avatars', express.static(avatarsDir, {
   fallthrough: true,
-  maxAge: '1h',
+  maxAge: 0,
+  setHeaders: (res) => {
+    res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+    res.setHeader('Pragma', 'no-cache');
+    res.setHeader('Expires', '0');
+  },
 }));
 
 // Routes
@@ -144,4 +149,3 @@ process.on('unhandledRejection', (reason) => {
 });
 
 module.exports = app;
-
