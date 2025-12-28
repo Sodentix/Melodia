@@ -2,7 +2,7 @@
 import { computed, onMounted, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { Icon } from '@iconify/vue';
-import ProfilePictureDebug from '@/components/ProfilePictureDebug.vue';
+import ProfilePictureDebug from '@/components/ProfilePicture.vue';
 
 import AvatarCropper from '@/components/AvatarCropper.vue'; 
 
