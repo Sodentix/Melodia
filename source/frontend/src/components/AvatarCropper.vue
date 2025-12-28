@@ -152,7 +152,10 @@ watch(
     internalOpen.value = open;
     if (open) {
       loadImage();
-      requestAnimationFrame(draw);
+      requestAnimationFrame(() => {
+        ensureCanvasSize();
+        draw();
+      });
     }
   },
 );
@@ -162,10 +165,14 @@ function ensureCanvasSize() {
   const container = containerRef.value;
   if (!canvas || !container) return;
 
-  const size = Math.min(container.clientWidth, container.clientHeight);
-  const targetSize = Math.max(260, Math.min(size, 400));
+  const rect = container.getBoundingClientRect();
+  const size = Math.min(rect.width, rect.height);
+  if (!size) return;
+  const targetSize = Math.max(1, Math.floor(size));
   canvas.width = targetSize;
   canvas.height = targetSize;
+  canvas.style.width = '100%';
+  canvas.style.height = '100%';
   canvasSize.value = targetSize;
 }
 
@@ -243,67 +250,61 @@ watch(scale, () => {
   draw();
 });
 
+
 function handleCrop() {
-  const canvas = canvasRef.value;
-  if (!canvas || !imageLoaded.value) return;
+  const canvas = canvasRef.value;
+  if (!canvas || !imageLoaded.value) return;
 
-  const size = canvasSize.value; // Die aktuelle Größe des Canvas im DOM
-  const outCanvas = document.createElement('canvas');
-  const outCtx = outCanvas.getContext('2d');
-  if (!outCtx) return;
+  const size = canvasSize.value;
+  const outCanvas = document.createElement('canvas');
+  const outCtx = outCanvas.getContext('2d');
+  if (!outCtx) return;
 
-  // Du kannst hier die Auflösung erhöhen (z.B. 800), wenn du mehr Qualität willst.
-  // Es bleibt aber quadratisch (1:1 Aspect Ratio).
-  const outputSize = 400; 
-  
-  outCanvas.width = outputSize;
-  outCanvas.height = outputSize;
+  const outputSize = 400; 
+  
+  outCanvas.width = outputSize;
+  outCanvas.height = outputSize;
 
-  // Hintergrund reinigen
-  outCtx.clearRect(0, 0, outputSize, outputSize);
 
-  outCtx.save();
+  outCtx.fillStyle = '#000000';
+  outCtx.fillRect(0, 0, outputSize, outputSize);
 
-  // --- ÄNDERUNG: Clipping entfernt ---
-  // Wir zeichnen KEINEN Kreis (arc/clip), damit das Bild seine 
-  // eckige Form behält und keine Transparenz "eingebrannt" wird.
-  
-  // Berechnung des Verhältnisses von Anzeige-Größe zu Ausgabe-Größe
-  const ratio = outputSize / size;
 
-  // Position und Skalierung auf die neue Ausgabegröße umrechnen
-  outCtx.translate(
-    outputSize / 2 + position.value.x * ratio, 
-    outputSize / 2 + position.value.y * ratio
-  );
-  
-  outCtx.scale(
-    scale.value * ratio, 
-    scale.value * ratio
-  );
+  outCtx.save();
 
-  const iw = image.width;
-  const ih = image.height;
-  
-  if (iw && ih) {
-    // Zeichne das Bild einfach ganz normal
-    outCtx.drawImage(image, -iw / 2, -ih / 2);
-  }
+  const ratio = outputSize / size;
 
-  outCtx.restore();
+  outCtx.translate(
+    outputSize / 2 + position.value.x * ratio, 
+    outputSize / 2 + position.value.y * ratio
+  );
+  
+  outCtx.scale(
+    scale.value * ratio, 
+    scale.value * ratio
+  );
 
-  // Blob erzeugen
-  outCanvas.toBlob(
-    (blob) => {
-      if (blob) {
-        emit('cropped', blob);
-      }
-      close();
-    },
-    'image/png', // Format
-    0.95         // Qualität
-  );
+  const iw = image.width;
+  const ih = image.height;
+  
+  if (iw && ih) {
+    outCtx.drawImage(image, -iw / 2, -ih / 2);
+  }
+
+  outCtx.restore();
+
+  outCanvas.toBlob(
+    (blob) => {
+      if (blob) {
+        emit('cropped', blob);
+      }
+      close();
+    },
+    'image/png', 
+    0.95
+  );
 }
+
 
 function onOverlayClick(evt) {
   if (evt.target === evt.currentTarget) {
@@ -446,18 +447,17 @@ onBeforeUnmount(() => {
   width: 100%;
   aspect-ratio: 1 / 1;
   border-radius: 22px;
-  background: radial-gradient(circle at 20% 20%, rgba(255, 0, 200, 0.3), transparent 60%),
-    radial-gradient(circle at 80% 80%, rgba(5, 217, 255, 0.28), transparent 60%);
+  background: #000000ff;
   overflow: hidden;
   display: flex;
-  align-items: center;
-  justify-content: center;
+  align-items: stretch;
+  justify-content: stretch;
 }
 
 .cropper-canvas {
-  
-  max-width: 100%;
-  max-height: 100%;
+  display: block;
+  width: 100%;
+  height: 100%;
   user-select: none;
   cursor: grab;
 }

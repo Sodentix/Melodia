@@ -3,7 +3,7 @@ import { computed, onMounted, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { Icon } from '@iconify/vue';
 import ProfilePictureDebug from '@/components/ProfilePictureDebug.vue';
-// IMPORT DES CROPPERS
+
 import AvatarCropper from '@/components/AvatarCropper.vue'; 
 
 const route = useRoute();
