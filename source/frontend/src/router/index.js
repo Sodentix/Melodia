@@ -32,8 +32,14 @@ const router = createRouter({
       path: '/profile/:username?',
       name: 'profile',
       component: () => import('@/views/ProfileView.vue'),
+    },
+    {
+      path: '/debug/profile-picture',
+      name: 'debug-profile-picture',
+      component: () => import('@/views/ProfilePictureDebugView.vue'),
     }
   ],
+
 
   scrollBehavior(to, from, savedPosition) {
     // Wenn es eine gespeicherte Position gibt (z. B. beim "Zurück"-Button)
