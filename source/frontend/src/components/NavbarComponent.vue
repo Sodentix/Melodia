@@ -1,7 +1,7 @@
 <script setup>
 import { onMounted, onBeforeUnmount, ref } from 'vue';
-import { Icon } from '@iconify/vue';
 import axios from 'axios';
+import ProfilePicture from '@/components/ProfilePicture.vue';
 
 const canvasRef = ref(null);
 const isAuthenticated = ref(false);
@@ -228,7 +228,7 @@ onBeforeUnmount(() => {
             Sign Up
           </router-link>
           <button v-if="isAuthenticated" popovertarget="profileMenu" class="profile-orb" id="profile-orb">
-            <Icon icon="solar:user-bold-duotone" class="userIcon" />
+            <ProfilePicture :can-toggle="false" :is-editable="false" :size="42" />
           </button>
 
           <div id="profileMenu" popover class="profile-popover" anchor="profile-orb">
