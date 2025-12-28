@@ -474,8 +474,8 @@ onBeforeUnmount(() => {
     radial-gradient(
       circle at center,
       transparent 0,
-      transparent 40%,
-      rgba(5, 6, 20, 0.78) 42%,
+      transparent 70%,
+      rgba(5, 6, 20, 0.78) 52%,
       rgba(5, 6, 20, 0.96) 100%
     );
   box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08);
