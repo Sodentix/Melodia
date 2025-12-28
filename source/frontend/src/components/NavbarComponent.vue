@@ -459,7 +459,7 @@ canvas {
     margin-left: auto;
     padding: 0.5rem;
     overflow: visible; 
-    margin-top: 5rem;
+    margin-top: 5.5rem;
     margin-right: 1.5rem;
 }
 
