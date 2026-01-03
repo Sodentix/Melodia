@@ -1,6 +1,7 @@
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, computed } from 'vue';
 import { Icon } from '@iconify/vue';
+import { userStore } from '@/stores/userStore';
 
 const props = defineProps({
   canToggle: {
@@ -19,55 +20,49 @@ const props = defineProps({
     type: Number,
     default: 72,
   },
+  staticSrc: {
+    type: String,
+    default: null
+  }
 });
 
 const isOrbActive = ref(false);
-const imageSrc = ref(null);
 
-const fetchAvatar = async () => {
-  try {
-    const baseUrl =
-      import.meta.env.VITE_API_BASE || import.meta.env.VITE_API_URL || '';
-
-    const token =
-      localStorage.getItem('melodia_token') || localStorage.getItem('token') || '';
-
-    const response = await fetch(`${baseUrl}/users/me`, {
-      headers: {
-        Authorization: token ? `Bearer ${token}` : '',
-        Accept: 'application/json',
-      },
-      credentials: 'include',
-    });
-
-    if (!response.ok) {
-      return;
-    }
-
-    const data = await response.json();
-    const avatarPath = data?.avatarUrl || data?.avatar || null;
-
-    if (avatarPath) {
-      imageSrc.value = avatarPath.startsWith('http')
-        ? avatarPath
-        : `${baseUrl}${avatarPath}`;
-    } else {
-      imageSrc.value = null;
-    }
-  } catch (error) {
-    console.error('Failed to fetch avatar:', error);
+const finalImageSrc = computed(() => {
+  // Vorschau - Bild wird angezeigt nach upload
+  if (props.previewImage) {
+    return props.previewImage;
   }
-};
+
+  // Store an sich
+  if (props.staticSrc) {
+    return props.staticSrc;
+  }
+
+  if (userStore.user && userStore.user.avatarUrl) {
+    const rawUrl = userStore.user.avatarUrl;
+    
+    const baseUrl = import.meta.env.VITE_API_URL 
+      ? import.meta.env.VITE_API_URL.replace(/\/$/, '') 
+      : '';
+      
+    const fullUrl = rawUrl.startsWith('http') 
+      ? rawUrl 
+      : `${baseUrl}${rawUrl}`;
+
+
+    // Falls später auch URL erlaubt ist, ist das essentiell!!
+    return `${fullUrl}?t=${userStore.avatarTimestamp}`;
+  }
+
+  return null;
+});
 
 const handleOrbClick = () => {
   if (!props.canToggle) return;
 
   isOrbActive.value = !isOrbActive.value;
 };
-
-onMounted(() => {
-  fetchAvatar();
-});
 </script>
 
 <template>
@@ -82,11 +77,12 @@ onMounted(() => {
       @click="handleOrbClick"
     >
       <img
-        v-if="previewImage || imageSrc"
-        :src="previewImage || imageSrc"
+        v-if="finalImageSrc"
+        :src="finalImageSrc"
         alt="Profile"
         class="profile-image"
       />
+      
       <Icon
         v-else
         icon="solar:user-bold-duotone"
@@ -112,6 +108,11 @@ onMounted(() => {
 </template>
 
 <style scoped>
+svg {
+  height: 60%;
+  width: 60%;
+}
+
 .orb-wrapper {
   position: relative;
   width: max-content;

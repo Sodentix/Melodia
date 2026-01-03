@@ -322,6 +322,42 @@ router.post('/verify-email-code', auth(true, true), async (req, res) => {
   }
 });
 
+// DELETE /users/me/avatar - Remove the current avatar
+router.delete('/me/avatar', auth(true, true), async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id);
+
+    if (!user) {
+      return res.status(404).json({ message: 'User not found.' });
+    }
+
+    // If an avatar exists, try to delete the file from the filesystem
+    if (user.avatarUrl) {
+      const filename = path.basename(user.avatarUrl);
+      const filePath = path.join(avatarsDir, filename);
+
+      fs.unlink(filePath, (err) => {
+        // We ignore ENOENT (file not found) errors in case the file was already deleted manually
+        if (err && err.code !== 'ENOENT') {
+          console.error('Failed to delete avatar file from disk:', err);
+        }
+      });
+    }
+
+    // Remove the reference from the database
+    user.avatarUrl = null;
+    await user.save();
+
+    return res.json({
+      message: 'Avatar deleted successfully.',
+      user: formatUserProfile(user),
+    });
+  } catch (error) {
+    console.error('Delete avatar error:', error);
+    return res.status(500).json({ message: 'Server error while deleting avatar.' });
+  }
+});
+
 router.post(
   '/me/avatar',
   auth(true, true),

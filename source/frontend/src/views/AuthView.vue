@@ -422,7 +422,6 @@ const handleRegister = async () => {
   height: 90%;
   align-items: center;
   justify-content: center;
-  background-color: var(--the-background-color);
 }
 
   

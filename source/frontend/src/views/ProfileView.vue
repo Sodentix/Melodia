@@ -3,7 +3,7 @@ import { computed, onMounted, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { Icon } from '@iconify/vue';
 import ProfilePictureDebug from '@/components/ProfilePicture.vue';
-
+import { userStore } from '@/stores/userStore'; // Store importiert
 import AvatarCropper from '@/components/AvatarCropper.vue'; 
 
 const route = useRoute();
@@ -13,7 +13,6 @@ const apiRoot = import.meta.env.VITE_API_URL
   ? import.meta.env.VITE_API_URL.replace(/\/$/, '')
   : '';
 const usersBase = apiRoot.endsWith('/users') ? apiRoot : `${apiRoot}/users`;
-const apiBase = apiRoot.replace(/\/users$/, '');
 
 const loading = ref(true);
 const error = ref(null);
@@ -152,7 +151,12 @@ async function fetchProfile() {
         lastName: data.lastname ?? data.lastName,
         email: data.email,
         createdAt: data.createdAt,
+        avatarUrl: data.avatarUrl 
       };
+      
+      // Store updaten, damit Daten aktuell sind
+      userStore.setUser(data); 
+
       stats.value = normalizeStats(data.stats);
       isOwnProfile.value = true;
     } catch (e) {
@@ -188,6 +192,7 @@ async function fetchProfile() {
       username: data.displayName || usernameParam,
       firstName: data.firstname ?? data.firstName,
       createdAt: data.createdAt,
+      avatarUrl: data.avatarUrl // Auch bei fremden Profilen wichtig
     };
     stats.value = normalizeStats(data.stats);
 
@@ -233,6 +238,55 @@ function closeEditProfile() {
   avatarPreviewUrl.value = null;
   avatarPendingFile.value = null;
   isEditingInline.value = false;
+}
+
+// --- DELETE FUNCTION ---
+async function deleteAvatar() {
+  if (!isOwnProfile.value || !usersBase) return;
+  
+  if (!confirm('Möchtest du dein Profilbild wirklich entfernen?')) return;
+
+  const token = localStorage.getItem('melodia_token') || localStorage.getItem('token') || '';
+  if (!token) {
+     editFeedback.value = 'Bitte melde dich erneut an.';
+     return;
+  }
+
+  editSaving.value = true; // Buttons deaktivieren
+
+  try {
+    const res = await fetch(`${usersBase}/me/avatar`, {
+      method: 'DELETE',
+      headers: { 
+        Authorization: `Bearer ${token}`,
+        Accept: 'application/json' 
+      },
+      credentials: 'include',
+    });
+
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}));
+      editFeedback.value = data.message || 'Fehler beim Löschen.';
+      return;
+    }
+
+    // Lokale Preview entfernen
+    if (avatarPreviewUrl.value) {
+      try { URL.revokeObjectURL(avatarPreviewUrl.value); } catch { /* ignore */ }
+    }
+    avatarPreviewUrl.value = null;
+    avatarPendingFile.value = null;
+
+    // Globalen Store updaten -> Alle Bilder in der App verschwinden
+    userStore.setAvatarUrl(null);
+
+    editFeedback.value = 'Profilbild entfernt.';
+  } catch(e) {
+    console.error(e);
+    editFeedback.value = 'Serverfehler beim Löschen.';
+  } finally {
+    editSaving.value = false;
+  }
 }
 
 async function saveProfileChanges(updated) {
@@ -293,7 +347,6 @@ async function saveProfileChanges(updated) {
           console.error('Avatar upload after profile save failed');
         }
       } 
-      // Hier Logik für Reset (falls vorhanden) einfügen
     } catch (err) {
       console.error('Avatar operation after profile save threw:', err);
     }
@@ -307,9 +360,8 @@ async function saveProfileChanges(updated) {
         email: data.user.email,
       };
 
-      try {
-        localStorage.setItem('melodia_user', JSON.stringify(data.user));
-      } catch { /* ignore */ }
+      // WICHTIG: Store updaten (Namen, Email, etc.)
+      userStore.setUser(data.user);
     }
 
     pendingEmailVerification.value = Boolean(data.verificationRequired);
@@ -329,7 +381,8 @@ async function saveProfileChanges(updated) {
   }
 }
 
-// --- LOGIK GEÄNDERT FÜR CROPPER ---
+
+// --- CROPPER STATE & LOGIC ---
 
 function handleAvatarSelected(event) {
   if (!isOwnProfile.value || !usersBase) return;
@@ -337,26 +390,21 @@ function handleAvatarSelected(event) {
   const file = event?.target?.files?.[0];
   if (!file) return;
 
-  // Statt direkt Preview zu setzen, laden wir es in den Cropper
   cropperFile.value = file;
   showCropper.value = true;
   
-  // Input zurücksetzen, damit man dieselbe Datei erneut wählen kann
   if (event.target) {
     event.target.value = '';
   }
 }
 
-// Callback wenn das Bild zugeschnitten wurde
 function onCropped(blob) {
   showCropper.value = false;
   cropperFile.value = null;
 
   if (!blob) return;
 
-  // Blob in File umwandeln für konsistenten Upload (mit Dateinamen)
   const file = new File([blob], "avatar.png", { type: "image/png" });
-  
   avatarPendingFile.value = file;
   avatarError.value = null;
 
@@ -374,13 +422,6 @@ function onCropperCancel() {
   cropperFile.value = null;
 }
 
-// ----------------------------------
-
-async function resetAvatar() {
-  // ... (Code wie bisher) ...
-  // (Ich kürze das hier ab, da unverändert, außer du brauchst es komplett im Copy-Paste)
-}
-
 async function uploadAvatarAfterProfile(file) {
   if (!file || !usersBase) return false;
   const token = localStorage.getItem('melodia_token') || localStorage.getItem('token') || '';
@@ -394,7 +435,6 @@ async function uploadAvatarAfterProfile(file) {
 
   try {
     const formData = new FormData();
-    // File ist jetzt das zugeschnittene PNG
     formData.append('avatar', file);
     formData.append('password', currentPassword.value || '');
 
@@ -412,12 +452,19 @@ async function uploadAvatarAfterProfile(file) {
       return false;
     }
 
+    // Success
     if (avatarPreviewUrl.value) {
       try { URL.revokeObjectURL(avatarPreviewUrl.value); } catch { /* ignore */ }
     }
     avatarPreviewUrl.value = null;
     avatarPendingFile.value = null;
     avatarRefreshKey.value += 1;
+
+    // WICHTIG: Store updaten -> Alle Bilder in der App laden neu
+    if (data.avatarUrl) {
+      userStore.setAvatarUrl(data.avatarUrl);
+    }
+
     return true;
   } catch (err) {
     console.error('Upload avatar after profile failed:', err);
@@ -435,11 +482,6 @@ function handleAvatarClick() {
   if (input) {
     input.click();
   }
-}
-
-// ... verifyEmailCode bleibt gleich ...
-async function verifyEmailCode(code) {
-  // ... (wie oben im Original) ...
 }
 </script>
 
@@ -508,6 +550,7 @@ async function verifyEmailCode(code) {
             <p class="value">{{ profile.email }}</p>
 
             <button
+              v-if="!isEditingInline"
               type="button"
               class="btn ghost profile-edit-toggle"
               @click="isEditingInline ? closeEditProfile() : openEditProfile()"
@@ -589,6 +632,14 @@ async function verifyEmailCode(code) {
               @click="closeEditProfile"
             >
               Abbrechen
+            </button>
+            <button
+              type="button"
+              class="btn"
+              :disabled="editSaving"
+              @click="deleteAvatar"
+            >
+              Profilbild zurücksetzen
             </button>
             <button
               type="button"
@@ -684,17 +735,12 @@ async function verifyEmailCode(code) {
 </template>
 
 <style scoped>
-:root {
-  --the-background-color: rgb(39, 39, 39);
-}
-
 .profile-page {
   min-height: calc(100vh - 5rem);
   padding: 4rem 3rem 5rem 3rem;
-  background-color: var(--the-background-color);
+  background-color: #181818;
 }
 
-/* ... REST DES CSS (Hier habe ich nichts entfernt oder geändert) ... */
 .profile-loading,
 .profile-error {
   display: flex;
