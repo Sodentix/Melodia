@@ -738,7 +738,7 @@ function handleAvatarClick() {
 .profile-page {
   min-height: calc(100vh - 5rem);
   padding: 4rem 3rem 5rem 3rem;
-  background-color: #181818;
+  background-color: var(--bg);
 }
 
 .profile-loading,
