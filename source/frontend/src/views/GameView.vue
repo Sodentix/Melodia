@@ -17,6 +17,21 @@
           <span class="icon">✕</span>
           <span class="label">Exit</span>
         </button>
+
+        <!-- Countdown in header under exit button so it doesn't push layout down -->
+        <div v-if="!isFreeplay && currentRound && !currentRound.completed" class="countdown-container">
+          <svg class="countdown-ring" viewBox="0 0 100 100">
+            <circle class="countdown-bg" cx="50" cy="50" r="45" />
+            <circle 
+              class="countdown-progress" 
+              cx="50" cy="50" r="45"
+              :style="{ strokeDashoffset: countdownOffset }"
+            />
+          </svg>
+          <div class="countdown-time" :class="{ warning: timeRemaining <= 10 }">
+            {{ timeRemaining }}
+          </div>
+        </div>
       </div>
     </header>
 
@@ -39,21 +54,6 @@
           +{{ lastPoints }}
         </div>
       </transition>
-
-      <!-- Countdown Timer (Competitive Mode Only) -->
-      <div v-if="!isFreeplay && currentRound && !currentRound.completed" class="countdown-container">
-        <svg class="countdown-ring" viewBox="0 0 100 100">
-          <circle class="countdown-bg" cx="50" cy="50" r="45" />
-          <circle 
-            class="countdown-progress" 
-            cx="50" cy="50" r="45"
-            :style="{ strokeDashoffset: countdownOffset }"
-          />
-        </svg>
-        <div class="countdown-time" :class="{ warning: timeRemaining <= 10 }">
-          {{ timeRemaining }}
-        </div>
-      </div>
 
       <!-- Audio Visualizer / Player Placeholder -->
       <div class="audio-visualizer">
@@ -838,6 +838,13 @@ export default {
   gap: 1rem;
 }
 
+.header-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.25rem;
+}
+
 .mode-badge, .category-badge {
   padding: 0.4rem 1rem;
   border-radius: 99px;
@@ -888,7 +895,7 @@ export default {
   position: relative;
   width: 80px;
   height: 80px;
-  margin-bottom: 1rem;
+  margin-bottom: 0;
 }
 
 .countdown-ring {
@@ -976,13 +983,13 @@ export default {
   }
 
   .game-stage {
-    gap: 2rem;
-    padding: 1rem;
+    gap: 1.5rem;
+    padding: 1.25rem 1rem 1rem;
   }
 
   .visualizer-container {
-    width: 350px;
-    height: 350px;
+    width: 320px;
+    height: 320px;
   }
 
   .hero-input {
@@ -993,8 +1000,8 @@ export default {
 
 @media (max-width: 480px) {
   .visualizer-container {
-    width: 280px;
-    height: 280px;
+    width: 230px;
+    height: 230px;
   }
 
   .instruction-text {
@@ -1010,6 +1017,59 @@ export default {
   .control-btn {
     width: 100%;
     justify-content: center;
+  }
+
+  .revealed-track {
+    max-width: 100%;
+    padding: 0.8rem 1rem;
+    margin-top: 0.5rem;
+  }
+
+  .revealed-label {
+    font-size: 0.75rem;
+    margin-bottom: 0.25rem;
+  }
+
+  .revealed-name {
+    font-size: 1.2rem;
+    margin-bottom: 0.1rem;
+  }
+
+  .revealed-artist {
+    font-size: 0.9rem;
+  }
+}
+
+/* Very small / short screens: avoid scrolling where possible */
+@media (max-height: 700px) {
+  .game-stage {
+    padding: 1rem 0.75rem 0.75rem;
+    gap: 0.75rem;
+    justify-content: space-between;
+  }
+
+  .audio-visualizer {
+    gap: 1rem;
+  }
+
+  .visualizer-container {
+    width: 220px;
+    height: 220px;
+  }
+
+  .countdown-container {
+    width: 64px;
+    height: 64px;
+    margin-bottom: 0.5rem;
+  }
+
+  .revealed-track {
+    padding: 1rem 1.25rem;
+    margin-top: 0.5rem;
+  }
+
+  .game-controls {
+    padding: 0.75rem;
   }
 }
 
