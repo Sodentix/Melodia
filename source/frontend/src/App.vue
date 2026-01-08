@@ -1,34 +1,35 @@
 <script setup>
 import { RouterLink, RouterView, useRoute } from 'vue-router'
-import { computed } from 'vue'
+import { computed, onMounted, ref } from 'vue' 
 import Navbar from '@/components/NavbarComponent.vue'
-import { onMounted } from 'vue';
 import { userStore } from './stores/userStore';
+import axios from 'axios';
 
+const isInitializing = ref(true);
 
 async function validateSession() {
   const token = localStorage.getItem('melodia_token');
   
   if (!token) {
-    userStore.clearUser(); // Sicherstellen, dass wir sauber sind
+    userStore.clearUser();
+    isInitializing.value = false; // App is ready
     return;
   }
 
   try {
-    // API Call...
     const { data } = await axios.get(`${import.meta.env.VITE_API_URL}/auth/isAuthed`, {
       headers: { Authorization: `Bearer ${token}` }
     });
 
     if (data?.loggedIn && data.user) {
-      // WICHTIG: Store mit den "echten" Server-Daten updaten
-      // Falls sich das Bild im Backend geändert hat, wird es hier aktualisiert
       userStore.setUser(data.user); 
     } else {
       userStore.clearUser();
     }
   } catch (e) {
     userStore.clearUser();
+  } finally {
+    isInitializing.value = false; // Only stop loading after the check is completely done (success or fail)
   }
 }
 
@@ -43,12 +44,12 @@ const showNavbar = computed(() => {
 </script>
 
 <template>
-  <div>
+  <div v-if="isInitializing" class="loading-screen">
+    Loading...
+  </div>
+
+  <div v-else>
     <Navbar v-if="showNavbar"/>
     <RouterView />
   </div>
-  
 </template>
-
-<style scoped>
-</style>
