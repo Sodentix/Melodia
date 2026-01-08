@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, watch } from 'vue';
 import { Icon } from '@iconify/vue';
 import { userStore } from '@/stores/userStore';
 
@@ -27,6 +27,11 @@ const props = defineProps({
 });
 
 const isOrbActive = ref(false);
+const hasLoadError = ref(false);
+
+watch(() => [props.previewImage, userStore.user?.avatarUrl], () => {
+  hasLoadError.value = false;
+});
 
 const finalImageSrc = computed(() => {
   // Vorschau - Bild wird angezeigt nach upload
@@ -40,23 +45,34 @@ const finalImageSrc = computed(() => {
   }
 
   if (userStore.user && userStore.user.avatarUrl) {
-    const rawUrl = userStore.user.avatarUrl;
-    
-    const baseUrl = import.meta.env.VITE_API_URL 
-      ? import.meta.env.VITE_API_URL.replace(/\/$/, '') 
-      : '';
+      const rawUrl = userStore.user.avatarUrl;
+      const baseUrl = import.meta.env.VITE_API_URL 
+        ? import.meta.env.VITE_API_URL.replace(/\/$/, '') 
+        : '';
+      const fullUrl = rawUrl.startsWith('http') ? rawUrl : `${baseUrl}${rawUrl}`;
       
-    const fullUrl = rawUrl.startsWith('http') 
-      ? rawUrl 
-      : `${baseUrl}${rawUrl}`;
-
-
-    // Falls später auch URL erlaubt ist, ist das essentiell!!
-    return `${fullUrl}?t=${userStore.avatarTimestamp}`;
-  }
-
-  return null;
+      return `${fullUrl}?t=${userStore.avatarTimestamp}`;
+    }
+    return null;
 });
+
+const handleImageError = async () => {
+  // 1. Sofort UI aktualisieren: Platzhalter anzeigen
+  hasLoadError.value = true;
+
+  // 2. Prüfen: Nur löschen, wenn es kein Preview und kein Static Image ist,
+  // sondern wirklich das User-Avatar aus der DB.
+  if (!props.previewImage && !props.staticSrc && userStore.user?.avatarUrl) {
+    console.warn("Bild nicht gefunden (404). Bereinige Datenbank...");
+    
+    try {
+      // Hier rufst du deine Store-Action auf, die den DB-Eintrag nullt
+      await userStore.deleteAvatarPath(); 
+    } catch (error) {
+      console.error("Fehler beim Bereinigen des Avatars:", error);
+    }
+  }
+};
 
 const handleOrbClick = () => {
   if (!props.canToggle) return;
@@ -67,20 +83,18 @@ const handleOrbClick = () => {
 
 <template>
   <div class="orb-wrapper">
-    <div
-      class="profile-orb"
-      :class="{
-        'is-active': isOrbActive,
-        'is-clickable': canToggle,
-      }"
+    <div 
+      class="profile-orb" 
+      :class="{ 'is-active': isOrbActive, 'is-clickable': canToggle }"
       :style="{ width: size + 'px', height: size + 'px' }"
       @click="handleOrbClick"
     >
       <img
-        v-if="finalImageSrc"
+        v-if="finalImageSrc && !hasLoadError"
         :src="finalImageSrc"
         alt="Profile"
         class="profile-image"
+        @error="handleImageError"
       />
       
       <Icon
@@ -90,21 +104,7 @@ const handleOrbClick = () => {
       />
     </div>
 
-    <div
-      v-if="isEditable"
-      class="edit-badge"
-      :style="{
-        width: size * 0.4 + 'px',
-        height: size * 0.4 + 'px',
-      }"
-    >
-      <Icon
-        icon="solar:pen-2-bold"
-        class="editIcon"
-        :style="{ fontSize: size * 0.22 + 'px' }"
-      />
     </div>
-  </div>
 </template>
 
 <style scoped>

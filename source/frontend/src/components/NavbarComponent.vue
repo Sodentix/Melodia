@@ -2,6 +2,7 @@
 import { onMounted, onBeforeUnmount, ref } from 'vue';
 import axios from 'axios';
 import ProfilePicture from '@/components/ProfilePicture.vue';
+import { userStore } from '@/stores/userStore';
 
 const canvasRef = ref(null);
 const isAuthenticated = ref(false);
@@ -37,6 +38,7 @@ async function validateSession() {
 
     if (data?.loggedIn && data.user) {
       localStorage.setItem('melodia_user', JSON.stringify(data.user));
+      userStore.user = data.user;
     }
   } catch (error) {
     console.warn('Navbar auth check failed:', error.response?.data || error.message);
