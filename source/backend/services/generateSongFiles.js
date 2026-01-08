@@ -23,6 +23,7 @@ const categories = {
     difficulty: "easy",
     accent: "#00FF55"
   },
+<<<<<<< Updated upstream
   masterplaylist: {
     playlistIds: [14800694023],
     name: "Master Playlist",
@@ -43,8 +44,31 @@ const categories = {
     description: "A mix of all available songs",
     difficulty: "really hard",
     accent: "#FF0675"
+=======
+  pop: {
+    playlistIds: [1282483245, 8282573142, 2159765062, 8074581462],
+    name: "Pop",
+    description: "Pop music for good mood",
+    difficulty: "easy",
+    accent: "#FF4FD8"
+  },
+  eightiesNineties: {
+    playlistIds: [13785202001],
+    name: "80s & 90s",
+    description: "80s and 90s groove for everyone",
+    difficulty: "easy",
+    accent: "#00f7ffff"
+  },
+  linusMischmasch: {
+    playlistIds: [14800694023],
+    name: "Linus' Mischmasch",
+    description: "Mischmasch Linus / Linus' Mischmasch",
+    difficulty: "linus",
+    accent: "#ff0000ff"
+>>>>>>> Stashed changes
   }
 };
+
 
 // Output directories
 const outputDir = path.join(__dirname, '../assets/songData');
