@@ -57,7 +57,14 @@
 
       <!-- Audio Visualizer / Player Placeholder -->
       <div class="audio-visualizer">
-        <div ref="visualizerContainer" class="visualizer-container"></div>
+        <div ref="visualizerContainer" class="visualizer-container">
+          <img
+            v-if="currentRound?.completed && currentRound?.albumImage"
+            :src="currentRound.albumImage"
+            alt="Album cover"
+            class="album-art"
+          />
+        </div>
         
         <div class="player-controls">
           <audio
@@ -559,12 +566,16 @@ export default {
           preview_url: data.preview_url,
           guessCount: 0,
           completed: false,
+          albumImage: null,
         };
 
         // Add track ID to played list to prevent repetition
         if (data.trackId && !this.playedTrackIds.includes(data.trackId)) {
           this.playedTrackIds.push(data.trackId);
         }
+
+        // Load album art from Deezer (if possible)
+        this.loadAlbumArt(data.trackId);
 
         this.showMessage('success', 'Round started! Listen and guess the song.');
         
@@ -707,6 +718,36 @@ export default {
       
       if (this.$refs.audioPlayer) {
         this.$refs.audioPlayer.pause();
+      }
+    },
+
+    async loadAlbumArt(trackId) {
+      // Track IDs coming from Deezer are prefixed, e.g. "deezer-12345"
+      if (!trackId || typeof trackId !== 'string') return;
+      if (!trackId.startsWith('deezer-')) return;
+
+      const base = import.meta.env.VITE_API_URL || '';
+      const token = localStorage.getItem('melodia_token') || localStorage.getItem('token');
+      if (!base || !token) return;
+
+      try {
+        const res = await fetch(`${base}/game/album-art/${encodeURIComponent(trackId)}`, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Accept': 'application/json',
+          },
+        });
+        
+        if (!res.ok) return;
+        
+        const data = await res.json();
+        const albumImage = data?.albumImage || null;
+
+        if (albumImage && this.currentRound && this.currentRound.trackId === trackId) {
+          this.currentRound.albumImage = albumImage;
+        }
+      } catch (e) {
+        console.error('Failed to load album art:', e);
       }
     },
 
@@ -970,6 +1011,18 @@ export default {
   border: 1px solid rgba(255, 255, 255, 0.1);
   box-shadow: 0 0 50px rgba(0, 0, 0, 0.5);
   overflow: hidden; /* Ensure canvas doesn't overflow circle */
+  position: relative;
+}
+
+.album-art {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: inherit;
+  opacity: 0.9;
+  filter: saturate(1.1);
 }
 
 .hidden-audio {
@@ -1060,12 +1113,7 @@ export default {
   .countdown-container {
     width: 64px;
     height: 64px;
-    margin-bottom: 0.5rem;
-  }
-
-  .revealed-track {
-    padding: 1rem 1.25rem;
-    margin-top: 0.5rem;
+    margin-bottom: 0.25rem;
   }
 
   .game-controls {
@@ -1087,14 +1135,18 @@ export default {
 
 /* Revealed Track Info */
 .revealed-track {
+  position: absolute;
+  left: 50%;
+  bottom: 6rem; /* above footer controls */
+  transform: translateX(-50%);
+  z-index: 30;
   text-align: center;
-  padding: 1.5rem 2rem;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 1.2rem 1.6rem;
+  background: rgba(15, 20, 35, 0.96);
+  border: 1px solid rgba(255, 255, 255, 0.15);
   border-radius: 16px;
-  backdrop-filter: blur(10px);
-  max-width: 400px;
-  margin-top: 1rem;
+  backdrop-filter: blur(16px);
+  max-width: min(420px, 90vw);
 }
 
 .revealed-label {
