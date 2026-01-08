@@ -22,6 +22,27 @@ const categories = {
     description: "Festive tunes for the season",
     difficulty: "easy",
     accent: "#00FF55"
+  },
+  masterplaylist: {
+    playlistIds: [14800694023],
+    name: "Master Playlist",
+    description: "A mix of all available songs",
+    difficulty: "medium",
+    accent: "#FF0055"
+  },
+  newAlternative: {
+    playlistIds: [1402845615],
+    name: "New Alternative",
+    description: "A mix of all available songs",
+    difficulty: "hard",
+    accent: "#06ffda"
+  },
+  hiphop: {
+    playlistIds: [14800693283],
+    name: "Hip-Hop",
+    description: "A mix of all available songs",
+    difficulty: "really hard",
+    accent: "#FF0675"
   }
 };
 
@@ -37,27 +58,63 @@ if (!fs.existsSync(categoriesDir)) {
   fs.mkdirSync(categoriesDir, { recursive: true });
 }
 
-// Fetch tracks from a single playlist
+// Fetch tracks from a single playlist (with pagination)
 async function fetchPlaylistPreviews(playlistId, minRank = 0) {
   try {
-    const url = `https://api.deezer.com/playlist/${playlistId}`;
-    const response = await axios.get(url);
+    const allTracks = [];
+    let index = 0;
+    const limit = 100; // Maximum allowed by Deezer API per request
+    let totalTracks = null;
+    let totalFetched = 0; // Track total number of tracks fetched (including those without previews)
 
-    if(!response.data || !response.data.tracks || !response.data.tracks.data){
-        console.warn("⚠️ Playlist mit der ID " + playlistId + " ist ungültig")
-        return []
+    while (true) {
+      const url = `https://api.deezer.com/playlist/${playlistId}/tracks?limit=${limit}&index=${index}`;
+      const response = await axios.get(url);
+
+      if (!response.data || !response.data.data || response.data.data.length === 0) {
+        break;
+      }
+
+      // Get total count from first response
+      if (totalTracks === null && response.data.total !== undefined) {
+        totalTracks = response.data.total;
+      }
+
+      const tracks = response.data.data;
+      totalFetched += tracks.length; // Count all tracks fetched, not just valid ones
+      
+      // Filter and map tracks
+      const validTracks = tracks
+        .filter(t => t.preview && t.rank >= minRank)
+        .map(t => ({
+          id: t.id,
+          artist: t.artist ? t.artist.name : 'Unknown Artist',
+          title: t.title,
+          url: t.preview
+        }));
+
+      allTracks.push(...validTracks);
+
+      // Check if we've fetched all tracks from the API (compare totalFetched to totalTracks)
+      if (totalTracks !== null && totalFetched >= totalTracks) {
+        break;
+      }
+
+      // If we got fewer tracks than the limit, we're done
+      if (tracks.length < limit) {
+        break;
+      }
+
+      // Move to next page
+      index += limit;
+
+      // Add a small delay to avoid rate limiting
+      await new Promise(resolve => setTimeout(resolve, 200));
     }
 
-    const tracks = response.data.tracks.data;
-
-    return tracks
-      .filter(t => t.preview && t.rank >= minRank)
-      .map(t => ({
-        id: t.id,
-        artist: t.artist ? t.artist.name : 'Unknown Artist',
-        title: t.title,
-        url: t.preview
-      }));
+    const totalInfo = totalTracks !== null ? ` (total: ${totalTracks}, fetched: ${totalFetched}, with preview: ${allTracks.length})` : '';
+    console.log(`✅ Fetched ${allTracks.length} tracks from playlist ${playlistId}${totalInfo}`);
+    return allTracks;
   } catch (error) {
     console.error(`❌ Error fetching playlist ${playlistId}:`, error.message);
     return [];
