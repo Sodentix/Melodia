@@ -383,6 +383,15 @@ export default {
       }
     },
 
+    // Normalize string for search (remove punctuation, special chars, normalize spaces)
+    normalizeSearchString(str) {
+      return (str || '')
+        .toLowerCase()
+        .replace(/[^\w\s]/g, ' ') // Replace punctuation with space
+        .replace(/\s+/g, ' ') // Normalize multiple spaces to single space
+        .trim();
+    },
+
     async searchSuggestions(query) {
       if (!query.trim()) {
         this.suggestions = [];
@@ -390,19 +399,17 @@ export default {
         return;
       }
 
-      const lowerQuery = query.toLowerCase();
+      const normalizedQuery = this.normalizeSearchString(query);
       if (this.categoryTracks.length > 0) {
         const filtered = this.categoryTracks
           .filter((track) => {
-            const haystack = [
+            const haystack = this.normalizeSearchString([
               track.name,
               ...(track.artists || []).map((artist) => artist.name || ''),
-            ]
-              .join(' ')
-              .toLowerCase();
-            return haystack.includes(lowerQuery);
+            ].join(' '));
+            return haystack.includes(normalizedQuery);
           })
-          .slice(0, 8)
+          .slice(0, 30) // Increased from 8 to 30 for more results
           .map((track) => ({
             id: track.id,
             name: track.name,
@@ -1277,9 +1284,30 @@ export default {
   background: rgba(15, 20, 35, 0.95);
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 16px;
-  overflow: hidden;
+  overflow-y: auto;
+  overflow-x: hidden;
+  max-height: 400px; /* Make scrollable when there are many results */
   backdrop-filter: blur(20px);
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+}
+
+/* Custom scrollbar for suggestions */
+.suggestions-menu::-webkit-scrollbar {
+  width: 8px;
+}
+
+.suggestions-menu::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 4px;
+}
+
+.suggestions-menu::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
+}
+
+.suggestions-menu::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.3);
 }
 
 .suggestion-item {
