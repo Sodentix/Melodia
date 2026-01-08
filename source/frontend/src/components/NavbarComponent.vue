@@ -1,62 +1,33 @@
 <script setup>
-import { onMounted, onBeforeUnmount, ref } from 'vue';
-import axios from 'axios';
+import { onMounted, onBeforeUnmount, ref, computed } from 'vue'; // computed importieren
+// axios brauchen wir hier nicht mehr zwingend, wenn wir nur den Store lesen
 import ProfilePicture from '@/components/ProfilePicture.vue';
 import { userStore } from '@/stores/userStore';
+import { useRouter } from 'vue-router'; // Router für Logout
 
+const router = useRouter();
 const canvasRef = ref(null);
-const isAuthenticated = ref(false);
 const isMenuOpen = ref(false);
-let animationId;
-let resizeObserver;
-let canvas;
-let ctx;
-let pixelRatio = 1;
 
-const apiRoot = import.meta.env.VITE_API_URL
-  ? import.meta.env.VITE_API_URL.replace(/\/$/, '')
-  : '';
-const authBase = apiRoot.endsWith('/auth') ? apiRoot : `${apiRoot}/auth`;
+// --- 1. AUTHENTIFIZIERUNG ÜBER STORE ---
+// Statt einer lokalen ref und einem API Call, hören wir direkt auf den Store.
+// Sobald App.vue den User geladen hat, wird das hier true.
+const isAuthenticated = computed(() => {
+  return !!userStore.user; 
+});
 
-async function validateSession() {
-  const token = localStorage.getItem('melodia_token') || localStorage.getItem('token');
+// Optional: Falls du auf den User zugreifen musst
+const currentUser = computed(() => userStore.user);
 
-  if (!token || !authBase) {
-    isAuthenticated.value = false;
-    return;
-  }
-
-  try {
-    const { data } = await axios.get(`${authBase}/isAuthed`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        Accept: 'application/json',
-      },
-    });
-
-    isAuthenticated.value = Boolean(data?.loggedIn);
-
-    if (data?.loggedIn && data.user) {
-      localStorage.setItem('melodia_user', JSON.stringify(data.user));
-      // Update userStore so ProfilePicture component gets the updated data
-      userStore.setUser(data.user);
-    } else {
-      // Clear userStore if not logged in
-      userStore.clearUser();
-    }
-  } catch (error) {
-    console.warn('Navbar auth check failed:', error.response?.data || error.message);
-    isAuthenticated.value = false;
-    localStorage.removeItem('melodia_token');
-    localStorage.removeItem('token');
-    localStorage.removeItem('melodia_user');
-    // Clear userStore on auth failure
-    userStore.clearUser();
-  }
-}
-
-function handleAuthChange() {
-  validateSession();
+// --- 2. LOGOUT LOGIK ---
+function logout() {
+  localStorage.removeItem("melodia_token");
+  localStorage.removeItem("melodia_user"); // Auch User Daten löschen
+  
+  userStore.clearUser(); // Store leeren -> isAuthenticated wird sofort false
+  
+  closePopover();
+  router.push({ name: 'auth' }); // Zurück zum Login/Home
 }
 
 function toggleMenu() {
@@ -67,24 +38,20 @@ function closeMenu() {
   isMenuOpen.value = false;
 }
 
-// Code für das Abmelden
-function logout() {
-  localStorage.removeItem("melodia_token");
-  isAuthenticated.value = false;
-}
-
-// Code um das Popover zu schließen
 function closePopover() {
   const popoverElement = document.getElementById("profileMenu");
   if (popoverElement?.hidePopover) popoverElement.hidePopover();
 }
 
+// --- 3. ANIMATION (unverändert) ---
+let animationId;
+let resizeObserver;
+let canvas;
+let ctx;
+let pixelRatio = 1;
 
-// Code für die Wellenanimation
 function resizeCanvas() {
-  if (!canvas || !ctx) {
-    return;
-  }
+  if (!canvas || !ctx) return;
 
   pixelRatio = window.devicePixelRatio || 1;
   const parent = canvas.parentElement;
@@ -109,15 +76,12 @@ function cleanupCanvasListeners() {
 }
 
 onMounted(() => {
-  validateSession();
-  window.addEventListener('melodia-auth-changed', handleAuthChange);
-
+  // KEIN validateSession() mehr hier! Das macht App.vue.
+  
   canvas = canvasRef.value;
-  if (!canvas) {
-    return;
-  }
+  if (!canvas) return;
+  
   ctx = canvas.getContext('2d');
-
   if (canvas) {
     resizeCanvas();
     if (window.ResizeObserver) {
@@ -128,13 +92,12 @@ onMounted(() => {
     }
   }
 
-    const colors = [
+  const colors = [
     'rgba(255,0,200,0.6)',
     'rgba(0,236,255,0.5)',
     'rgba(61,255,140,0.45)',
     'rgba(255,255,255,0.35)'
-    ];
-
+  ];
   const lineWidths = [3.1, 2.8, 2.5, 2.3];
   let time = 0;
 
@@ -143,9 +106,7 @@ onMounted(() => {
   }
 
   function draw() {
-    if (!canvas || !ctx) {
-      return;
-    }
+    if (!canvas || !ctx) return;
     time += 0.018;
     const width = canvas.width / pixelRatio;
     const height = canvas.height / pixelRatio;
@@ -161,32 +122,21 @@ onMounted(() => {
         const secondary = Math.sin(time * (0.6 + i * 0.18));
         const combined = primary * secondary * (1.1 - i * 0.12);
         const y = mapWave(combined, topLimit, bottomLimit);
-        if (x === 0) {
-          ctx.moveTo(x, y);
-        } else {
-          ctx.lineTo(x, y);
-        }
+        if (x === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
       }
       ctx.strokeStyle = colors[i];
       ctx.lineWidth = lineWidths[i];
       ctx.stroke();
     }
-
     animationId = requestAnimationFrame(draw);
   }
-
-  // Start Animation
   animationId = requestAnimationFrame(draw);
-
-  // Cleanup bei Unmount
 });
 
 onBeforeUnmount(() => {
-  window.removeEventListener('melodia-auth-changed', handleAuthChange);
   cleanupCanvasListeners();
-  if (animationId) {
-    cancelAnimationFrame(animationId);
-  }
+  if (animationId) cancelAnimationFrame(animationId);
 });
 </script>
 
@@ -197,6 +147,7 @@ onBeforeUnmount(() => {
     </div>
     <div class="nav-inner">
       <div id="logo">Melodia - Feel The Rythm.</div>
+      
       <button
         type="button"
         class="menu-toggle"
@@ -205,10 +156,9 @@ onBeforeUnmount(() => {
         @click="toggleMenu"
         aria-label="Navigation öffnen oder schließen"
       >
-        <span />
-        <span />
-        <span />
+        <span /><span /><span />
       </button>
+
       <nav id="primary-nav" :class="{ 'is-open': isMenuOpen }">
         <ul class="nav-list">
           <li>
@@ -226,6 +176,7 @@ onBeforeUnmount(() => {
             </router-link>
           </li>
         </ul>
+
         <div class="nav-actions">
           <router-link
             class="btn primary"
@@ -235,15 +186,19 @@ onBeforeUnmount(() => {
           >
             Sign Up
           </router-link>
+
           <button v-if="isAuthenticated" popovertarget="profileMenu" class="profile-orb" id="profile-orb">
-            <ProfilePicture :can-toggle="false" :is-editable="false" :size="42" />
+            <ProfilePicture 
+                :can-toggle="false" 
+                :is-editable="false" 
+                :size="42" 
+            />
           </button>
 
           <div id="profileMenu" popover class="profile-popover" anchor="profile-orb">
             <div class="popover-arrow"></div> 
-
             <router-link :to="{ name: 'profile' }" class="dropdownOption" @click="closePopover()">Profil</router-link>
-            <p class="dropdownOption" @click="logout(), closePopover()">Abmelden</p>
+            <p class="dropdownOption" @click="logout">Abmelden</p>
           </div>
         </div>
       </nav>

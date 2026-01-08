@@ -45,6 +45,17 @@ const viewingUsername = computed(() => {
   return route.params.username || storedUser.value?.username || null;
 });
 
+const displayAvatarUrl = computed(() => {
+  if (avatarPreviewUrl.value) return avatarPreviewUrl.value;
+
+  const url = profile.value?.avatarUrl;
+  if (!url) return null;
+
+  if (url.startsWith('http')) return url;
+
+  return `${apiRoot}${url.startsWith('/') ? '' : '/'}${url}`;
+});
+
 const formattedJoined = computed(() => {
   if (!profile.value?.createdAt) return null;
   const date = new Date(profile.value.createdAt);
@@ -511,22 +522,23 @@ function handleAvatarClick() {
       <div class="profile-header" :class="{ 'profile-header--expanded': isEditingInline }">
         <div class="profile-header-top">
           <div class="identity">
-            <div v-if="isOwnProfile" class="profile-avatar-block">
+            <div class="profile-avatar-block">
               <button
                 type="button"
                 class="avatar-orb-button"
                 :class="{ 'avatar-orb-button--editable': isEditingInline }"
-                @click="handleAvatarClick"
+                @click="handleAvatarClick" 
               >
                 <ProfilePictureDebug
                   :key="avatarRefreshKey"
                   :can-toggle="false"
                   :is-editable="isEditingInline"
                   :preview-image="avatarPreviewUrl"
-                />
+                  :static-src="displayAvatarUrl"  />
               </button>
 
               <input
+                v-if="isOwnProfile"
                 ref="avatarFileInput"
                 type="file"
                 accept="image/*"
