@@ -169,13 +169,24 @@ async function fetchProfile() {
   }
 
   try {
-    const res = await fetch(`${usersBase}/profile/${encodeURIComponent(usernameParam)}`, {
+    // Try with token first (if available)
+    let res = await fetch(`${usersBase}/profile/${encodeURIComponent(usernameParam)}`, {
       headers: {
         Authorization: token ? `Bearer ${token}` : '',
         Accept: 'application/json',
       },
       credentials: 'include',
     });
+
+    // If we get 401/403 with a token, retry without token (public profile should work without auth)
+    if (!res.ok && (res.status === 401 || res.status === 403) && token) {
+      res = await fetch(`${usersBase}/profile/${encodeURIComponent(usernameParam)}`, {
+        headers: {
+          Accept: 'application/json',
+        },
+        credentials: 'include',
+      });
+    }
 
     if (!res.ok) {
       if (res.status === 404) {

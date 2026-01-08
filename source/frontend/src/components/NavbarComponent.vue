@@ -38,7 +38,11 @@ async function validateSession() {
 
     if (data?.loggedIn && data.user) {
       localStorage.setItem('melodia_user', JSON.stringify(data.user));
-      userStore.user = data.user;
+      // Update userStore so ProfilePicture component gets the updated data
+      userStore.setUser(data.user);
+    } else {
+      // Clear userStore if not logged in
+      userStore.clearUser();
     }
   } catch (error) {
     console.warn('Navbar auth check failed:', error.response?.data || error.message);
@@ -46,6 +50,8 @@ async function validateSession() {
     localStorage.removeItem('melodia_token');
     localStorage.removeItem('token');
     localStorage.removeItem('melodia_user');
+    // Clear userStore on auth failure
+    userStore.clearUser();
   }
 }
 
