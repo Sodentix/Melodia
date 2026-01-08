@@ -1,4 +1,5 @@
 const express = require('express');
+const axios = require('axios');
 const auth = require('../middleware/auth');
 const Stats = require('../models/Stats');
 const { fetchRandomClip, getLocalClipsStatus, listTracksByCategory } = require('../services/clipService');
@@ -238,6 +239,43 @@ router.post('/giveup', auth(true, true), async (req, res) => {
   } catch (err) {
     console.error('Give up error:', err);
     const message = process.env.NODE_ENV === 'production' ? 'Failed to process give up' : String(err.message || err);
+    return res.status(500).json({ message });
+  }
+});
+
+// Get album art from Deezer API (proxied to avoid CORS)
+router.get('/album-art/:trackId', auth(true, true), async (req, res) => {
+  try {
+    const trackId = (req.params.trackId || '').toString();
+    if (!trackId || !trackId.startsWith('deezer-')) {
+      return res.status(400).json({ message: 'Invalid track ID' });
+    }
+
+    const deezerId = trackId.replace('deezer-', '').trim();
+    if (!deezerId) {
+      return res.status(400).json({ message: 'Invalid Deezer ID' });
+    }
+
+    // Fetch from Deezer API (server-side, no CORS issues)
+    const deezerRes = await axios.get(`https://api.deezer.com/track/${encodeURIComponent(deezerId)}`);
+    const data = deezerRes.data;
+    const albumImage =
+      data?.album?.cover_medium ||
+      data?.album?.cover_big ||
+      data?.album?.cover ||
+      null;
+
+    if (!albumImage) {
+      return res.status(404).json({ message: 'Album art not available' });
+    }
+
+    return res.json({ albumImage });
+  } catch (err) {
+    console.error('Album art fetch error:', err);
+    if (err.response && err.response.status === 404) {
+      return res.status(404).json({ message: 'Track not found on Deezer' });
+    }
+    const message = process.env.NODE_ENV === 'production' ? 'Failed to fetch album art' : String(err.message || err);
     return res.status(500).json({ message });
   }
 });
