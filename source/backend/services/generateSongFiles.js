@@ -9,12 +9,12 @@ const path = require('path');
 const cron = require('node-cron');
 
 const categories = {
-  all: {
+  pop: {
     playlistIds: [1282483245, 8282573142, 2159765062, 8074581462],
-    name: "Hit Mix",
-    description: "A mix of all available songs",
-    difficulty: "medium",
-    accent: "#FF0055"
+    name: "Pop",
+    description: "Pop music for good mood",
+    difficulty: "easy",
+    accent: "#FF4FD8"
   },
   holiday: {
     playlistIds: [8454338222],
@@ -44,26 +44,12 @@ const categories = {
     difficulty: "really hard",
     accent: "#FF0675"
   },
-  pop: {
-    playlistIds: [1282483245, 8282573142, 2159765062, 8074581462],
-    name: "Pop",
-    description: "Pop music for good mood",
-    difficulty: "easy",
-    accent: "#FF4FD8"
-  },
   eightiesNineties: {
     playlistIds: [13785202001],
     name: "80s & 90s",
     description: "80s and 90s groove for everyone",
     difficulty: "easy",
     accent: "#00f7ffff"
-  },
-  linusMischmasch: {
-    playlistIds: [14800694023],
-    name: "Linus' Mischmasch",
-    description: "Mischmasch Linus / Linus' Mischmasch",
-    difficulty: "linus",
-    accent: "#ff0000ff"
   }
 };
 
