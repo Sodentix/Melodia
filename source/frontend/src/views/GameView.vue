@@ -81,9 +81,16 @@
       </div>
 
       <!-- Revealed Track Info (shown after round ends) -->
-      <transition name="fade">
-        <div v-if="revealedTrack && currentRound?.completed" class="revealed-track">
-          <div class="revealed-label">{{ messageType === 'success' ? '🎉 Correct!' : '🎵 The song was:' }}</div>
+      <transition name="fade" mode="out-in">
+        
+        <div 
+          v-if="revealedTrack && currentRound?.completed" 
+          key="result" 
+          class="revealed-track"
+        >
+          <div class="revealed-label">
+            {{ messageType === 'success' ? '🎉 Correct!' : '🎵 The song was:' }}
+          </div>
           <div class="revealed-name">{{ revealedTrack.name }}</div>
           <div class="revealed-artist">
             {{ Array.isArray(revealedTrack.artists) 
@@ -91,43 +98,50 @@
                 : '' }}
           </div>
         </div>
-      </transition>
 
-      <!-- Input Area -->
-      <div class="input-area">
-        <div class="input-wrapper" v-click-outside="closeSuggestions">
-          <input
-            v-model="guessInput"
-            @input="onGuessInput"
-            @keydown="handleKeydown"
-            @focus="onInputFocus"
-            placeholder="Type song or artist..."
-            :disabled="!currentRound || isSubmitting || currentRound.completed"
-            class="hero-input"
-            ref="guessInputRef"
-          />
-          <div class="input-glow"></div>
-          
-          <!-- Suggestions -->
-          <transition name="fade">
-            <div v-if="showSuggestions && suggestions.length > 0" class="suggestions-menu">
-              <div
-                v-for="(suggestion, index) in suggestions"
-                :key="suggestion.id"
-                @click="selectSuggestion(suggestion)"
-                @mouseenter="selectedIndex = index"
-                :class="['suggestion-item', { selected: selectedIndex === index }]"
-              >
-                <img v-if="suggestion.image" :src="suggestion.image" alt="" class="thumb" />
-                <div class="info">
-                  <div class="name">{{ suggestion.name }}</div>
-                  <div class="artist">{{ suggestion.artists.map(a => a.name).join(', ') }}</div>
+        <div 
+          v-else 
+          key="input" 
+          class="input-area"
+        >
+          <div class="input-wrapper" v-click-outside="closeSuggestions">
+            <input
+              v-model="guessInput"
+              @input="onGuessInput"
+              @keydown="handleKeydown"
+              @focus="onInputFocus"
+              placeholder="Type song or artist..."
+              :disabled="!currentRound || isSubmitting || currentRound.completed"
+              class="hero-input"
+              ref="guessInputRef"
+            />
+            <div class="input-glow"></div>
+            
+            <transition name="fade">
+              <div v-if="showSuggestions && suggestions.length > 0" class="suggestions-menu">
+                <div
+                  v-for="(suggestion, index) in suggestions"
+                  :key="suggestion.id"
+                  @click="selectSuggestion(suggestion)"
+                  @mouseenter="selectedIndex = index"
+                  :class="['suggestion-item', { selected: selectedIndex === index }]"
+                >
+                  <img v-if="suggestion.image" :src="suggestion.image" alt="" class="thumb" />
+                  <div class="info">
+                    <div class="name">{{ suggestion.name }}</div>
+                    <div class="artist">{{ suggestion.artists.map(a => a.name).join(', ') }}</div>
+                  </div>
                 </div>
               </div>
-            </div>
-          </transition>
+            </transition>
+          </div>
         </div>
-      </div>
+
+      </transition>
+
+
+
+
 
     </main>
 
@@ -854,8 +868,10 @@ export default {
 </script>
 
 <style scoped>
+/* --- BASIS SETUP --- */
 .game-view {
   min-height: 100vh;
+  height: 100dvh; /* Wichtig für Mobile Browser */
   position: relative;
   display: flex;
   flex-direction: column;
@@ -873,14 +889,14 @@ export default {
   z-index: -1;
 }
 
-/* Header */
+/* --- HEADER --- */
 .game-header {
+  flex-shrink: 0;
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start;
   padding: 1.5rem 2rem;
   z-index: 10;
-  position: absolute;
   width: 100%;
 }
 
@@ -893,7 +909,7 @@ export default {
   display: flex;
   flex-direction: column;
   align-items: flex-end;
-  gap: 0.25rem;
+  gap: 0.5rem;
 }
 
 .mode-badge, .category-badge {
@@ -905,6 +921,7 @@ export default {
   letter-spacing: 0.05em;
   background: rgba(255, 255, 255, 0.1);
   border: 1px solid rgba(255, 255, 255, 0.1);
+  white-space: nowrap;
 }
 
 .mode-badge.free {
@@ -925,28 +942,32 @@ export default {
   transition: color 0.2s;
 }
 
-.exit-btn:hover {
-  color: white;
-}
+.exit-btn:hover { color: white; }
 
-/* Main Stage */
+/* --- GAME STAGE (Layout) --- */
 .game-stage {
   flex: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  gap: 1rem;
-  padding: 2rem;
+  justify-content: center; /* Alles vertikal mittig */
+  
+  /* Der Abstand zwischen Visualizer und Input/Lösung */
+  gap: 3rem; 
+  
+  padding: 1rem 2rem;
   position: relative;
+  width: 100%;
+  max-width: 800px;
+  margin: 0 auto;
+  transition: gap 0.3s ease; /* Weicher Übergang bei Resize */
 }
 
 /* Countdown Timer */
 .countdown-container {
   position: relative;
-  width: 80px;
-  height: 80px;
-  margin-bottom: 0;
+  width: 60px;
+  height: 60px;
 }
 
 .countdown-ring {
@@ -966,7 +987,7 @@ export default {
   stroke: #00ecff;
   stroke-width: 6;
   stroke-linecap: round;
-  stroke-dasharray: 283; /* 2 * PI * 45 */
+  stroke-dasharray: 283;
   stroke-dashoffset: 0;
   transition: stroke-dashoffset 0.3s ease, stroke 0.3s ease;
 }
@@ -976,7 +997,7 @@ export default {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  font-size: 1.5rem;
+  font-size: 1.2rem;
   font-weight: 700;
   color: white;
   font-variant-numeric: tabular-nums;
@@ -986,20 +1007,7 @@ export default {
   color: #ff6b6b;
   animation: pulse 1s ease-in-out infinite;
 }
-
-.countdown-time.warning + .countdown-ring .countdown-progress,
-.countdown-container:has(.countdown-time.warning) .countdown-progress {
-  stroke: #ff6b6b;
-}
-
-@keyframes pulse {
-  0%, 100% {
-    transform: translate(-50%, -50%) scale(1);
-  }
-  50% {
-    transform: translate(-50%, -50%) scale(1.1);
-  }
-}
+.countdown-time.warning + .countdown-ring .countdown-progress { stroke: #ff6b6b; }
 
 /* Visualizer */
 .audio-visualizer {
@@ -1007,12 +1015,14 @@ export default {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 2rem;
+  flex-shrink: 0; /* Verhindert, dass der Kreis eingedrückt wird */
 }
 
 .visualizer-container {
-  width: 450px;
-  height: 450px;
+  /* Standardgröße Desktop */
+  width: 400px;
+  height: 400px;
+  
   display: flex;
   justify-content: center;
   align-items: center;
@@ -1020,8 +1030,9 @@ export default {
   background: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05));
   border: 1px solid rgba(255, 255, 255, 0.1);
   box-shadow: 0 0 50px rgba(0, 0, 0, 0.5);
-  overflow: hidden; /* Ensure canvas doesn't overflow circle */
+  overflow: hidden;
   position: relative;
+  transition: width 0.3s ease, height 0.3s ease;
 }
 
 .album-art {
@@ -1030,148 +1041,42 @@ export default {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  border-radius: inherit;
   opacity: 0.9;
   filter: saturate(1.1);
 }
 
-.hidden-audio {
-  display: none; /* Hide default player */
-}
+.hidden-audio { display: none; }
 
-/* Responsiveness */
-@media (max-width: 768px) {
-  .game-header {
-    padding: 1rem;
-  }
-
-  .game-stage {
-    gap: 1.5rem;
-    padding: 1.25rem 1rem 1rem;
-  }
-
-  .visualizer-container {
-    width: 320px;
-    height: 320px;
-  }
-
-  .hero-input {
-    font-size: 1.2rem;
-    padding: 1rem 1.5rem;
-  }
-}
-
-@media (max-width: 480px) {
-  .visualizer-container {
-    width: 230px;
-    height: 230px;
-  }
-
-  .instruction-text {
-    font-size: 1rem;
-  }
-
-  .controls-wrapper {
-    width: 100%;
-    flex-direction: column-reverse;
-    gap: 1rem;
-  }
-
-  .control-btn {
-    width: 100%;
-    justify-content: center;
-  }
-
-  .revealed-track {
-    max-width: 100%;
-    padding: 0.8rem 1rem;
-    margin-top: 0.5rem;
-  }
-
-  .revealed-label {
-    font-size: 0.75rem;
-    margin-bottom: 0.25rem;
-  }
-
-  .revealed-name {
-    font-size: 1.2rem;
-    margin-bottom: 0.1rem;
-  }
-
-  .revealed-artist {
-    font-size: 0.9rem;
-  }
-}
-
-/* Very small / short screens: avoid scrolling where possible */
-@media (max-height: 700px) {
-  .game-stage {
-    padding: 1rem 0.75rem 0.75rem;
-    gap: 0.75rem;
-    justify-content: space-between;
-  }
-
-  .audio-visualizer {
-    gap: 1rem;
-  }
-
-  .visualizer-container {
-    width: 220px;
-    height: 220px;
-  }
-
-  .countdown-container {
-    width: 64px;
-    height: 64px;
-    margin-bottom: 0.25rem;
-  }
-
-  .game-controls {
-    padding: 0.75rem;
-  }
-}
-
-.instruction-text {
-  font-size: 1.1rem;
-  color: rgba(255, 255, 255, 0.8);
-  text-align: center;
-  font-weight: 500;
-  letter-spacing: 0.02em;
-}
-
-.instruction-text.idle {
-  color: rgba(255, 255, 255, 0.5);
-}
-
-/* Revealed Track Info */
+/* Revealed Track (Lösung) */
 .revealed-track {
-  position: absolute;
-  left: 50%;
-  bottom: 6rem; /* above footer controls */
-  transform: translateX(-50%);
-  z-index: 30;
+  position: relative;
+  width: 100%;
+  max-width: 500px;
   text-align: center;
-  padding: 1.2rem 1.6rem;
-  background: rgba(15, 20, 35, 0.96);
+  padding: 1.5rem;
+  background: rgba(15, 20, 35, 0.85);
   border: 1px solid rgba(255, 255, 255, 0.15);
-  border-radius: 16px;
+  border-radius: 24px;
   backdrop-filter: blur(16px);
-  max-width: min(420px, 90vw);
+  box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+  animation: slide-up-fade 0.5s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .revealed-label {
-  font-size: 0.9rem;
-  color: rgba(255, 255, 255, 0.6);
+  font-size: 0.85rem;
+  color: #00ecff;
   text-transform: uppercase;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.15em;
   margin-bottom: 0.5rem;
+  font-weight: 700;
 }
 
 .revealed-name {
-  font-size: 1.5rem;
-  font-weight: 700;
+  font-size: 1.6rem;
+  font-weight: 800;
   color: white;
   margin-bottom: 0.25rem;
+  line-height: 1.2;
 }
 
 .revealed-artist {
@@ -1179,73 +1084,12 @@ export default {
   color: rgba(255, 255, 255, 0.7);
 }
 
-/* Fade transition */
-.fade-enter-active,
-.fade-leave-active {
-  transition: opacity 0.3s ease;
-}
-
-.fade-enter-from,
-.fade-leave-to {
-  opacity: 0;
-}
-
-/* Toast transition */
-.toast-enter-active,
-.toast-leave-active {
-  transition: all 0.3s ease;
-}
-
-.toast-enter-from,
-.toast-leave-to {
-  opacity: 0;
-  transform: translateX(-50%) translateY(-20px);
-}
-
-/* Pop transition */
-.pop-enter-active {
-  animation: pop-in 0.5s ease-out;
-}
-
-.pop-leave-active {
-  animation: pop-out 0.3s ease-in;
-}
-
-@keyframes pop-in {
-  0% {
-    opacity: 0;
-    transform: translate(-50%, -50%) scale(0.5);
-  }
-  70% {
-    transform: translate(-50%, -50%) scale(1.1);
-  }
-  100% {
-    opacity: 1;
-    transform: translate(-50%, -50%) scale(1);
-  }
-}
-
-@keyframes pop-out {
-  from {
-    opacity: 1;
-    transform: translate(-50%, -50%) scale(1);
-  }
-  to {
-    opacity: 0;
-    transform: translate(-50%, -50%) scale(0.8);
-  }
-}
-
 /* Input Area */
 .input-area {
   width: 100%;
-  max-width: 600px;
+  max-width: 500px;
   position: relative;
   z-index: 20;
-}
-
-.input-wrapper {
-  position: relative;
 }
 
 .hero-input {
@@ -1254,7 +1098,7 @@ export default {
   border: 1px solid rgba(255, 255, 255, 0.2);
   border-radius: 16px;
   padding: 1.2rem 1.5rem;
-  font-size: 1.5rem;
+  font-size: 1.3rem;
   color: white;
   text-align: center;
   backdrop-filter: blur(10px);
@@ -1268,49 +1112,22 @@ export default {
   box-shadow: 0 0 30px rgba(0, 236, 255, 0.15);
 }
 
-.hero-input::placeholder {
-  color: rgba(255, 255, 255, 0.3);
-}
-
-.hero-input:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
+.hero-input:disabled { opacity: 0.5; cursor: not-allowed; }
 
 /* Suggestions */
 .suggestions-menu {
   position: absolute;
-  bottom: 100%;
+  bottom: 110%; /* Öffnet nach oben */
   left: 0;
   right: 0;
-  margin-bottom: 1rem;
-  background: rgba(15, 20, 35, 0.95);
+  margin-bottom: 0.5rem;
+  background: rgba(15, 20, 35, 0.98);
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 16px;
   overflow-y: auto;
-  overflow-x: hidden;
-  max-height: 400px; /* Make scrollable when there are many results */
+  max-height: 250px;
   backdrop-filter: blur(20px);
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
-}
-
-/* Custom scrollbar for suggestions */
-.suggestions-menu::-webkit-scrollbar {
-  width: 8px;
-}
-
-.suggestions-menu::-webkit-scrollbar-track {
-  background: rgba(255, 255, 255, 0.05);
-  border-radius: 4px;
-}
-
-.suggestions-menu::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.2);
-  border-radius: 4px;
-}
-
-.suggestions-menu::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.3);
 }
 
 .suggestion-item {
@@ -1319,44 +1136,61 @@ export default {
   gap: 1rem;
   padding: 0.8rem 1rem;
   cursor: pointer;
-  transition: background 0.2s;
   border-bottom: 1px solid rgba(255, 255, 255, 0.05);
 }
 
-.suggestion-item:last-child {
-  border-bottom: none;
+.thumb { width: 40px; height: 40px; border-radius: 6px; object-fit: cover; }
+.info { flex: 1; text-align: left; }
+.name { font-weight: 600; font-size: 0.95rem; }
+.artist { font-size: 0.8rem; color: rgba(255, 255, 255, 0.6); }
+
+/* Footer Controls */
+.game-controls {
+  flex-shrink: 0;
+  padding: 1.5rem;
+  padding-bottom: 2rem;
+  display: flex;
+  justify-content: center;
+  width: 100%;
 }
 
-.suggestion-item:hover, .suggestion-item.selected {
-  background: rgba(255, 255, 255, 0.1);
+.controls-wrapper {
+  display: flex;
+  gap: 1rem;
+  width: 100%;
+  max-width: 500px;
 }
 
-.thumb {
-  width: 40px;
-  height: 40px;
-  border-radius: 6px;
-  object-fit: cover;
-}
-
-.info {
-  flex: 1;
-  text-align: left;
-}
-
-.name {
+.control-btn {
+  padding: 1rem 2rem;
+  border-radius: 16px;
   font-weight: 600;
-  color: white;
+  cursor: pointer;
+  border: none;
+  font-size: 1rem;
+  transition: all 0.2s;
+  flex: 1;
 }
 
-.artist {
-  font-size: 0.85rem;
-  color: rgba(255, 255, 255, 0.6);
+.control-btn.primary {
+  background: white;
+  color: black;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.5rem;
 }
 
-/* Toast Messages */
+.control-btn.give-up {
+  background: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Animations */
 .status-toast {
   position: absolute;
-  top: 10%;
+  top: 15%;
   left: 50%;
   transform: translateX(-50%);
   background: rgba(255, 255, 255, 0.95);
@@ -1369,138 +1203,140 @@ export default {
   font-weight: 600;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
   z-index: 100;
+  width: max-content;
 }
+.status-toast.error { background: #ff4d4d; color: white; }
+.status-toast.success { background: #00ecff; color: black; }
 
-.status-toast.error {
-  background: #ff4d4d;
-  color: white;
-}
-
-.status-toast.success {
-  background: #00ecff;
-  color: black;
-}
-
-.status-icon {
-  font-size: 1.2rem;
-}
-
-/* Points Pop */
 .points-pop {
   position: absolute;
-  top: 40%;
+  top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  font-size: 4rem;
-  font-weight: 800;
+  font-size: 5rem;
+  font-weight: 900;
   color: #00ecff;
-  text-shadow: 0 0 20px rgba(0, 236, 255, 0.5);
+  text-shadow: 0 0 30px rgba(0, 236, 255, 0.6);
   z-index: 50;
   pointer-events: none;
 }
 
-/* Controls */
-.game-controls {
-  padding: 1.5rem;
-  display: flex;
-  justify-content: center;
+@keyframes slide-up-fade {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
-.controls-wrapper {
-  display: flex;
-  gap: 1rem;
+@keyframes pulse {
+  0%, 100% { transform: translate(-50%, -50%) scale(1); }
+  50% { transform: translate(-50%, -50%) scale(1.1); }
 }
 
-.control-btn {
-  padding: 1rem 2rem;
-  border-radius: 99px;
-  font-weight: 600;
-  cursor: pointer;
-  border: none;
-  font-size: 1rem;
-  transition: all 0.2s;
+.pop-enter-active { animation: pop-in 0.5s ease-out; }
+@keyframes pop-in {
+  0% { opacity: 0; transform: translate(-50%, -50%) scale(0.5); }
+  70% { transform: translate(-50%, -50%) scale(1.1); }
+  100% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
 }
 
-.control-btn.primary {
-  background: white;
-  color: black;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
+/* ---------------------------------------------------- */
+/* RESPONSIVE DESIGN */
+/* ---------------------------------------------------- */
 
-.control-btn.primary:hover:not(:disabled) {
-  transform: translateY(-2px);
-  box-shadow: 0 5px 20px rgba(255, 255, 255, 0.2);
-}
-
-.control-btn.give-up {
-  background: transparent;
-  color: rgba(255, 255, 255, 0.6);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-}
-
-.control-btn.give-up:hover {
-  background: rgba(255, 255, 255, 0.1);
-  color: white;
-}
-
-.control-btn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-@media (min-width: 720px) {
-  .guess-actions {
-    flex-direction: row;
-    align-items: flex-start;
-  }
-
-  .submit-btn {
-    width: auto;
-    min-width: 180px;
+/* 1. Laptops & kleine Desktops */
+@media (max-width: 1024px) {
+  .visualizer-container {
+    width: 350px;
+    height: 350px;
   }
 }
 
-@media (max-width: 600px) {
-  .control-btn {
-    min-width: 100%;
+/* 2. Tablets & große Handys (Portrait) */
+@media (max-width: 768px) {
+  .game-stage {
+    gap: 2rem; /* Abstand etwas verringern */
   }
-
-  .mode-banner {
-    width: 100%;
-    justify-content: flex-start;
+  .visualizer-container {
+    width: 300px;
+    height: 300px;
+  }
+  .hero-input {
+    font-size: 1.2rem;
+    padding: 1rem 1.2rem;
   }
 }
 
+/* 3. Handys (Portrait) - max 480px */
 @media (max-width: 480px) {
-  .panel {
+  .game-header {
     padding: 1rem;
-    border-radius: 18px;
+  }
+  
+  .game-stage {
+    gap: 1.5rem; /* Weniger Abstand auf kleinen Screens */
+  }
+  
+  .visualizer-container {
+    width: 250px;
+    height: 250px;
   }
 
-  .chip {
-    width: 100%;
+  /* Kleinerer Text */
+  .hero-input {
+    font-size: 1.1rem;
+    padding: 0.9rem;
+  }
+  
+  .revealed-name {
+    font-size: 1.3rem;
+  }
+  
+  .control-btn {
+    padding: 0.8rem;
+    font-size: 0.9rem;
+  }
+
+  .status-toast {
+    top: 12%;
+    font-size: 0.8rem;
+    padding: 0.6rem 1rem;
+  }
+}
+
+/* 4. Handys im Querformat (Landscape) */
+/* Hier ändern wir das Layout von "untereinander" zu "nebeneinander",
+   damit man trotz geringer Höhe alles sieht. */
+@media (max-height: 720px) and (orientation: landscape) {
+  .game-header {
+    padding: 0.5rem 2rem; /* Flacher Header */
+  }
+  
+  .game-stage {
+    flex-direction: row; /* Nebeneinander! */
+    gap: 2rem;
     justify-content: center;
-    font-size: 0.75rem;
+    padding: 0.5rem 2rem;
   }
 
-  .mode-banner {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 0.5rem;
+  .audio-visualizer {
+    margin: 0;
   }
 
-  .guess-actions {
-    flex-direction: column;
+  .visualizer-container {
+    width: 180px; /* Viel kleiner */
+    height: 180px;
   }
 
-  .submit-btn {
-    width: 100%;
+  .input-area, .revealed-track {
+    max-width: 400px; /* Nimmt die rechte Seite ein */
+    flex: 1;
   }
-
+  
   .game-controls {
-    flex-direction: column;
+    padding: 0.5rem -3rem; /* Flacher Footer */
+  }
+  
+  .suggestions-menu {
+    max-height: 150px; /* Kleineres Menü */
   }
 }
 </style>
