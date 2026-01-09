@@ -534,7 +534,10 @@ function handleAvatarClick() {
                   :can-toggle="false"
                   :is-editable="isEditingInline"
                   :preview-image="avatarPreviewUrl"
-                  :static-src="displayAvatarUrl"  />
+                  :static-src="displayAvatarUrl"
+                  
+                  :fallback-to-store="isOwnProfile" 
+                />
               </button>
 
               <input

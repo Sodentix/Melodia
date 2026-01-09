@@ -23,6 +23,10 @@ const props = defineProps({
   staticSrc: {
     type: String,
     default: null
+  }, 
+  fallbackToStore: {
+    type: Boolean, 
+    default: true
   }
 });
 
@@ -44,17 +48,18 @@ const finalImageSrc = computed(() => {
     return props.staticSrc;
   }
 
-  if (userStore.user && userStore.user.avatarUrl) {
-      const rawUrl = userStore.user.avatarUrl;
-      const baseUrl = import.meta.env.VITE_API_URL 
-        ? import.meta.env.VITE_API_URL.replace(/\/$/, '') 
-        : '';
-      const fullUrl = rawUrl.startsWith('http') ? rawUrl : `${baseUrl}${rawUrl}`;
-      
-      return `${fullUrl}?t=${userStore.avatarTimestamp}`;
+  if (props.fallbackToStore && userStore.user && userStore.user.avatarUrl) {
+        const rawUrl = userStore.user.avatarUrl;
+        const baseUrl = import.meta.env.VITE_API_URL 
+          ? import.meta.env.VITE_API_URL.replace(/\/$/, '') 
+          : '';
+        const fullUrl = rawUrl.startsWith('http') ? rawUrl : `${baseUrl}${rawUrl}`;
+        
+        return `${fullUrl}?t=${userStore.avatarTimestamp}`;
     }
+    
     return null;
-});
+  });
 
 const handleImageError = async () => {
   // 1. Sofort UI aktualisieren: Platzhalter anzeigen
