@@ -384,10 +384,13 @@ export default {
     },
 
     // Normalize string for search (remove punctuation, special chars, normalize spaces)
+    // Handles: AC/DC -> acdc, don't -> dont, J. Cole -> j cole, etc.
     normalizeSearchString(str) {
       return (str || '')
         .toLowerCase()
-        .replace(/[^\w\s]/g, ' ') // Replace punctuation with space
+        .replace(/['"`´]/g, '') // Remove quotes/apostrophes completely
+        .replace(/\//g, '') // Remove slashes completely (AC/DC -> acdc)
+        .replace(/[^\w\s]/g, ' ') // Replace other punctuation with space
         .replace(/\s+/g, ' ') // Normalize multiple spaces to single space
         .trim();
     },
