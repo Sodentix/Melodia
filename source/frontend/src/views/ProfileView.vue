@@ -45,6 +45,17 @@ const viewingUsername = computed(() => {
   return route.params.username || storedUser.value?.username || null;
 });
 
+const displayAvatarUrl = computed(() => {
+  if (avatarPreviewUrl.value) return avatarPreviewUrl.value;
+
+  const url = profile.value?.avatarUrl;
+  if (!url) return null;
+
+  if (url.startsWith('http')) return url;
+
+  return `${apiRoot}${url.startsWith('/') ? '' : '/'}${url}`;
+});
+
 const formattedJoined = computed(() => {
   if (!profile.value?.createdAt) return null;
   const date = new Date(profile.value.createdAt);
@@ -169,13 +180,24 @@ async function fetchProfile() {
   }
 
   try {
-    const res = await fetch(`${usersBase}/profile/${encodeURIComponent(usernameParam)}`, {
+    // Try with token first (if available)
+    let res = await fetch(`${usersBase}/profile/${encodeURIComponent(usernameParam)}`, {
       headers: {
         Authorization: token ? `Bearer ${token}` : '',
         Accept: 'application/json',
       },
       credentials: 'include',
     });
+
+    // If we get 401/403 with a token, retry without token (public profile should work without auth)
+    if (!res.ok && (res.status === 401 || res.status === 403) && token) {
+      res = await fetch(`${usersBase}/profile/${encodeURIComponent(usernameParam)}`, {
+        headers: {
+          Accept: 'application/json',
+        },
+        credentials: 'include',
+      });
+    }
 
     if (!res.ok) {
       if (res.status === 404) {
@@ -500,22 +522,26 @@ function handleAvatarClick() {
       <div class="profile-header" :class="{ 'profile-header--expanded': isEditingInline }">
         <div class="profile-header-top">
           <div class="identity">
-            <div v-if="isOwnProfile" class="profile-avatar-block">
+            <div class="profile-avatar-block">
               <button
                 type="button"
                 class="avatar-orb-button"
                 :class="{ 'avatar-orb-button--editable': isEditingInline }"
-                @click="handleAvatarClick"
+                @click="handleAvatarClick" 
               >
                 <ProfilePictureDebug
                   :key="avatarRefreshKey"
                   :can-toggle="false"
                   :is-editable="isEditingInline"
                   :preview-image="avatarPreviewUrl"
+                  :static-src="displayAvatarUrl"
+                  
+                  :fallback-to-store="isOwnProfile" 
                 />
               </button>
 
               <input
+                v-if="isOwnProfile"
                 ref="avatarFileInput"
                 type="file"
                 accept="image/*"

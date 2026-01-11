@@ -95,13 +95,16 @@ router.get('/profile/:username', auth(false, false), async (req, res) => {
         }
 
         const stats = await Stats.findOne({ user: user._id });
+
+        console.log('User from DB:', user); 
+  console.log('Avatar URL specific:', user.avatarUrl);
         
         const publicProfile = {
             firstname: user.firstName,
             displayName: user.username,
             avatarUrl: user.avatarUrl,
             stats: stats ? {
-                totalGames: stats.averageTimeMs,
+                totalGames: stats.totalPlayed,
                 wins: stats.wins,
                 averageTimeMs: stats.averageTimeMs,
                 bestStreak: stats.bestStreak,

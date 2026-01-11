@@ -2,10 +2,12 @@
 import { defineComponent } from 'vue'
 import BaseCard from '@/components/BaseCard.vue'
 import LeaderboardComponent from '@/components/LeaderboardComponent.vue';
+import SecondBaseCard from '@/components/SecondBaseCard.vue';
 
 export default defineComponent({
   components: {
     BaseCard,
+    SecondBaseCard,
     LeaderboardComponent
   },
 })
@@ -41,7 +43,7 @@ export default defineComponent({
       <h1 id="howtoplay">How to play</h1>
       <h2>Drei einfache Schritte zwischen dir und dem Sieg. Höre, erkenne, und dominiere die Charts.</h2>
       <div class="explanationDiv">
-        <BaseCard
+        <SecondBaseCard
           class="explanationCard"
           title="1. Listen"
           description="Ein kurzer Song-Ausschnitt startet. Lausche genau auf Melodie und Rhythmus."
@@ -50,7 +52,7 @@ export default defineComponent({
           cardWidth="100%"
           cardHeight="16rem"
         />
-        <BaseCard
+        <SecondBaseCard
           class="explanationCard"
           title="2. Guess"
           description="Tippe den Titel oder Künstler ein - je schneller du rätst, desto mehr Punkte gibt's!"
@@ -59,7 +61,7 @@ export default defineComponent({
           cardWidth="100%"
           cardHeight="16rem"
         />
-        <BaseCard
+        <SecondBaseCard
           class="explanationCard"
           title="3. Score"
           description="Verdiene Punkte, steige im Ranking auf und werde der ultimative Beat-Master."

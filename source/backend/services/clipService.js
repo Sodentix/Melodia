@@ -236,14 +236,26 @@ function listClips(baseUrl) {
   return entries.map(e => simplifyClip(e, baseUrl));
 }
 
+// Normalize string for search (remove punctuation, special chars, normalize spaces)
+// Handles: AC/DC -> acdc, don't -> dont, J. Cole -> j cole, etc.
+function normalizeSearchString(str) {
+  return (str || '')
+    .toLowerCase()
+    .replace(/['"`´]/g, '') // Remove quotes/apostrophes completely
+    .replace(/\//g, '') // Remove slashes completely (AC/DC -> acdc)
+    .replace(/[^\w\s]/g, ' ') // Replace other punctuation with space
+    .replace(/\s+/g, ' ') // Normalize multiple spaces to single space
+    .trim();
+}
+
 function searchClips(query, baseUrl) {
-  const q = (query || '').toString().trim().toLowerCase();
+  const q = normalizeSearchString(query);
   if (!q) return [];
   const items = listClips(baseUrl);
   return items.filter(it => {
-    const hay = [it.name, ...(it.artists || []).map(a => a.name)].join(' ').toLowerCase();
+    const hay = normalizeSearchString([it.name, ...(it.artists || []).map(a => a.name)].join(' '));
     return hay.includes(q);
-  }).slice(0, 20);
+  }).slice(0, 30); // Increased from 20 to 30 for more results
 }
 
 function listTracksByCategory(baseUrl, categoryId) {

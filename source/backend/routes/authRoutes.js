@@ -44,6 +44,7 @@ function formatUser(user) {
     firstName: user.firstName,
     lastName: user.lastName,
     emailVerified: user.emailVerified,
+    avatarUrl: user.avatarUrl,
     createdAt: user.createdAt,
     updatedAt: user.updatedAt,
   };

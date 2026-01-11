@@ -56,29 +56,6 @@ const cardStyle = computed(() => ({
       <p class="title">{{ title }}</p>
       <p class="description">{{ description }}</p>
     </div>
-
-    <div class="play-action-wrapper">
-      <svg 
-        xmlns="http://www.w3.org/2000/svg" 
-        viewBox="0 0 24 24"
-        class="play-svg"
-      >
-        <defs>
-          <linearGradient id="triColorGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-            <stop offset="0%" stop-color="var(--accent-pink, #f02eaa)" />
-            <stop offset="50%" stop-color="var(--accent-cyan, #06b6d4)" />
-            <stop offset="100%" stop-color="var(--accent-green, #4ade80)" />
-          </linearGradient>
-        </defs>
-        
-        <path 
-          class="play-path"
-          fill="url(#triColorGrad)" 
-          d="M12 2C6.477 2 2 6.477 2 12s4.477 10 10 10s10-4.477 10-10S17.523 2 12 2M9.5 16.5v-9l7 4.5z"
-        />
-      </svg>
-    </div>
-
   </div>
 </template>
 
