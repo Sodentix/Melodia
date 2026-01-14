@@ -302,7 +302,9 @@ async function deleteAvatar() {
     // Globalen Store updaten -> Alle Bilder in der App verschwinden
     userStore.setAvatarUrl(null);
 
+    window.location.reload();
     editFeedback.value = 'Profilbild entfernt.';
+    
   } catch(e) {
     console.error(e);
     editFeedback.value = 'Serverfehler beim Löschen.';
@@ -395,6 +397,8 @@ async function saveProfileChanges(updated) {
     if (!pendingEmailVerification.value) {
       isEditingInline.value = false;
     }
+
+    window.location.reload();
   } catch (err) {
     console.error('Save profile changes failed:', err);
     editFeedback.value = 'Es ist ein Fehler beim Speichern aufgetreten.';

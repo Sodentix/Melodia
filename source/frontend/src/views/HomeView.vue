@@ -10,6 +10,18 @@ export default defineComponent({
     SecondBaseCard,
     LeaderboardComponent
   },
+
+  mounted() {
+    // 1. Prüfen: Wurde schon neu geladen?
+    if (!sessionStorage.getItem('reloaded')) {
+      // 2. Wenn NEIN: Flag setzen und Seite neu laden
+      sessionStorage.setItem('reloaded', 'true');
+      window.location.reload();
+    } else {
+      // 3. Wenn JA: Flag entfernen (damit es beim nächsten richtigen Besuch wieder lädt)
+      sessionStorage.removeItem('reloaded');
+    }
+  }
 })
 </script>
 
