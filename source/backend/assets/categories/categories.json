@@ -1,10 +1,10 @@
 [
   {
-    "id": "all",
-    "name": "Hit Mix",
-    "description": "A mix of all available songs",
-    "difficulty": "medium",
-    "accent": "#FF0055"
+    "id": "pop",
+    "name": "Pop",
+    "description": "Pop music for good mood",
+    "difficulty": "easy",
+    "accent": "#FF4FD8"
   },
   {
     "id": "holiday",
@@ -12,5 +12,33 @@
     "description": "Festive tunes for the season",
     "difficulty": "easy",
     "accent": "#00FF55"
+  },
+  {
+    "id": "masterplaylist",
+    "name": "Master Playlist",
+    "description": "A mix of all available songs",
+    "difficulty": "medium",
+    "accent": "#FF0055"
+  },
+  {
+    "id": "newAlternative",
+    "name": "New Alternative",
+    "description": "A mix of all available songs",
+    "difficulty": "hard",
+    "accent": "#06ffda"
+  },
+  {
+    "id": "hiphop",
+    "name": "Hip-Hop",
+    "description": "A mix of all available songs",
+    "difficulty": "really hard",
+    "accent": "#FF0675"
+  },
+  {
+    "id": "eightiesNineties",
+    "name": "80s & 90s",
+    "description": "80s and 90s groove for everyone",
+    "difficulty": "easy",
+    "accent": "#00f7ffff"
   }
 ]

@@ -1,5 +1,6 @@
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
+const { getJwtSecret } = require('../config/auth');
 
 function auth(required = true, checkEmailVerification = false) {
   return async function authMiddleware(req, res, next) {
@@ -13,12 +14,12 @@ function auth(required = true, checkEmailVerification = false) {
     }
 
     try {
-      const secret = process.env.JWT_SECRET || 'dev-secret-change-me';
+      const secret = getJwtSecret();
       const payload = jwt.verify(token, secret);
       
       // If email verification is required, fetch user from database
       if (checkEmailVerification) {
-        const user = await User.findById(payload.sub);
+        const user = await User.findByIdNotDeleted(payload.sub);
         if (!user) {
           return res.status(401).json({ message: 'User not found' });
         }

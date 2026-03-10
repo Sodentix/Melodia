@@ -2,6 +2,7 @@
 import { ref, computed, watch } from 'vue';
 import { Icon } from '@iconify/vue';
 import { userStore } from '@/stores/userStore';
+import { getApiBase } from '@/api/client';
 
 const props = defineProps({
   canToggle: {
@@ -50,10 +51,8 @@ const finalImageSrc = computed(() => {
 
   if (props.fallbackToStore && userStore.user && userStore.user.avatarUrl) {
         const rawUrl = userStore.user.avatarUrl;
-        const baseUrl = import.meta.env.VITE_API_URL 
-          ? import.meta.env.VITE_API_URL.replace(/\/$/, '') 
-          : '';
-        const fullUrl = rawUrl.startsWith('http') ? rawUrl : `${baseUrl}${rawUrl}`;
+        const baseUrl = getApiBase();
+        const fullUrl = rawUrl.startsWith('http') ? rawUrl : `${baseUrl}${rawUrl.startsWith('/') ? '' : '/'}${rawUrl}`;
         
         return `${fullUrl}?t=${userStore.avatarTimestamp}`;
     }

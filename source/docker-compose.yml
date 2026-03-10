@@ -1,0 +1,51 @@
+services:
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "3001:80"
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    env_file:
+      - ./backend/.env
+    environment:
+      - NODE_ENV=production
+      - HOST=0.0.0.0
+      - PORT=5001
+      - MONGODB_URI=mongodb://${MONGO_USER:-melodia}:${MONGO_PASSWORD:-melodia_secret}@mongodb:27017/melodia?authSource=admin
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    volumes:
+      - backend-clips:/app/assets/clips
+      - backend-avatars:/app/assets/avatars
+    restart: unless-stopped
+
+  mongodb:
+    image: mongo:7
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_USER:-melodia}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD:-melodia_secret}
+      MONGO_INITDB_DATABASE: melodia
+    volumes:
+      - mongodb-data:/data/db
+    ports:
+      - "27017:27017"
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  backend-clips:
+  backend-avatars:
+  mongodb-data:

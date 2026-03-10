@@ -1,0 +1,411 @@
+/**
+ * Global design system - shared across components.
+ * Components should use these classes; keep only layout/positioning in scoped styles.
+ */
+
+/* ========== Page background (AuthView-style) ========== */
+.page-bg {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background:
+    radial-gradient(ellipse 70% 60% at 15% 30%, rgba(255, 79, 219, 0.15), transparent 50%),
+    radial-gradient(ellipse 50% 50% at 85% 70%, rgba(5, 217, 255, 0.12), transparent 50%),
+    linear-gradient(180deg, #05060c 0%, #080a14 40%, #060818 100%);
+  pointer-events: none;
+}
+
+/* ========== Glass card (AuthView-style) ========== */
+.glass-card {
+  background: rgba(10, 12, 28, 0.9);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 24px;
+  box-shadow:
+    0 24px 64px rgba(0, 0, 0, 0.4),
+    0 0 0 1px rgba(255, 79, 219, 0.06);
+  backdrop-filter: blur(24px);
+}
+
+.brand-text {
+  font-size: 1.35rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  font-weight: 600;
+  background: linear-gradient(135deg, #ff4fdb, #05d9ff);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* ========== Cards ========== */
+.card {
+  border-radius: 26px;
+  padding: 2rem 2.4rem;
+  background: linear-gradient(135deg, rgba(13, 9, 46, 0.96), rgba(7, 9, 24, 0.96)) padding-box;
+  border: 1px solid transparent;
+  box-shadow: 0 18px 40px rgba(5, 217, 255, 0.18);
+}
+
+.card--gradient {
+  background:
+    linear-gradient(135deg, rgba(13, 9, 46, 0.96), rgba(7, 9, 24, 0.96)) padding-box,
+    linear-gradient(120deg, rgba(255, 0, 200, 0.5), rgba(5, 217, 255, 0.4)) border-box;
+}
+
+.card__title {
+  font-size: 1.4rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text);
+  margin: 0 0 1.5rem 0;
+}
+
+/* ========== Buttons ========== */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  border: 1px solid var(--stroke);
+  background: rgba(255, 255, 255, 0.02);
+  color: #ffffff;
+  padding: 10px 22px;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  cursor: pointer;
+  transition: all 0.24s ease;
+  text-decoration: none;
+}
+
+.btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+}
+
+.btn:disabled {
+  opacity: 0.7;
+  cursor: default;
+}
+
+.btn--primary {
+  border: none;
+  background: var(--gradient-accent);
+  box-shadow: 0 10px 32px rgba(255, 0, 200, 0.18);
+  color: #050505;
+}
+
+.btn--danger {
+  background: linear-gradient(135deg, #c92a4a, #a01e3a);
+  border: 1px solid rgba(255, 79, 131, 0.5);
+  color: #fff;
+  box-shadow: 0 4px 16px rgba(255, 79, 131, 0.25);
+}
+
+.btn--danger:hover:not(:disabled) {
+  background: linear-gradient(135deg, #d93a5a, #b02e4a);
+  border-color: rgba(255, 79, 131, 0.7);
+  box-shadow: 0 6px 20px rgba(255, 79, 131, 0.35);
+}
+
+.btn--ghost {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: rgba(234, 238, 255, 0.8);
+}
+
+.btn--ghost:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.btn--small {
+  padding: 0.5rem 1rem;
+  font-size: 0.88rem;
+}
+
+.btn--secondary {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  color: #fff;
+}
+
+.btn--secondary:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.35);
+}
+
+/* ========== Form elements ========== */
+.form-row {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.form-row--switch {
+  flex-direction: row;
+  align-items: center;
+}
+
+.form-label {
+  font-size: 0.8rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(234, 238, 255, 0.7);
+}
+
+.form-input,
+.form-select {
+  padding: 0.6rem 0.9rem;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(4, 6, 18, 0.9);
+  color: #fff;
+  font-size: 0.95rem;
+}
+
+.form-input:focus,
+.form-select:focus {
+  outline: none;
+  border-color: rgba(5, 217, 255, 0.5);
+}
+
+.form-input::placeholder {
+  color: rgba(240, 244, 255, 0.45);
+}
+
+.form-row--switch input[type="checkbox"] {
+  width: 1.2rem;
+  height: 1.2rem;
+  accent-color: var(--accent-cyan);
+}
+
+.form-range {
+  width: 100%;
+  height: 6px;
+  -webkit-appearance: none;
+  appearance: none;
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 3px;
+}
+
+.form-range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--gradient-accent);
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(5, 217, 255, 0.4);
+}
+
+.form-range::-moz-range-thumb {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--gradient-accent);
+  cursor: pointer;
+  border: none;
+}
+
+.form-hint {
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  color: rgba(234, 238, 255, 0.48);
+}
+
+/* ========== Feedback messages ========== */
+.feedback {
+  padding: 0.75rem 1rem;
+  border-radius: 12px;
+  font-size: 0.9rem;
+  margin-bottom: 1rem;
+}
+
+.feedback--success {
+  background: rgba(80, 255, 210, 0.15);
+  color: #d8fff3;
+}
+
+.feedback--error {
+  background: rgba(255, 79, 131, 0.15);
+  color: #ffd9e5;
+}
+
+/* ========== Spinner ========== */
+.spinner {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 3px solid rgba(255, 255, 255, 0.16);
+  border-top-color: var(--accent-cyan);
+  animation: spin 0.9s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ========== Danger zone (delete account, etc.) ========== */
+.danger-zone {
+  margin-top: 2.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid rgba(255, 79, 131, 0.25);
+}
+
+.danger-zone__title {
+  font-size: 0.9rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #ff6b8a;
+  margin: 0 0 0.5rem 0;
+}
+
+.danger-zone__desc {
+  font-size: 0.85rem;
+  color: rgba(234, 238, 255, 0.65);
+  margin: 0 0 1rem 0;
+  line-height: 1.4;
+}
+
+.danger-zone__form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.danger-zone__hint {
+  font-size: 0.8rem;
+  color: rgba(234, 238, 255, 0.6);
+  margin: 0;
+}
+
+.danger-zone__input {
+  padding: 0.6rem 0.9rem;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 79, 131, 0.4);
+  background: rgba(255, 79, 131, 0.08);
+  color: #fff;
+  font-size: 0.95rem;
+}
+
+.danger-zone__input:focus {
+  outline: none;
+  border-color: rgba(255, 79, 131, 0.7);
+  box-shadow: 0 0 0 2px rgba(255, 79, 131, 0.2);
+}
+
+.danger-zone__actions {
+  display: flex;
+  gap: 0.75rem;
+}
+
+/* ========== Validation rules (registration) ========== */
+.validation-rules {
+  list-style: none;
+  margin: 0.5rem 0 0 0;
+  padding: 0;
+  font-size: 0.82rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.validation-rules__item,
+.validation-rules li {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: rgba(255, 121, 131, 0.9);
+}
+
+.validation-rules__item--met,
+.validation-rules li.met {
+  color: rgba(80, 255, 210, 0.9);
+}
+
+.validation-rules__icon,
+.validation-rules .rule-icon {
+  font-weight: bold;
+  min-width: 1em;
+}
+
+/* ========== Page loading/error states ========== */
+.page-loading,
+.page-error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  color: var(--text);
+}
+
+/* ========== Auth-style page background (shared) ========== */
+.page-bg {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background:
+    radial-gradient(ellipse 70% 60% at 15% 30%, rgba(255, 79, 219, 0.15), transparent 50%),
+    radial-gradient(ellipse 50% 50% at 85% 70%, rgba(5, 217, 255, 0.12), transparent 50%),
+    linear-gradient(180deg, #05060c 0%, #080a14 40%, #060818 100%);
+  pointer-events: none;
+}
+
+/* ========== Glass card (AuthView-style) ========== */
+.glass-card {
+  background: rgba(10, 12, 28, 0.9);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 24px;
+  box-shadow:
+    0 24px 64px rgba(0, 0, 0, 0.4),
+    0 0 0 1px rgba(255, 79, 219, 0.06);
+  backdrop-filter: blur(24px);
+}
+
+/* ========== Brand logo text (shared) ========== */
+.brand-logo-text {
+  font-size: 1.35rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  font-weight: 600;
+  background: linear-gradient(135deg, #ff4fdb, #05d9ff);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* ========== Auth-style page background (shared) ========== */
+.page-bg {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background:
+    radial-gradient(ellipse 70% 60% at 15% 30%, rgba(255, 79, 219, 0.15), transparent 50%),
+    radial-gradient(ellipse 50% 50% at 85% 70%, rgba(5, 217, 255, 0.12), transparent 50%),
+    linear-gradient(180deg, #05060c 0%, #080a14 40%, #060818 100%);
+  pointer-events: none;
+}
+
+/* ========== Glass card (AuthView-style) ========== */
+.glass-card {
+  background: rgba(10, 12, 28, 0.9);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 24px;
+  box-shadow:
+    0 24px 64px rgba(0, 0, 0, 0.4),
+    0 0 0 1px rgba(255, 79, 219, 0.06);
+  backdrop-filter: blur(24px);
+}
+
+/* ========== Brand logo text (gradient) ========== */
+.brand-logo {
+  font-size: 1.35rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  font-weight: 600;
+  background: linear-gradient(135deg, #ff4fdb, #05d9ff);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}

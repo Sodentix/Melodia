@@ -3,15 +3,14 @@ import { computed, onMounted, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { Icon } from '@iconify/vue';
 import ProfilePictureDebug from '@/components/ProfilePicture.vue';
-import { userStore } from '@/stores/userStore'; // Store importiert
-import AvatarCropper from '@/components/AvatarCropper.vue'; 
+import { userStore } from '@/stores/userStore';
+import AvatarCropper from '@/components/AvatarCropper.vue';
+import { getApiBase, getToken } from '@/api/client';
 
 const route = useRoute();
 const router = useRouter();
 
-const apiRoot = import.meta.env.VITE_API_URL
-  ? import.meta.env.VITE_API_URL.replace(/\/$/, '')
-  : '';
+const apiRoot = getApiBase();
 const usersBase = apiRoot.endsWith('/users') ? apiRoot : `${apiRoot}/users`;
 
 const loading = ref(true);
@@ -115,7 +114,7 @@ async function fetchProfile() {
   profile.value = null;
   stats.value = null;
 
-  const token = localStorage.getItem('melodia_token') || localStorage.getItem('token') || '';
+  const token = getToken();
 
   try {
     const raw = localStorage.getItem('melodia_user');
@@ -268,7 +267,7 @@ async function deleteAvatar() {
   
   if (!confirm('Möchtest du dein Profilbild wirklich entfernen?')) return;
 
-  const token = localStorage.getItem('melodia_token') || localStorage.getItem('token') || '';
+  const token = getToken();
   if (!token) {
      editFeedback.value = 'Bitte melde dich erneut an.';
      return;
@@ -314,7 +313,7 @@ async function deleteAvatar() {
 async function saveProfileChanges(updated) {
   if (!isOwnProfile.value || !usersBase) return;
 
-  const token = localStorage.getItem('melodia_token') || localStorage.getItem('token') || '';
+  const token = getToken();
 
   if (!token) {
     editFeedback.value = 'Bitte melde dich erneut an.';
@@ -446,7 +445,7 @@ function onCropperCancel() {
 
 async function uploadAvatarAfterProfile(file) {
   if (!file || !usersBase) return false;
-  const token = localStorage.getItem('melodia_token') || localStorage.getItem('token') || '';
+  const token = getToken();
   if (!token) {
     avatarError.value = 'Bitte melde dich erneut an.';
     return false;
@@ -509,9 +508,10 @@ function handleAvatarClick() {
 
 <template>
   <div class="profile-page">
+    <div class="page-bg"></div>
     <div v-if="loading" class="profile-loading">
       <div class="spinner"></div>
-      <p>Profil wird geladen...</p>
+      <p>{{ $t('profile.loading') }}</p>
     </div>
 
     <div v-else-if="error" class="profile-error">
@@ -556,7 +556,7 @@ function handleAvatarClick() {
 
             <div class="identity-text">
               <p class="profile-eyebrow">
-                {{ isOwnProfile ? 'Dein Melodia Profil' : 'Melodia Spielerprofil' }}
+                {{ isOwnProfile ? $t('profile.yourProfile') : $t('profile.playerProfile') }}
               </p>
               <h1 class="profile-name">
                 {{ profile.firstName || profile.username }}
@@ -566,26 +566,26 @@ function handleAvatarClick() {
                 @{{ profile.username }}
               </p>
               <p v-if="formattedJoined" class="profile-meta">
-                Dabei seit {{ formattedJoined }}
+                {{ $t('profile.joinedSince', { date: formattedJoined }) }}
               </p>
             </div>
           </div>
 
           <div v-if="isOwnProfile && profile.email" class="profile-side">
-            <p class="label">E-Mail</p>
+            <p class="label">{{ $t('profile.email') }}</p>
             <p class="value">{{ profile.email }}</p>
 
             <button
               v-if="!isEditingInline"
               type="button"
-              class="btn ghost profile-edit-toggle"
+              class="btn btn--ghost profile-edit-toggle"
               @click="isEditingInline ? closeEditProfile() : openEditProfile()"
             >
               <Icon
                 :icon="isEditingInline ? 'solar:check-read-line-duotone' : 'solar:pen-2-bold-duotone'"
                 style="margin-right: 0.4rem; font-size: 1rem"
               />
-              {{ isEditingInline ? 'Fertig' : 'Bearbeiten' }}
+              {{ isEditingInline ? $t('profile.done') : $t('profile.edit') }}
             </button>
           </div>
         </div>
@@ -653,7 +653,7 @@ function handleAvatarClick() {
           <div class="edit-actions">
             <button
               type="button"
-              class="btn ghost"
+              class="btn btn--ghost"
               :disabled="editSaving"
               @click="closeEditProfile"
             >
@@ -669,7 +669,7 @@ function handleAvatarClick() {
             </button>
             <button
               type="button"
-              class="btn primary"
+              class="btn btn--primary"
               :disabled="editSaving"
               @click="saveProfileChanges(profile)"
             >
@@ -764,7 +764,7 @@ function handleAvatarClick() {
 .profile-page {
   min-height: calc(100vh - 5rem);
   padding: 4rem 3rem 5rem 3rem;
-  background-color: var(--bg);
+  position: relative;
 }
 
 .profile-loading,
@@ -994,26 +994,12 @@ function handleAvatarClick() {
     border-color 0.25s ease;
   text-decoration: none;
 }
-.btn.primary {
-  border: none;
-  background: var(--gradient-accent);
-  box-shadow: 0 10px 28px rgba(255, 0, 200, 0.25);
-  color: #050505;
-}
-.btn.ghost {
-  background: rgba(255, 255, 255, 0.03);
-}
 .btn:hover:not(:disabled) {
   transform: translateY(-1px);
   box-shadow:
     0 0 16px rgba(255, 0, 200, 0.45),
     0 0 26px rgba(5, 217, 255, 0.45);
   border-color: rgba(255, 255, 255, 0.4);
-}
-.btn.primary:hover:not(:disabled) {
-  box-shadow:
-    0 0 18px rgba(255, 0, 200, 0.65),
-    0 0 32px rgba(5, 217, 255, 0.6);
 }
 .btn:active:not(:disabled) {
   transform: translateY(0);

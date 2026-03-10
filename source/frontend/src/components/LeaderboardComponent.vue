@@ -4,44 +4,56 @@
             <div class="content">
                 <div class="topText">
                     <div>
-                        <p class="textType1">Live Chart</p>
-                        <p class="textType2">Top Players</p>
+                        <p class="textType1">{{ $t('leaderboard.liveChart') }}</p>
+                        <p class="textType2">{{ $t('leaderboard.topPlayers') }}</p>
                     </div>
                     <div>
-                        <p class="textType1">Your rank</p>
+                        <p class="textType1">{{ $t('leaderboard.yourRank') }}</p>
                         <p class="textType2">{{ userRank ? `#${userRank}` : '–' }}</p>
                     </div>
                 </div>
-                <div class="ranking">
+                <div v-if="errorMessage" class="error-banner">{{ errorMessage }}</div>
+                <div v-else-if="loading" class="ranking loading-state">
+                    <div class="spinner" aria-hidden="true"></div>
+                    <p>{{ $t('leaderboard.loading') }}</p>
+                </div>
+                <div v-else-if="leaderboard.length === 0" class="ranking empty-state">
+                    <p>{{ $t('leaderboard.empty') }}</p>
+                </div>
+                <div v-else class="ranking">
                     <div class="podium">
                         <div class="podiumItem second" :class="{ highlight: leaderboard[1]?.username === currentUsername }">
                             <p class="textType1">2</p>
                             <p class="textType2 username" :title="leaderboard[1]?.username">
-                              <a :href="`/profile/${leaderboard[1]?.username}`">
-                                {{ leaderboard[1]?.username || "–" }}
-                              </a>
+                              <router-link v-if="leaderboard[1]?.username" :to="{ name: 'profile', params: { username: leaderboard[1].username } }">
+                                {{ leaderboard[1].username }}
+                              </router-link>
+                              <span v-else>–</span>
                             </p>
-                            <p class="textType2">{{ leaderboard[1]?.totalPoints.toLocaleString() }}</p>
+                            <p class="textType2">{{ (leaderboard[1]?.totalPoints ?? 0).toLocaleString() }}</p>
                         </div>
 
                         <div class="podiumItem first" :class="{ highlight: leaderboard[0]?.username === currentUsername }">
                             <Icon class="crown" icon="mdi:crown"/>
                             <p class="textType1">1</p>
                             <p class="textType2 username" :title="leaderboard[0]?.username">
-                              <a :href="`/profile/${leaderboard[0]?.username}`">
-                                {{ leaderboard[0]?.username || "–" }}
-                              </a>                              </p>
-                            <p class="textType2">{{ leaderboard[0]?.totalPoints.toLocaleString() }}</p>
+                              <router-link v-if="leaderboard[0]?.username" :to="{ name: 'profile', params: { username: leaderboard[0].username } }">
+                                {{ leaderboard[0].username }}
+                              </router-link>
+                              <span v-else>–</span>
+                            </p>
+                            <p class="textType2">{{ (leaderboard[0]?.totalPoints ?? 0).toLocaleString() }}</p>
                         </div>
 
                         <div class="podiumItem third" :class="{ highlight: leaderboard[2]?.username === currentUsername }">
                             <p class="textType1">3</p>
                             <p class="textType2 username" :title="leaderboard[2]?.username">
-                              <a :href="`/profile/${leaderboard[2]?.username}`">
-                                {{ leaderboard[2]?.username || "–" }}
-                              </a>
+                              <router-link v-if="leaderboard[2]?.username" :to="{ name: 'profile', params: { username: leaderboard[2].username } }">
+                                {{ leaderboard[2].username }}
+                              </router-link>
+                              <span v-else>–</span>
                             </p>
-                            <p class="textType2">{{ leaderboard[2]?.totalPoints.toLocaleString() }}</p>
+                            <p class="textType2">{{ (leaderboard[2]?.totalPoints ?? 0).toLocaleString() }}</p>
                         </div>
                     </div>
 
@@ -49,17 +61,17 @@
                         <table>
                             <thead>
                                 <tr>
-                                <th>Rank</th>
-                                <th>Player</th>
-                                <th class="hide-mobile">Win Rate</th>
-                                <th class="hide-mobile">Streak</th>
-                                <th>Score</th>
+                                <th scope="col">{{ $t('leaderboard.rank') }}</th>
+                                <th scope="col">{{ $t('leaderboard.player') }}</th>
+                                <th scope="col" class="hide-mobile">{{ $t('leaderboard.winRate') }}</th>
+                                <th scope="col" class="hide-mobile">{{ $t('leaderboard.streak') }}</th>
+                                <th scope="col">{{ $t('leaderboard.score') }}</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <tr v-for="player in leaderboard.slice(3)" :key="player.username" :class="{ highlight: player.username === currentUsername }">
                                 <td>#{{ player.rank }}</td>
-                                  <td><a :href="`/profile/${player.username}`">{{ player.username }}</a></td>
+                                  <td><router-link :to="{ name: 'profile', params: { username: player.username } }">{{ player.username }}</router-link></td>
                                   <td class="hide-mobile">{{ player.winRate }}%</td>
                                   <td class="hide-mobile">{{ player.bestStreak }}</td>
                                 <td>{{ player.totalPoints.toLocaleString() }}</td>
@@ -75,28 +87,35 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
-import axios from "axios";
-import { Icon } from '@iconify/vue';
-const leaderboard = ref([]);
-const userRank = ref(null);
-const currentUsername = ref(null);
-const apiRoot = import.meta.env.VITE_API_URL
-    ? import.meta.env.VITE_API_URL.replace(/\/$/, '')
-    : '';
+import { Icon } from '@iconify/vue'
+import { getApiBase, getAuthHeaders } from '@/api/client'
+
+const leaderboard = ref([])
+const userRank = ref(null)
+const currentUsername = ref(null)
+const loading = ref(true)
+const errorMessage = ref(null)
 
 onMounted(async () => {
+  loading.value = true
+  errorMessage.value = null
   try {
-    const { data } = await axios.get(apiRoot + "/stats/leaderboard", {
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem('melodia_token')}`
-      }
-    });
-    console.log(data);
-    leaderboard.value = data.leaderboard || [];
-    userRank.value = data.userRank;
-    currentUsername.value = data.currentUsername;
+    const base = getApiBase()
+    const res = await fetch(`${base}/stats/leaderboard`, {
+      headers: getAuthHeaders(),
+    })
+    if (!res.ok) {
+      errorMessage.value = 'Leaderboard konnte nicht geladen werden.'
+      return
+    }
+    const data = await res.json()
+    leaderboard.value = data.leaderboard || []
+    userRank.value = data.userRank
+    currentUsername.value = data.currentUsername
   } catch (err) {
-    console.error("Fehler:", err);
+    errorMessage.value = 'Leaderboard konnte nicht geladen werden.'
+  } finally {
+    loading.value = false
   }
 })
 </script>
@@ -108,12 +127,14 @@ a {
   color: inherit;
 }
 .leaderboard {
-    background-color: var(--card);
+    background: rgba(10, 12, 28, 0.85);
     width: min(100%, 40rem);
     min-height: 33rem;
-    border: 1px solid rgba(255,255,255,0.03);
+    border: 1px solid rgba(255, 255, 255, 0.06);
     padding-top: 0;
-    border-radius: 16px;
+    border-radius: 20px;
+    backdrop-filter: blur(16px);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(255, 79, 219, 0.04);
 }
 
 .content {
@@ -175,6 +196,39 @@ a {
 .podiumItem.third {
     transform: translateY(0);
     box-shadow: 0 0 20px 2px #c37300;
+}
+
+.error-banner {
+  padding: 1rem;
+  margin: 1rem 0;
+  background: rgba(255, 79, 131, 0.15);
+  border: 1px solid rgba(255, 79, 131, 0.4);
+  border-radius: 12px;
+  color: #ffd9e5;
+}
+
+.loading-state, .empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  min-height: 12rem;
+  color: var(--text);
+  opacity: 0.9;
+}
+
+.loading-state .spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid rgba(255, 255, 255, 0.1);
+  border-top-color: var(--accent-cyan, #00ecff);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
 }
 
 .leaderboard-list {

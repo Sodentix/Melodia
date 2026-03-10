@@ -2,6 +2,7 @@ const express = require('express');
 const auth = require('../middleware/auth');
 const Stats = require('../models/Stats');
 const User = require('../models/User');
+const appLogger = require('../utils/logger');
 
 const router = express.Router();
 
@@ -55,7 +56,7 @@ router.get('/me', auth(true, true), async (req, res) => {
       modes,
     });
   } catch (err) {
-    console.error('Get stats error:', err);
+    appLogger.error('Get stats error', { err });
     return res.status(500).json({ message: 'Failed to fetch stats' });
   }
 });
@@ -64,13 +65,13 @@ router.get('/me', auth(true, true), async (req, res) => {
 router.get('/leaderboard', auth(false), async (req, res) => {
   try {
     const limit = Math.min(Number(req.query.limit) || 10, 100);
-    const skip = Math.max(Number(req.query.skip) || 0, 0);
+    const skip = Math.min(Math.max(Number(req.query.skip) || 0, 0), 5000);
 
     const leaderboard = await Stats.find({ totalPoints: { $gt: 0 } })
       .sort({ totalPoints: -1, totalWins: -1, bestStreak: -1, bestTimeMs: 1 })
       .limit(limit)
       .skip(skip)
-      .populate('user', 'username email firstName lastName')
+      .populate('user', 'username firstName lastName')
       .lean();
 
     const formatted = leaderboard.map((stat, index) => {
@@ -97,11 +98,8 @@ router.get('/leaderboard', auth(false), async (req, res) => {
     let userStats = null;
     let currentUsername = null;
 
-    console.log('Leaderboard request user:', req.user);
-
     if (req.user) {
       const userStatDoc = await Stats.findOne({ user: req.user.id }).populate('user', 'username');
-      console.log('User stats doc found:', !!userStatDoc);
       if (userStatDoc) {
         const count = await Stats.countDocuments({
           $or: [
@@ -114,7 +112,6 @@ router.get('/leaderboard', auth(false), async (req, res) => {
         userRank = count + 1;
         userStats = userStatDoc.toObject();
         currentUsername = userStatDoc.user?.username;
-        console.log('Calculated rank:', userRank, 'Username:', currentUsername);
       }
     }
 
@@ -125,7 +122,7 @@ router.get('/leaderboard', auth(false), async (req, res) => {
       currentUsername
     });
   } catch (err) {
-    console.error('Leaderboard error:', err);
+    appLogger.error('Leaderboard error', { err });
     return res.status(500).json({ message: 'Failed to fetch leaderboard' });
   }
 });

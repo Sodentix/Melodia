@@ -3,11 +3,12 @@ const router = express.Router();
 const User = require('../models/User');
 const Stats = require('../models/Stats');
 const auth = require('../middleware/auth');
-const { generateVerificationToken, sendVerificationEmail } = require('../services/emailService');
+const { generateVerificationToken, sendVerificationEmail, sendEmailChangeVerificationEmail } = require('../services/emailService');
 const bcrypt = require('bcryptjs');
 const multer = require('multer');
 const fs = require('fs');
 const path = require('path');
+const appLogger = require('../utils/logger');
 
 const USERNAME_PATTERN = /^[a-z0-9_.-]+$/;
 
@@ -41,6 +42,7 @@ function formatUserProfile(user) {
     lastName: user.lastName,
     avatarUrl: user.avatarUrl,
     emailVerified: user.emailVerified,
+    userRole: user.userRole || 'user',
     createdAt: user.createdAt,
     updatedAt: user.updatedAt,
   };
@@ -56,15 +58,11 @@ fs.mkdirSync(avatarsDir, { recursive: true });
 
 const avatarStorage = multer.diskStorage({
   destination: (_req, _file, cb) => {
-    // Debug: ensure we know where avatars are stored
-    console.log('[avatarStorage] destination:', avatarsDir);
     cb(null, avatarsDir);
   },
   filename: (req, file, cb) => {
     const ext = path.extname(file.originalname || '').toLowerCase() || '.png';
     const filename = `${req.user.id}${ext}`;
-    // Debug: log final avatar filename
-    console.log('[avatarStorage] filename for user', req.user?.id, '=>', filename);
     cb(null, filename);
   },
 });
@@ -86,19 +84,20 @@ const avatarUpload = multer({
 // Public profile - accessible to everyone
 router.get('/profile/:username', auth(false, false), async (req, res) => {
     try {
-        const username = req.params.username;
+        const username = sanitizeUsername(req.params.username || '');
 
-        const user = await User.findOne({ username })
-        
+        if (!username || !USERNAME_PATTERN.test(username)) {
+            return res.status(400).json({ error: 'Invalid username.' });
+        }
+
+        const user = await User.findOneNotDeleted({ username });
+
         if (!user) {
             return res.status(404).json({ error: 'User not found' });
         }
 
         const stats = await Stats.findOne({ user: user._id });
 
-        console.log('User from DB:', user); 
-  console.log('Avatar URL specific:', user.avatarUrl);
-        
         const publicProfile = {
             firstname: user.firstName,
             displayName: user.username,
@@ -114,22 +113,19 @@ router.get('/profile/:username', auth(false, false), async (req, res) => {
                 totalPoints: stats.totalPoints, 
                 totalWins: stats.totalWins,
             } : "Never played any games"
-        }; //Es gibt noch mehr stats - nur die "wichtigsten" mal gefetched!
+        };
 
-        console.log(publicProfile);
         res.json(publicProfile);
 
     } catch (error) {
-        console.error(error);
+        appLogger.error('Profile fetch error', { err: error });
         res.status(500).json({ error: 'Server error' });
     }
 });
 
 router.get('/me', auth(true, true), async (req, res) => {
     try {
-        // req.user.id is set by auth middleware after verifying the token
-        const user = await User.findById(req.user.id);
-        console.log(user._id);
+        const user = await User.findByIdNotDeleted(req.user.id);
 
         if (!user) {
             return res.status(404).json({ error: 'User not found' });
@@ -143,12 +139,24 @@ router.get('/me', auth(true, true), async (req, res) => {
           firstname: user.firstName,
           lastname: user.lastName,
           email: user.email,
+          userRole: user.userRole || 'user',
           createdAt: user.createdAt,
           avatarUrl: user.avatarUrl,
-          // any other private fields you want to expose to the logged-in user
+          settings: user.settings && typeof user.settings === 'object'
+            ? {
+                theme: user.settings.theme ?? 'dark',
+                language: user.settings.language ?? 'de',
+                soundEnabled: user.settings.soundEnabled !== false,
+                musicVolume: Math.max(0, Math.min(100, Number(user.settings.musicVolume) || 80)),
+                sfxVolume: Math.max(0, Math.min(100, Number(user.settings.sfxVolume) || 80)),
+                notifications: user.settings.notifications !== false,
+                showStatsOnHome: user.settings.showStatsOnHome !== false,
+                reducedMotion: Boolean(user.settings.reducedMotion),
+              }
+            : { theme: 'dark', language: 'de', soundEnabled: true, musicVolume: 80, sfxVolume: 80, notifications: true, showStatsOnHome: true, reducedMotion: false },
           stats: stats
             ? {
-                totalGames: stats.totalGames,
+                totalGames: stats.totalPlayed,
                 wins: stats.wins,
                 averageTimeMs: stats.averageTimeMs,
                 bestStreak: stats.bestStreak,
@@ -164,7 +172,7 @@ router.get('/me', auth(true, true), async (req, res) => {
         res.json(privateProfile);
 
     } catch (error) {
-        console.error(error);
+        appLogger.error('Get me error', { err: error });
         res.status(500).json({ error: 'Server error' });
     }
 });
@@ -172,7 +180,7 @@ router.get('/me', auth(true, true), async (req, res) => {
 // Update own profile (name, username, email, ...)
 router.put('/me', auth(true, true), async (req, res) => {
   try {
-    const user = await User.findById(req.user.id);
+    const user = await User.findByIdNotDeleted(req.user.id).select('+passwordHash +salt');
     const passwordGiven =
       typeof req.body.password === 'string' ? req.body.password : '';
 
@@ -224,7 +232,7 @@ router.put('/me', auth(true, true), async (req, res) => {
         });
       }
 
-      const existingUsername = await User.findOne({
+      const existingUsername = await User.findOneNotDeleted({
         _id: { $ne: user._id },
         username: usernameInput,
       });
@@ -241,7 +249,7 @@ router.put('/me', auth(true, true), async (req, res) => {
 
     let emailChanged = false;
     if (emailInput && emailInput !== user.email) {
-      const existingEmail = await User.findOne({
+      const existingEmail = await User.findOneNotDeleted({
         _id: { $ne: user._id },
         email: emailInput,
       });
@@ -252,25 +260,22 @@ router.put('/me', auth(true, true), async (req, res) => {
         });
       }
 
-      updates.email = emailInput;
-      updates.emailVerified = false;
       emailChanged = true;
-
       const verificationToken = generateVerificationToken();
       const verificationExpires = new Date(Date.now() + 24 * 60 * 60 * 1000);
-
-      updates.emailVerificationToken = verificationToken;
-      updates.emailVerificationExpires = verificationExpires;
+      updates.pendingEmail = emailInput;
+      updates.pendingEmailToken = verificationToken;
+      updates.pendingEmailExpires = verificationExpires;
+      updates.emailVerificationToken = undefined;
+      updates.emailVerificationExpires = undefined;
 
       try {
-        const emailSent = await sendVerificationEmail(emailInput, verificationToken);
+        const emailSent = await sendEmailChangeVerificationEmail(emailInput, verificationToken);
         if (!emailSent) {
-          console.error('Failed to send verification email on profile update.', {
-            email: emailInput,
-          });
+          appLogger.warn('Failed to send email change verification', { email: emailInput });
         }
       } catch (err) {
-        console.error('Error sending verification email on profile update:', err);
+        appLogger.error('Error sending email change verification', { err });
       }
     }
 
@@ -285,7 +290,7 @@ router.put('/me', auth(true, true), async (req, res) => {
       user: formatUserProfile(user),
     });
   } catch (error) {
-    console.error('Update profile error:', error);
+    appLogger.error('Update profile error', { err: error });
     return res.status(500).json({ message: 'Failed to update profile.' });
   }
 });
@@ -300,7 +305,7 @@ router.post('/verify-email-code', auth(true, true), async (req, res) => {
       return res.status(400).json({ message: 'Verification code is required.' });
     }
 
-    const user = await User.findOne({
+    const user = await User.findOneNotDeleted({
       _id: req.user.id,
       emailVerificationToken: code,
       emailVerificationExpires: { $gt: new Date() },
@@ -320,34 +325,137 @@ router.post('/verify-email-code', auth(true, true), async (req, res) => {
       user: formatUserProfile(user),
     });
   } catch (error) {
-    console.error('Verify email code error:', error);
+    appLogger.error('Verify email code error', { err: error });
     return res.status(500).json({ message: 'Failed to verify email.' });
+  }
+});
+
+const SETTINGS_THEMES = ['dark', 'light', 'system'];
+const SETTINGS_LANGUAGES = ['de', 'en', 'fr'];
+
+// PATCH /users/me/settings - Update user preferences
+router.patch('/me/settings', auth(true, true), async (req, res) => {
+  try {
+    const user = await User.findByIdNotDeleted(req.user.id);
+    if (!user) {
+      return res.status(404).json({ message: 'User not found.' });
+    }
+
+    const settings = user.settings && typeof user.settings === 'object' ? { ...user.settings } : { theme: 'dark', language: 'de', soundEnabled: true };
+
+    if (req.body.theme !== undefined) {
+      const theme = typeof req.body.theme === 'string' ? req.body.theme.trim().toLowerCase() : '';
+      if (SETTINGS_THEMES.includes(theme)) {
+        settings.theme = theme;
+      }
+    }
+    if (req.body.language !== undefined) {
+      const language = typeof req.body.language === 'string' ? req.body.language.trim().toLowerCase() : '';
+      if (SETTINGS_LANGUAGES.includes(language)) {
+        settings.language = language;
+      }
+    }
+    if (req.body.soundEnabled !== undefined) {
+      settings.soundEnabled = Boolean(req.body.soundEnabled);
+    }
+    if (req.body.musicVolume !== undefined) {
+      const v = Number(req.body.musicVolume);
+      settings.musicVolume = Number.isFinite(v) ? Math.max(0, Math.min(100, Math.round(v))) : 80;
+    }
+    if (req.body.sfxVolume !== undefined) {
+      const v = Number(req.body.sfxVolume);
+      settings.sfxVolume = Number.isFinite(v) ? Math.max(0, Math.min(100, Math.round(v))) : 80;
+    }
+    if (req.body.notifications !== undefined) {
+      settings.notifications = Boolean(req.body.notifications);
+    }
+    if (req.body.showStatsOnHome !== undefined) {
+      settings.showStatsOnHome = Boolean(req.body.showStatsOnHome);
+    }
+    if (req.body.reducedMotion !== undefined) {
+      settings.reducedMotion = Boolean(req.body.reducedMotion);
+    }
+
+    user.settings = settings;
+    await user.save();
+
+    const responseSettings = {
+      theme: settings.theme ?? 'dark',
+      language: settings.language ?? 'de',
+      soundEnabled: settings.soundEnabled !== false,
+      musicVolume: Math.max(0, Math.min(100, Number(settings.musicVolume) || 80)),
+      sfxVolume: Math.max(0, Math.min(100, Number(settings.sfxVolume) || 80)),
+      notifications: settings.notifications !== false,
+      showStatsOnHome: settings.showStatsOnHome !== false,
+      reducedMotion: Boolean(settings.reducedMotion),
+    };
+
+    return res.json({
+      message: 'Settings updated.',
+      settings: responseSettings,
+      user: formatUserProfile(user),
+    });
+  } catch (error) {
+    appLogger.error('Patch settings error', { err: error });
+    return res.status(500).json({ message: 'Failed to update settings.' });
+  }
+});
+
+// DELETE /users/me - Soft delete own account (requires password)
+router.delete('/me', auth(true, true), async (req, res) => {
+  try {
+    const passwordGiven = typeof req.body.password === 'string' ? req.body.password : '';
+    if (!passwordGiven) {
+      return res.status(400).json({ message: 'Password is required to delete your account.' });
+    }
+
+    const user = await User.findByIdNotDeleted(req.user.id).select('+passwordHash +salt');
+    if (!user) {
+      return res.status(404).json({ message: 'User not found.' });
+    }
+
+    const passwordValid = await verifyPasswordWithSalt(passwordGiven, user.salt, user.passwordHash);
+    if (!passwordValid) {
+      return res.status(401).json({ message: 'Password is incorrect.' });
+    }
+
+    const idStr = String(user._id);
+    user.deletedEmail = user.email;
+    user.deletedUsername = user.username;
+    user.deletedAt = new Date();
+    user.email = `deleted_${idStr}@deleted.local`;
+    user.username = `deleted_${idStr}`;
+    user.usernameLower = `deleted_${idStr}`;
+    await user.save();
+
+    return res.json({ message: 'Account deleted.' });
+  } catch (error) {
+    appLogger.error('Delete account error', { err: error });
+    return res.status(500).json({ message: 'Failed to delete account.' });
   }
 });
 
 // DELETE /users/me/avatar - Remove the current avatar
 router.delete('/me/avatar', auth(true, true), async (req, res) => {
   try {
-    const user = await User.findById(req.user.id);
+    const user = await User.findByIdNotDeleted(req.user.id);
 
     if (!user) {
       return res.status(404).json({ message: 'User not found.' });
     }
 
-    // If an avatar exists, try to delete the file from the filesystem
     if (user.avatarUrl) {
       const filename = path.basename(user.avatarUrl);
       const filePath = path.join(avatarsDir, filename);
-
-      fs.unlink(filePath, (err) => {
-        // We ignore ENOENT (file not found) errors in case the file was already deleted manually
-        if (err && err.code !== 'ENOENT') {
-          console.error('Failed to delete avatar file from disk:', err);
+      try {
+        await fs.promises.unlink(filePath);
+      } catch (err) {
+        if (err.code !== 'ENOENT') {
+          appLogger.error('Failed to delete avatar file from disk', { err });
         }
-      });
+      }
     }
 
-    // Remove the reference from the database
     user.avatarUrl = null;
     await user.save();
 
@@ -356,18 +464,34 @@ router.delete('/me/avatar', auth(true, true), async (req, res) => {
       user: formatUserProfile(user),
     });
   } catch (error) {
-    console.error('Delete avatar error:', error);
+    appLogger.error('Delete avatar error', { err: error });
     return res.status(500).json({ message: 'Server error while deleting avatar.' });
   }
 });
 
+function handleAvatarUpload(req, res, next) {
+  avatarUpload.single('avatar')(req, res, (err) => {
+    if (err) {
+      if (err.code === 'LIMIT_FILE_SIZE') {
+        return res.status(400).json({ message: 'File too large. Maximum size is 2MB.' });
+      }
+      if (err.message && err.message.includes('Unsupported file type')) {
+        return res.status(400).json({ message: err.message });
+      }
+      appLogger.error('Multer avatar error', { err });
+      return res.status(400).json({ message: 'Invalid file upload.' });
+    }
+    next();
+  });
+}
+
 router.post(
   '/me/avatar',
   auth(true, true),
-  avatarUpload.single('avatar'),
+  handleAvatarUpload,
   async (req, res) => {
     try {
-      const user = await User.findById(req.user.id);
+      const user = await User.findByIdNotDeleted(req.user.id).select('+passwordHash +salt');
 
       if (!user) {
         return res.status(404).json({ message: 'User not found.' });
@@ -401,7 +525,7 @@ router.post(
           const existingPath = path.join(avatarsDir, path.basename(user.avatarUrl));
           fs.unlink(existingPath, (err) => {
             if (err && err.code !== 'ENOENT') {
-              console.error('Failed to remove old avatar:', err);
+              appLogger.error('Failed to remove old avatar', { err });
             }
           });
         }
@@ -419,12 +543,11 @@ router.post(
         const existingFilename = path.basename(user.avatarUrl);
         const newFilename = req.file.filename;
 
-        // Nur löschen, wenn sich der Dateiname wirklich ändert
         if (existingFilename && existingFilename !== newFilename) {
           const existingPath = path.join(avatarsDir, existingFilename);
           fs.unlink(existingPath, (err) => {
             if (err && err.code !== 'ENOENT') {
-              console.error('Failed to remove old avatar:', err);
+              appLogger.error('Failed to remove old avatar', { err });
             }
           });
         }
@@ -439,7 +562,7 @@ router.post(
         avatarUrl: publicPath,
       });
     } catch (error) {
-      console.error('Avatar upload error:', error);
+      appLogger.error('Avatar upload error', { err: error });
       return res.status(500).json({ message: 'Failed to upload avatar.' });
     }
   }

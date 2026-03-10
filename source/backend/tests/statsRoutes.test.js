@@ -103,6 +103,42 @@ describe('Stats routes', () => {
     expect(res.body.averageTimeMs).toBeLessThanOrEqual(2000);
     expect(res.body.modes.classic.totalPlayed).toBe(2);
   });
+
+  test('GET /stats/leaderboard without auth returns leaderboard and no email in entries', async () => {
+    const res = await request(app).get('/stats/leaderboard');
+    expect(res.status).toBe(200);
+    expect(res.body).toHaveProperty('leaderboard');
+    expect(Array.isArray(res.body.leaderboard)).toBe(true);
+    res.body.leaderboard.forEach((entry) => {
+      expect(entry).not.toHaveProperty('email');
+      expect(entry).toHaveProperty('username');
+      expect(entry).toHaveProperty('totalPoints');
+      expect(entry).toHaveProperty('rank');
+    });
+  });
+
+  test('GET /stats/leaderboard with auth returns userRank when user has stats', async () => {
+    const token = await signUpAndLogin();
+    await request(app)
+      .post('/game/record')
+      .set('Authorization', `Bearer ${token}`)
+      .send({ win: true, correctGuesses: 1, wrongGuesses: 0, timeMs: 1000, mode: 'competitive' });
+
+    const res = await request(app)
+      .get('/stats/leaderboard')
+      .set('Authorization', `Bearer ${token}`);
+    expect(res.status).toBe(200);
+    expect(res.body).toHaveProperty('leaderboard');
+    expect(res.body).toHaveProperty('userRank');
+    expect(res.body.userRank).toBeGreaterThanOrEqual(1);
+  });
+
+  test('GET /stats/leaderboard respects limit and skip', async () => {
+    const res = await request(app)
+      .get('/stats/leaderboard?limit=5&skip=0');
+    expect(res.status).toBe(200);
+    expect(res.body.leaderboard.length).toBeLessThanOrEqual(5);
+  });
 });
 
 

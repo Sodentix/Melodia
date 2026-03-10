@@ -5,6 +5,8 @@ const Stats = require('../models/Stats');
 const { fetchRandomClip, getLocalClipsStatus, listTracksByCategory } = require('../services/clipService');
 const { GameRoundStore, isGuessCorrect, calculatePoints } = require('../services/gameService');
 const { listCategories, findCategoryById } = require('../services/categoryService');
+const { isSafeCategoryId } = require('../services/clipService');
+const appLogger = require('../utils/logger');
 
 const router = express.Router();
 const rounds = new GameRoundStore();
@@ -51,7 +53,7 @@ router.post('/record', auth(true, true), async (req, res) => {
 
     return res.status(200).json({ message: 'Game recorded' });
   } catch (err) {
-    console.error('Record game error:', err);
+    appLogger.error('Record game error', { err });
     return res.status(500).json({ message: 'Failed to record game' });
   }
 });
@@ -61,20 +63,20 @@ router.get('/categories', (_req, res) => {
     const categories = listCategories();
     return res.json({ categories });
   } catch (err) {
-    console.error('List categories error:', err);
+    appLogger.error('List categories error', { err });
     return res.status(500).json({ message: 'Failed to load categories' });
   }
 });
 
 router.get('/category/:categoryId/tracks', auth(true, true), (req, res) => {
   try {
-    const categoryId = req.params.categoryId || 'all';
+    const raw = (req.params.categoryId || 'all').trim();
+    const categoryId = isSafeCategoryId(raw) ? raw : 'all';
     const base = `${req.protocol}://${req.get('host')}`;
     const tracks = listTracksByCategory(base, categoryId);
-    console.log(`[DEBUG] /category/${categoryId}/tracks returning ${tracks.length} tracks. First item:`, tracks[0]);
     return res.json({ tracks });
   } catch (err) {
-    console.error('List category tracks error:', err);
+    appLogger.error('List category tracks error', { err });
     const message = process.env.NODE_ENV === 'production' ? 'Failed to load category tracks' : String(err.message || err);
     return res.status(500).json({ message });
   }
@@ -105,7 +107,7 @@ router.post('/start', auth(true, true), async (req, res) => {
     logDebug('round_started', { roundId, trackId: track.id, source: 'local', userId: req.user.id, mode, category, excludedCount: excludeIds.length });
     return res.json({ roundId, preview_url: track.preview_url, trackId: track.id, mode, categoryId: category });
   } catch (err) {
-    console.error('Start round error:', err);
+    appLogger.error('Start round error', { err });
     const status = /No clips available/i.test(String(err.message || '')) ? 503 : 500;
     const message = process.env.NODE_ENV === 'production' ? 'Failed to start round' : String(err.message || err);
     return res.status(status).json({ message });
@@ -182,7 +184,7 @@ router.post('/guess', auth(true, true), async (req, res) => {
       categoryId: round.categoryId || 'all',
     });
   } catch (err) {
-    console.error('Guess error:', err);
+    appLogger.error('Guess error', { err });
     const message = process.env.NODE_ENV === 'production' ? 'Failed to process guess' : String(err.message || err);
     return res.status(500).json({ message });
   }
@@ -237,7 +239,7 @@ router.post('/giveup', auth(true, true), async (req, res) => {
       categoryId: round.categoryId || 'all',
     });
   } catch (err) {
-    console.error('Give up error:', err);
+    appLogger.error('Give up error', { err });
     const message = process.env.NODE_ENV === 'production' ? 'Failed to process give up' : String(err.message || err);
     return res.status(500).json({ message });
   }
@@ -271,11 +273,75 @@ router.get('/album-art/:trackId', auth(true, true), async (req, res) => {
 
     return res.json({ albumImage });
   } catch (err) {
-    console.error('Album art fetch error:', err);
-    if (err.response && err.response.status === 404) {
-      return res.status(404).json({ message: 'Track not found on Deezer' });
+    appLogger.error('Album art fetch error', { err });
+    if (err.response) {
+      const status = err.response.status;
+      if (status === 404) {
+        return res.status(404).json({ message: 'Track not found on Deezer' });
+      }
+      if (status === 403) {
+        // Deezer denied the request (e.g. geo/IP restrictions or rate limiting).
+        // Treat this as "no album art available" instead of surfacing a 403 to the client.
+        return res.status(404).json({ message: 'Album art not available' });
+      }
     }
-    const message = process.env.NODE_ENV === 'production' ? 'Failed to fetch album art' : String(err.message || err);
+
+    const message =
+      process.env.NODE_ENV === 'production'
+        ? 'Failed to fetch album art'
+        : 'Failed to fetch album art from Deezer';
+    return res.status(500).json({ message });
+  }
+});
+
+// Proxy Deezer audio previews through our backend to avoid browser-side blocking.
+// This route is intentionally NOT auth-protected because the <audio> element
+// cannot easily send auth headers, and previews are not user-specific.
+router.get('/preview/:trackId', async (req, res) => {
+  try {
+    const trackId = (req.params.trackId || '').toString();
+    if (!trackId || !trackId.startsWith('deezer-')) {
+      return res.status(400).json({ message: 'Invalid track ID' });
+    }
+
+    const deezerId = trackId.replace('deezer-', '').trim();
+    if (!deezerId) {
+      return res.status(400).json({ message: 'Invalid Deezer ID' });
+    }
+
+    // 1) Look up the track on Deezer to get the current preview URL
+    const trackRes = await axios.get(`https://api.deezer.com/track/${encodeURIComponent(deezerId)}`);
+    const trackData = trackRes.data;
+    const previewUrl = trackData?.preview;
+
+    if (!previewUrl) {
+      return res.status(404).json({ message: 'Preview not available' });
+    }
+
+    // 2) Stream the preview audio from Deezer to the client
+    const audioRes = await axios.get(previewUrl, { responseType: 'stream' });
+
+    // Forward basic headers
+    if (audioRes.headers['content-type']) {
+      res.setHeader('Content-Type', audioRes.headers['content-type']);
+    }
+    if (audioRes.headers['content-length']) {
+      res.setHeader('Content-Length', audioRes.headers['content-length']);
+    }
+    if (audioRes.headers['accept-ranges']) {
+      res.setHeader('Accept-Ranges', audioRes.headers['accept-ranges']);
+    }
+
+    audioRes.data.pipe(res);
+  } catch (err) {
+    appLogger.error('Preview proxy error', { err });
+    if (err.response && err.response.status === 404) {
+      return res.status(404).json({ message: 'Preview not available' });
+    }
+    const message =
+      process.env.NODE_ENV === 'production'
+        ? 'Failed to load preview'
+        : 'Failed to load preview from Deezer';
     return res.status(500).json({ message });
   }
 });

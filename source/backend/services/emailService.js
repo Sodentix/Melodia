@@ -16,13 +16,28 @@ function generateVerificationToken() {
   return crypto.randomBytes(32).toString('hex');
 }
 
+/**
+ * Base URL for email links (verify-email, reset-password, etc.).
+ * Must point to the Vue frontend, NOT the backend API.
+ * Uses FRONTEND_URL; falls back to BACKEND_URL with a warning if unset.
+ */
+function getFrontendBaseUrl() {
+  let raw = process.env.FRONTEND_URL || '';
+  if (!raw.trim()) {
+    raw = process.env.BACKEND_URL || 'http://localhost:5173';
+    console.warn(
+      '[emailService] FRONTEND_URL is not set in .env. Using fallback. ' +
+      'Add FRONTEND_URL=http://localhost:5173 (or your Vue app URL) so verification links work correctly.'
+    );
+  }
+  const url = raw.trim().replace(/\/+$/, '');
+  return url || 'http://localhost:5173';
+}
+
 // Send verification email
 async function sendVerificationEmail(email, verificationToken) {
-  const baseUrl = process.env.BACKEND_URL;
-  if (!baseUrl) {
-    throw new Error('BACKEND_URL is not set. Please configure it in your environment (.env or docker-compose).');
-  }
-  const verificationUrl = `${baseUrl}/auth/verify-email?token=${verificationToken}`;
+  const baseUrl = getFrontendBaseUrl();
+  const verificationUrl = `${baseUrl}/verify-email?token=${verificationToken}`;
   
   const mailOptions = {
     from: process.env.EMAIL_USER,
@@ -67,11 +82,8 @@ async function sendVerificationEmail(email, verificationToken) {
 
 // Send password reset email (bonus feature)
 async function sendPasswordResetEmail(email, resetToken) {
-  const baseUrl = process.env.BACKEND_URL;
-  if (!baseUrl) {
-    throw new Error('BACKEND_URL is not set. Please configure it in your environment (.env or docker-compose).');
-  }
-  const resetUrl = `${baseUrl}/auth/reset-password?token=${resetToken}`;
+  const baseUrl = getFrontendBaseUrl();
+  const resetUrl = `${baseUrl}/reset-password?token=${resetToken}`;
   
   const mailOptions = {
     from: process.env.EMAIL_USER,
@@ -114,8 +126,42 @@ async function sendPasswordResetEmail(email, resetToken) {
   }
 }
 
+// Send email change confirmation to the new address
+async function sendEmailChangeVerificationEmail(email, token) {
+  const baseUrl = getFrontendBaseUrl();
+  const confirmUrl = `${baseUrl}/verify-new-email?token=${token}`;
+
+  const mailOptions = {
+    from: process.env.EMAIL_USER,
+    to: email,
+    subject: 'Confirm your new Melodia email address',
+    html: `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+        <h2 style="color: #333;">Confirm new email address</h2>
+        <p>You requested to change your Melodia account email to this address. Click the button below to confirm.</p>
+        <div style="text-align: center; margin: 30px 0;">
+          <a href="${confirmUrl}" style="background-color: #4CAF50; color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px; display: inline-block;">Confirm email</a>
+        </div>
+        <p style="word-break: break-all; color: #666;">${confirmUrl}</p>
+        <p style="color: #666; font-size: 14px;">This link expires in 24 hours. If you did not request this change, you can safely ignore this email.</p>
+        <hr style="margin: 30px 0; border: none; border-top: 1px solid #eee;">
+        <p style="color: #999; font-size: 12px;">This email was sent from Melodia.</p>
+      </div>
+    `,
+  };
+
+  try {
+    await transporter.sendMail(mailOptions);
+    return true;
+  } catch (error) {
+    console.error('Error sending email change verification:', error);
+    return false;
+  }
+}
+
 module.exports = {
   generateVerificationToken,
   sendVerificationEmail,
   sendPasswordResetEmail,
+  sendEmailChangeVerificationEmail,
 };

@@ -13,9 +13,9 @@
         </div>
       </div>
       <div class="header-right">
-        <button class="exit-btn" @click="$router.push('/game')">
-          <span class="icon">✕</span>
-          <span class="label">Exit</span>
+        <button class="exit-btn" :aria-label="$t('game.exitAria')" @click="$router.push('/game')">
+          <span class="icon" aria-hidden="true">✕</span>
+          <span class="label">{{ $t('game.exit') }}</span>
         </button>
 
         <!-- Countdown in header under exit button so it doesn't push layout down -->
@@ -40,8 +40,8 @@
       
       <!-- Status Messages (Toast style) -->
       <transition name="toast">
-        <div v-if="message" :class="['status-toast', messageType]">
-          <span class="status-icon">
+        <div v-if="message" :class="['status-toast', messageType]" role="status" aria-live="polite" aria-atomic="true">
+          <span class="status-icon" aria-hidden="true">
             {{ messageType === 'success' ? '✓' : messageType === 'error' ? '✕' : 'ℹ' }}
           </span>
           <span class="status-text">{{ message }}</span>
@@ -70,9 +70,9 @@
           <audio
             ref="audioPlayer"
             :src="currentRound?.preview_url"
-            crossorigin="anonymous"
             controls
             autoplay
+            crossorigin="anonymous"
             @ended="onAudioEnded"
             @timeupdate="onTimeUpdate"
             class="hidden-audio"
@@ -110,7 +110,7 @@
               @input="onGuessInput"
               @keydown="handleKeydown"
               @focus="onInputFocus"
-              placeholder="Type song or artist..."
+              :placeholder="$t('game.placeholder')"
               :disabled="!currentRound || isSubmitting || currentRound.completed"
               class="hero-input"
               ref="guessInputRef"
@@ -173,6 +173,8 @@
 
 <script>
 import AudioMotionAnalyzer from 'audiomotion-analyzer';
+import { getApiBase, getToken } from '@/api/client';
+import { userStore } from '@/stores/userStore';
 
 export default {
   name: 'GameView',
@@ -197,6 +199,7 @@ export default {
       revealedTrack: null, // Store revealed track info after round ends
       timeRemaining: 30, // Countdown timer in seconds
       audioDuration: 30, // Total audio duration
+      audioAutoplayError: false, // Indicates if browser blocked autoplay
     };
   },
   mounted() {
@@ -283,19 +286,14 @@ export default {
       }
     },
     async verifySession() {
-      const token = localStorage.getItem('melodia_token') || localStorage.getItem('token');
+      const token = getToken();
       if (!token) {
         this.handleInvalidSession('Bitte melde dich an, um zu spielen.');
         return;
       }
       this.authToken = token;
 
-      const base = import.meta.env.VITE_API_URL || '';
-      if (!base) {
-        this.showMessage('error', 'API base URL not configured');
-        return;
-      }
-
+      const base = getApiBase();
       const authBase = base.endsWith('/auth') ? base : `${base}/auth`;
 
       try {
@@ -322,7 +320,6 @@ export default {
         }
         await this.loadCategoryTracks();
       } catch (error) {
-        console.error('Session validation failed:', error);
         this.handleInvalidSession('Bitte melde dich erneut an.');
       }
     },
@@ -333,12 +330,8 @@ export default {
         return;
       }
 
-      const base = import.meta.env.VITE_API_URL || '';
-      if (!base) {
-        return;
-      }
-
-      const token = this.authToken || localStorage.getItem('melodia_token') || localStorage.getItem('token');
+      const base = getApiBase();
+      const token = this.authToken || getToken();
       if (!token) {
         return;
       }
@@ -358,15 +351,12 @@ export default {
         const data = await res.json();
         this.categoryTracks = Array.isArray(data.tracks) ? data.tracks : [];
       } catch (error) {
-        console.error('Load category tracks failed:', error);
         this.categoryTracks = [];
       }
     },
 
     handleInvalidSession(message = 'Session expired. Please log in again.') {
-      localStorage.removeItem('melodia_token');
-      localStorage.removeItem('token');
-      localStorage.removeItem('melodia_user');
+      userStore.clearUser();
       this.showMessage('error', message);
       this.$router.push('/auth');
     },
@@ -394,6 +384,10 @@ export default {
     onInputFocus() {
       if (this.suggestions.length > 0) {
         this.showSuggestions = true;
+      }
+      // Ensure visualizer AudioContext is resumed after a user gesture (click/focus)
+      if (this.audioMotion && this.audioMotion.audioCtx && this.audioMotion.audioCtx.state === 'suspended') {
+        this.audioMotion.audioCtx.resume().catch(() => {});
       }
     },
 
@@ -439,13 +433,8 @@ export default {
         return;
       }
 
-      const base = import.meta.env.VITE_API_URL || '';
-      if (!base) {
-        this.showMessage('error', 'API base URL not configured');
-        return;
-      }
-
-      const token = localStorage.getItem('melodia_token') || localStorage.getItem('token');
+      const base = getApiBase();
+      const token = getToken();
       if (!token) {
         this.handleInvalidSession('Bitte melde dich an, um zu spielen.');
         return;
@@ -533,31 +522,27 @@ export default {
     },
 
     async startNewRound() {
-      const base = import.meta.env.VITE_API_URL || '';
-      if (!base) {
-        this.showMessage('error', 'API base URL not configured');
-        return;
-      }
-
+      const base = getApiBase();
       if (!this.selectedCategory) {
         this.showMessage('error', 'Bitte wähle zuerst eine Kategorie.');
         this.$router.push('/game');
         return;
       }
 
-      const token = localStorage.getItem('melodia_token') || localStorage.getItem('token');
+      const token = getToken();
       if (!token) {
         this.handleInvalidSession('Bitte melde dich an, um zu spielen.');
         return;
       }
 
       this.isSubmitting = true;
+      this.audioAutoplayError = false;
       this.message = '';
       this.lastPoints = 0;
       this.guessInput = '';
       this.suggestions = [];
       this.showSuggestions = false;
-      this.revealedTrack = null; // Clear revealed track from previous round
+      this.revealedTrack = null;
       this.timeRemaining = 30; // Reset countdown timer
       this.audioDuration = 30;
 
@@ -605,14 +590,21 @@ export default {
         
         // Auto-play audio
         this.$nextTick(() => {
-          if (this.$refs.audioPlayer) {
-            this.$refs.audioPlayer.play().catch(e => {
-              console.warn('Auto-play prevented:', e);
-            });
-            
+          const audioEl = this.$refs.audioPlayer;
+          if (audioEl) {
+            audioEl.currentTime = 0;
+            const playPromise = audioEl.play();
+            if (playPromise && typeof playPromise.then === 'function') {
+              playPromise.catch(e => {
+                console.warn('Auto-play prevented:', e);
+                this.audioAutoplayError = true;
+                this.showMessage('info', 'Klicke auf „Play“, um den Song zu starten.');
+              });
+            }
+
             // Resume AudioContext if suspended (browser policy)
             if (this.audioMotion && this.audioMotion.audioCtx.state === 'suspended') {
-              this.audioMotion.audioCtx.resume();
+              this.audioMotion.audioCtx.resume().catch(() => {});
             }
           }
         });
@@ -629,8 +621,8 @@ export default {
         return;
       }
 
-      const base = import.meta.env.VITE_API_URL || '';
-      const token = localStorage.getItem('melodia_token') || localStorage.getItem('token');
+      const base = getApiBase();
+      const token = getToken();
       
       if (!token) {
         this.handleInvalidSession('Bitte melde dich an, um zu spielen.');
@@ -700,8 +692,8 @@ export default {
         return;
       }
 
-      const base = import.meta.env.VITE_API_URL || '';
-      const token = localStorage.getItem('melodia_token') || localStorage.getItem('token');
+      const base = getApiBase();
+      const token = getToken();
 
       this.isSubmitting = true;
 
@@ -750,8 +742,8 @@ export default {
       if (!trackId || typeof trackId !== 'string') return;
       if (!trackId.startsWith('deezer-')) return;
 
-      const base = import.meta.env.VITE_API_URL || '';
-      const token = localStorage.getItem('melodia_token') || localStorage.getItem('token');
+      const base = getApiBase();
+      const token = getToken();
       if (!base || !token) return;
 
       try {
@@ -862,6 +854,25 @@ export default {
           }
         }
       });
+    },
+
+    manualPlayAudio() {
+      const audio = this.$refs.audioPlayer;
+      if (!audio) return;
+
+      this.audioAutoplayError = false;
+
+      const playPromise = audio.play();
+      if (playPromise && typeof playPromise.then === 'function') {
+        playPromise.catch(e => {
+          console.warn('Manual play failed:', e);
+          this.audioAutoplayError = true;
+        });
+      }
+
+      if (this.audioMotion && this.audioMotion.audioCtx.state === 'suspended') {
+        this.audioMotion.audioCtx.resume().catch(() => {});
+      }
     },
   },
 };
@@ -1046,6 +1057,25 @@ export default {
 }
 
 .hidden-audio { display: none; }
+
+.manual-play-btn {
+  margin-top: 0.75rem;
+  padding: 0.4rem 0.9rem;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  background: rgba(0, 0, 0, 0.4);
+  color: white;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.manual-play-btn:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
 
 /* Revealed Track (Lösung) */
 .revealed-track {

@@ -15,9 +15,12 @@ router.get('/all', auth(true, true), (req, res) => {
   }
 });
 
+const MAX_SEARCH_QUERY_LENGTH = 200;
+
 router.get('/search', auth(true, true), (req, res) => {
   try {
-    const q = (req.query.q || '').toString();
+    const raw = (req.query.q || '').toString();
+    const q = raw.length > MAX_SEARCH_QUERY_LENGTH ? raw.slice(0, MAX_SEARCH_QUERY_LENGTH) : raw;
     const base = `${req.protocol}://${req.get('host')}`;
     const items = q ? searchClips(q, base) : [];
     return res.json({ items });

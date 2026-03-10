@@ -379,14 +379,14 @@ onBeforeUnmount(() => {
           <div class="cropper-actions">
             <button
               type="button"
-              class="btn ghost"
+              class="btn btn--ghost"
               @click="cancel"
             >
               Abbrechen
             </button>
             <button
               type="button"
-              class="btn primary"
+              class="btn btn--primary"
               :disabled="!imageLoaded"
               @click="handleCrop"
             >
@@ -529,29 +529,12 @@ onBeforeUnmount(() => {
   text-decoration: none;
 }
 
-.btn.primary {
-  border: none;
-  background: var(--gradient-accent);
-  box-shadow: 0 10px 28px rgba(255, 0, 200, 0.25);
-  color: #050505;
-}
-
-.btn.ghost {
-  background: rgba(255, 255, 255, 0.03);
-}
-
 .btn:hover:not(:disabled) {
   transform: translateY(-1px);
   box-shadow:
     0 0 16px rgba(255, 0, 200, 0.45),
     0 0 26px rgba(5, 217, 255, 0.45);
   border-color: rgba(255, 255, 255, 0.4);
-}
-
-.btn.primary:hover:not(:disabled) {
-  box-shadow:
-    0 0 18px rgba(255, 0, 200, 0.65),
-    0 0 32px rgba(5, 217, 255, 0.6);
 }
 
 .btn:active:not(:disabled) {

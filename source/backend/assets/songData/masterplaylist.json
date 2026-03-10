@@ -1,0 +1,596 @@
+[
+  {
+    "id": 71608366,
+    "artist": "Manu Chao",
+    "title": "Me Gustas Tu",
+    "url": "https://cdnt-preview.dzcdn.net/api/1/1/7/d/3/0/7d32d091bb3525a1117a85987962f51c.mp3?hdnea=exp=1773055501~acl=/api/1/1/7/d/3/0/7d32d091bb3525a1117a85987962f51c.mp3*~data=user_id=0,application_id=42~hmac=4873f813ac137541217a7af4ddbdbaf6a6a36876e32e7d0548fd2d860be15ac2"
+  },
+  {
+    "id": 884035,
+    "artist": "ABBA",
+    "title": "The Winner Takes It All",
+    "url": "https://cdnt-preview.dzcdn.net/api/1/1/f/9/f/0/f9f04923f459973a863f4802647a248f.mp3?hdnea=exp=1773055501~acl=/api/1/1/f/9/f/0/f9f04923f459973a863f4802647a248f.mp3*~data=user_id=0,application_id=42~hmac=d7075538a5a4493646f8c635d4e1f329d085796f1f9b5380a982c9c2f1ba3012"
+  },
+  {
+    "id": 2176856,
+    "artist": "Amy Winehouse",
+    "title": "Back To Black",
+    "url": "https://cdnt-preview.dzcdn.net/api/1/1/8/c/5/0/8c51a0c8941f72ee783a7b2798cff8c8.mp3?hdnea=exp=1773055501~acl=/api/1/1/8/c/5/0/8c51a0c8941f72ee783a7b2798cff8c8.mp3*~data=user_id=0,application_id=42~hmac=840f5a70e7dec4afee7dbe2f2086fdd51b7217822afb75acfd6be11b5a7c675b"
+  },
+  {
+    "id": 2176852,
+    "artist": "Amy Winehouse",
+    "title": "Rehab",
+    "url": "https://cdnt-preview.dzcdn.net/api/1/1/2/1/d/0/21dd455c62dd8ecfbb94a879455fce82.mp3?hdnea=exp=1773055501~acl=/api/1/1/2/1/d/0/21dd455c62dd8ecfbb94a879455fce82.mp3*~data=user_id=0,application_id=42~hmac=b859c422f8db9606310fb8be5cb2efb9104aa45b41bdeba5add4716a7703e8d1"
+  },
+  {
+    "id": 1013792,
+    "artist": "Mariah Carey",
+    "title": "Fantasy",
+    "url": "https://cdnt-preview.dzcdn.net/api/1/1/8/0/7/0/8075ab03acadc3f8587fccbbb1b2e7aa.mp3?hdnea=exp=1773055501~acl=/api/1/1/8/0/7/0/8075ab03acadc3f8587fccbbb1b2e7aa.mp3*~data=user_id=0,application_id=42~hmac=9ddc6ec180e7dcf0a8569e47ebbfb0de48c5b122297ea66657d6c2b522b08739"
+  },
+  {
+    "id": 2511970,
+    "artist": "Mariah Carey",
+    "title": "We Belong Together",
+    "url": "https://cdnt-preview.dzcdn.net/api/1/1/0/3/e/0/03e10d9a0daae501003f9521e0f30f79.mp3?hdnea=exp=1773055501~acl=/api/1/1/0/3/e/0/03e10d9a0daae501003f9521e0f30f79.mp3*~data=user_id=0,application_id=42~hmac=6802499949fa629fb690db1c3b95e86a028cfe9d61848989f2587cb62c6658cd"
+  },
+  {
+    "id": 4247257,
+    "artist": "Mariah Carey",
+    "title": "Obsessed",
+    "url": "https://cdnt-preview.dzcdn.net/api/1/1/6/6/4/0/664d963d5f769e9bc1a06b13fa3d169b.mp3?hdnea=exp=1773055501~acl=/api/1/1/6/6/4/0/664d963d5f769e9bc1a06b13fa3d169b.mp3*~data=user_id=0,application_id=42~hmac=2a6028165d7606f7acdb8ec9448dfe997486cbef3f064f83d340d44985395afd"
+  },
+  {
+    "id": 4945407,
+    "artist": "Whitney Houston",
+    "title": "I Wanna Dance with Somebody (Who Loves Me)",
+    "url": "https://cdnt-preview.dzcdn.net/api/1/1/c/2/9/0/c290c93cc53de913cf181d3f028abc0f.mp3?hdnea=exp=1773055501~acl=/api/1/1/c/2/9/0/c290c93cc53de913cf181d3f028abc0f.mp3*~data=user_id=0,application_id=42~hmac=996b3002976778fdd7d6281ddface70fa3f7ec86b14b7769cb79de7927c3bac5"
+  },
+  {
+    "id": 2244121,
+    "artist": "Whitney Houston",
+    "title": "I Will Always Love You",
+    "url": "https://cdnt-preview.dzcdn.net/api/1/1/b/4/2/0/b4236e6f42779a308e35087db4ed2b60.mp3?hdnea=exp=1773055501~acl=/api/1/1/b/4/2/0/b4236e6f42779a308e35087db4ed2b60.mp3*~data=user_id=0,application_id=42~hmac=1fe59d4e5f04d9c0e106b4a962f06949123b450170e963d01c725234604af15d"
+  },
+  {
+    "id": 5363365,
+    "artist": "Whitney Houston",
+    "title": "I Have Nothing",
+    "url": "https://cdnt-preview.dzcdn.net/api/1/1/a/f/c/0/afc6809ad570abf506587a81f8989d4b.mp3?hdnea=exp=1773055501~acl=/api/1/1/a/f/c/0/afc6809ad570abf506587a81f8989d4b.mp3*~data=user_id=0,application_id=42~hmac=b49741bb8958c8d8358051c905bfc2fd738649c718ba785127c6067f1dd311ae"
+  },
+  {
+    "id": 1131192,
+    "artist": "Whitney Houston",
+    "title": "How Will I Know",
+    "url": "https://cdnt-preview.dzcdn.net/api/1/1/2/2/8/0/22875876c763ab4f2c5f3ca8f3a20365.mp3?hdnea=exp=1773055501~acl=/api/1/1/2/2/8/0/22875876c763ab4f2c5f3ca8f3a20365.mp3*~data=user_id=0,application_id=42~hmac=fa290d7c8e1ae5692e5f439efb548f61ce32ac63fd3a7023dc01d34ba3de364e"
+  },
+  {
+    "id": 8011850,
+    "artist": "Bruno Mars",
+    "title": "Just the Way You Are",
+    "url": "https://cdnt-preview.dzcdn.net/api/1/1/f/9/f/0/f9fe7ab157c5496285f09fbefd7bc647.mp3?hdnea=exp=1773055501~acl=/api/1/1/f/9/f/0/f9fe7ab157c5496285f09fbefd7bc647.mp3*~data=user_id=0,application_id=42~hmac=a6e9040867d86cf970f58fff22db4a249c47fc3daa63ca94344a7460c4a6a3ca"
+  },
+  {
+    "id": 12000509,
+    "artist": "Sean Kingston",
+    "title": "Beautiful Girls",
+    "url": "https://cdnt-preview.dzcdn.net/api/1/1/2/e/b/0/2ebe1a796746840e859b1e449a130546.mp3?hdnea=exp=1773055501~acl=/api/1/1/2/e/b/0/2ebe1a796746840e859b1e449a130546.mp3*~data=user_id=0,application_id=42~hmac=e5b1cd65c954f60a340f4ddf1362d64ea6bf18c79aad29bd8ba28424f4039407"
+  },
+  {
+    "id": 8011849,
+    "artist": "Bruno Mars",
+    "title": "Grenade",
+    "url": "https://cdnt-preview.dzcdn.net/api/1/1/1/2/c/0/12c6a1605606deacfd9f0d8fde07abf2.mp3?hdnea=exp=1773055501~acl=/api/1/1/1/2/c/0/12c6a1605606deacfd9f0d8fde07abf2.mp3*~data=user_id=0,application_id=42~hmac=a9936bac11d93f81da52bcd55d2a6fad70dc02d7aeb25de096e09e7cf701b77e"
+  },
+  {
+    "id": 80274512,
+    "artist": "Evanescence",
+    "title": "Bring Me To Life",
+    "url": "https://cdnt-preview.dzcdn.net/api/1/1/5/e/0/0/5e09a4a0e73681c2f28f724a4e41ce74.mp3?hdnea=exp=1773055501~acl=/api/1/1/5/e/0/0/5e09a4a0e73681c2f28f724a4e41ce74.mp3*~data=user_id=0,application_id=42~hmac=b9e24f01356e90c571119114db326c989dbc31cc909df95e9793bb17d549d73a"
+  },
+  {
+    "id": 884025,
+    "artist": "ABBA",
+    "title": "Dancing Queen",
+    "url": "https://cdnt-preview.dzcdn.net/api/1/1/9/1/6/0/916f7137187790e999bc66e6460c07b2.mp3?hdnea=exp=1773055501~acl=/api/1/1/9/1/6/0/916f7137187790e999bc66e6460c07b2.mp3*~data=user_id=0,application_id=42~hmac=2302a40a01e1fb3cc8b37e6120815e9acb7d63b4708686bfc446cc29a3cf2799"
+  },
+  {
+    "id": 14333215,
+    "artist": "Billy Joel",
+    "title": "Piano Man",
+    "url": "https://cdnt-preview.dzcdn.net/api/1/1/9/3/3/0/933097dc0fe9004ec219553cb6f54980.mp3?hdnea=exp=1773055501~acl=/api/1/1/9/3/3/0/933097dc0fe9004ec219553cb6f54980.mp3*~data=user_id=0,application_id=42~hmac=07d31a4a39c14c845a0ad3d678d29e0a3eb2d26937371b6510712f076614869a"
+  },
+  {
+    "id": 561855992,
+    "artist": "Lady Gaga",
+    "title": "Shallow",
+    "url": "https://cdnt-preview.dzcdn.net/api/1/1/5/c/8/0/5c893bebee36adefcc193a36c6d6783f.mp3?hdnea=exp=1773055501~acl=/api/1/1/5/c/8/0/5c893bebee36adefcc193a36c6d6783f.mp3*~data=user_id=0,application_id=42~hmac=27f4c9479036d789b01858036851e007c2800289cc79743af38d2fab3da09a17"
+  },
+  {
+    "id": 538660022,
+    "artist": "Bon Jovi",
+    "title": "Livin' On A Prayer",
+    "url": "https://cdnt-preview.dzcdn.net/api/1/1/7/c/1/0/7c1d95d2fe6ad479f66d912db049df50.mp3?hdnea=exp=1773055501~acl=/api/1/1/7/c/1/0/7c1d95d2fe6ad479f66d912db049df50.mp3*~data=user_id=0,application_id=42~hmac=60a846067b798c69631130c05b381e231f6cf152dea49a089e10349621399569"
+  },
+  {
+    "id": 14993990,
+    "artist": "Gotye",
+    "title": "Somebody That I Used To Know",
+    "url": "https://cdnt-preview.dzcdn.net/api/1/1/5/d/5/0/5d5488ceea4fee4901faa1bae7909235.mp3?hdnea=exp=1773055501~acl=/api/1/1/5/d/5/0/5d5488ceea4fee4901faa1bae7909235.mp3*~data=user_id=0,application_id=42~hmac=c68c05813b6d0f4dacf36eb694fa704271e50f9a313bc59b82fc1bb27f4ca887"
+  },
+  {
+    "id": 145434430,
+    "artist": "Neil Diamond",
+    "title": "Sweet Caroline",
+    "url": "https://cdnt-preview.dzcdn.net/api/1/1/c/a/c/0/cac88a2bb24c08bffc758b37132d6119.mp3?hdnea=exp=1773055501~acl=/api/1/1/c/a/c/0/cac88a2bb24c08bffc758b37132d6119.mp3*~data=user_id=0,application_id=42~hmac=638b6ed1197b698e16f5d78dbd2e7230cdd6b5e0b44abbebba58e92c4ce0b8bc"
+  },
+  {
+    "id": 3851850,
+    "artist": "Hot Chocolate",
+    "title": "You Sexy Thing",
+    "url": "https://cdnt-preview.dzcdn.net/api/1/1/e/2/7/0/e27c02c33b535cc2153cf10088175026.mp3?hdnea=exp=1773055501~acl=/api/1/1/e/2/7/0/e27c02c33b535cc2153cf10088175026.mp3*~data=user_id=0,application_id=42~hmac=268c1b43326422a85668466832c3bd2f3edda031e802f7286869d06a7f9c08c3"
+  },
+  {
+    "id": 2271563,
+    "artist": "Tracy Chapman",
+    "title": "Fast Car",
+    "url": "https://cdnt-preview.dzcdn.net/api/1/1/0/0/0/0/0009cabc4816aa3e3f10fa9e26bceace.mp3?hdnea=exp=1773055501~acl=/api/1/1/0/0/0/0/0009cabc4816aa3e3f10fa9e26bceace.mp3*~data=user_id=0,application_id=42~hmac=53a7a31a64025007ac3e5be7e98f59af229024ffa06bff5222af84881cbf2c81"
+  },
+  {
+    "id": 89870993,
+    "artist": "Bon Jovi",
+    "title": "It's My Life",
+    "url": "https://cdnt-preview.dzcdn.net/api/1/1/3/7/e/0/37e796a27156222852cf585904d2c98d.mp3?hdnea=exp=1773055501~acl=/api/1/1/3/7/e/0/37e796a27156222852cf585904d2c98d.mp3*~data=user_id=0,application_id=42~hmac=27487a0cbe6800d8b5494a5582b0ba28a7f479be9b632394aefe5830286985c4"
+  },
+  {
+    "id": 61109754,
+    "artist": "Emeli Sandé",
+    "title": "Read All About It, Pt. III",
+    "url": "https://cdnt-preview.dzcdn.net/api/1/1/f/d/e/0/fde46516a9a3d0a6c05e1b79b3f34dfb.mp3?hdnea=exp=1773055501~acl=/api/1/1/f/d/e/0/fde46516a9a3d0a6c05e1b79b3f34dfb.mp3*~data=user_id=0,application_id=42~hmac=026754fc33d5438ef7a02f49c20c7af28b45df658dbefc7997a6ee3c2781caf2"
+  },
+  {
+    "id": 61542462,
+    "artist": "Alicia Keys",
+    "title": "Girl on Fire",
+    "url": "https://cdnt-preview.dzcdn.net/api/1/1/c/d/0/0/cd0e2fd4e4795705f2469d8d32242f06.mp3?hdnea=exp=1773055501~acl=/api/1/1/c/d/0/0/cd0e2fd4e4795705f2469d8d32242f06.mp3*~data=user_id=0,application_id=42~hmac=a8e68aaeb903d1d860e442529684c5f8dcfc0889e56030c9240fa1eb2ff54687"
+  },
+  {
+    "id": 1045565,
+    "artist": "Elvis Presley",
+    "title": "Jailhouse Rock",
+    "url": "https://cdnt-preview.dzcdn.net/api/1/1/a/0/b/0/a0b0621c340191b99bc04eca4f8f1833.mp3?hdnea=exp=1773055501~acl=/api/1/1/a/0/b/0/a0b0621c340191b99bc04eca4f8f1833.mp3*~data=user_id=0,application_id=42~hmac=9d26cb33f22fa53f70719554e8b1e2b979cd23cb8f622f4b34d939d64a1aeaf1"
+  },
+  {
+    "id": 5305200,
+    "artist": "Unheilig",
+    "title": "Geboren um zu leben",
+    "url": "https://cdnt-preview.dzcdn.net/api/1/1/a/6/6/0/a669a4e8d105bf26366c045728b20cc5.mp3?hdnea=exp=1773055501~acl=/api/1/1/a/6/6/0/a669a4e8d105bf26366c045728b20cc5.mp3*~data=user_id=0,application_id=42~hmac=f6ff08dcfb28ecc3c056769d40fa6f6ccd2895e3205bdd18b7b15cf1099b9278"
+  },
+  {
+    "id": 609244,
+    "artist": "Beyoncé",
+    "title": "Crazy In Love (feat. JAY-Z)",
+    "url": "https://cdnt-preview.dzcdn.net/api/1/1/9/d/a/0/9da6dc6e093d7afe9aba7868644fda2a.mp3?hdnea=exp=1773055501~acl=/api/1/1/9/d/a/0/9da6dc6e093d7afe9aba7868644fda2a.mp3*~data=user_id=0,application_id=42~hmac=70d6e5c09b010f04a15802adea854ee6d940935b5cd23b10c618ddf00fdb4cfc"
+  },
+  {
+    "id": 4303104,
+    "artist": "Train",
+    "title": "Hey, Soul Sister",
+    "url": "https://cdnt-preview.dzcdn.net/api/1/1/c/1/c/0/c1c311876c4d76bbc76f5cbc254a17b2.mp3?hdnea=exp=1773055501~acl=/api/1/1/c/1/c/0/c1c311876c4d76bbc76f5cbc254a17b2.mp3*~data=user_id=0,application_id=42~hmac=39d35b2f5878a0c06185948a0ec0c2a2d9528909cc44da9e1cd2094125b3166f"
+  },
+  {
+    "id": 676954,
+    "artist": "JAY Z",
+    "title": "Numb / Encore",
+    "url": "https://cdnt-preview.dzcdn.net/api/1/1/6/e/8/0/6e8d0e1d66889d80c8259388855f3884.mp3?hdnea=exp=1773055501~acl=/api/1/1/6/e/8/0/6e8d0e1d66889d80c8259388855f3884.mp3*~data=user_id=0,application_id=42~hmac=c09e12f67155f20545702dd5c031bed595d8bca7257b05aa9a50171b86f19ea8"
+  },
+  {
+    "id": 664444,
+    "artist": "Fleetwood Mac",
+    "title": "Everywhere",
+    "url": "https://cdnt-preview.dzcdn.net/api/1/1/a/8/7/0/a87fbec50d79f4ffe7a5fec11a35d279.mp3?hdnea=exp=1773055501~acl=/api/1/1/a/8/7/0/a87fbec50d79f4ffe7a5fec11a35d279.mp3*~data=user_id=0,application_id=42~hmac=e0945f6c3e3f8bdf2a6056b241c441d08fdc9c92640172015aee62214f740244"
+  },
+  {
+    "id": 1022285,
+    "artist": "Eurythmics",
+    "title": "Sweet Dreams (Are Made of This)",
+    "url": "https://cdnt-preview.dzcdn.net/api/1/1/5/4/8/0/54847febfb0f146f6f039e71dc887cf6.mp3?hdnea=exp=1773055501~acl=/api/1/1/5/4/8/0/54847febfb0f146f6f039e71dc887cf6.mp3*~data=user_id=0,application_id=42~hmac=799655c4901627c640aa0c395ec6615c9f1461e697df17d6ae3ad11b7af5172c"
+  },
+  {
+    "id": 61287079,
+    "artist": "Icona Pop",
+    "title": "I Love It (feat. Charli XCX)",
+    "url": "https://cdnt-preview.dzcdn.net/api/1/1/1/f/1/0/1f13cb4777b02f8c71315f906bf2e31f.mp3?hdnea=exp=1773055501~acl=/api/1/1/1/f/1/0/1f13cb4777b02f8c71315f906bf2e31f.mp3*~data=user_id=0,application_id=42~hmac=ba2acc73391c47ec9121fec60cb2dc93d43dbc8f3d1d3b0b71b3a7ba90796f80"
+  },
+  {
+    "id": 44131861,
+    "artist": "Dean Martin",
+    "title": "That's Amore (2001 Remastered Version)",
+    "url": "https://cdnt-preview.dzcdn.net/api/1/1/8/9/3/0/893809f1a9a1793c45e32b0580da06cd.mp3?hdnea=exp=1773055501~acl=/api/1/1/8/9/3/0/893809f1a9a1793c45e32b0580da06cd.mp3*~data=user_id=0,application_id=42~hmac=68f1b27115a1fe92f14cae388ee4c71d76d6cb5eec0f34327737791aa6984580"
+  },
+  {
+    "id": 725636482,
+    "artist": "Gloria Gaynor",
+    "title": "I Will Survive",
+    "url": "https://cdnt-preview.dzcdn.net/api/1/1/8/8/4/0/8841e038bd9e7be0f8058b3549d97afe.mp3?hdnea=exp=1773055501~acl=/api/1/1/8/8/4/0/8841e038bd9e7be0f8058b3549d97afe.mp3*~data=user_id=0,application_id=42~hmac=210f056b5600c5c3f2ace5a2acb58b59366ffdb76076c2b40baf4b9da9f8bda0"
+  },
+  {
+    "id": 2686140,
+    "artist": "Jason Mraz",
+    "title": "I'm Yours",
+    "url": "https://cdnt-preview.dzcdn.net/api/1/1/2/7/d/0/27de9a005e318f52c1630426e33d04a6.mp3?hdnea=exp=1773055501~acl=/api/1/1/2/7/d/0/27de9a005e318f52c1630426e33d04a6.mp3*~data=user_id=0,application_id=42~hmac=0aa93a1ae7476891015ab4d46f98b00656604e592f9d8f7e8873acc1f5a01bf1"
+  },
+  {
+    "id": 698274,
+    "artist": "Alphaville",
+    "title": "Forever Young",
+    "url": "https://cdnt-preview.dzcdn.net/api/1/1/7/f/0/0/7f02fea4b9542f7219e32b30a0b50e60.mp3?hdnea=exp=1773055501~acl=/api/1/1/7/f/0/0/7f02fea4b9542f7219e32b30a0b50e60.mp3*~data=user_id=0,application_id=42~hmac=b783f041a40314b671930beaa802f1ad4d3a98c0d9f3181f53ee81079eb050f1"
+  },
+  {
+    "id": 1177883,
+    "artist": "The Police",
+    "title": "Every Breath You Take (Remastered 2003)",
+    "url": "https://cdnt-preview.dzcdn.net/api/1/1/c/3/1/0/c31a16379c70e8193c3193b3c1d172c9.mp3?hdnea=exp=1773055501~acl=/api/1/1/c/3/1/0/c31a16379c70e8193c3193b3c1d172c9.mp3*~data=user_id=0,application_id=42~hmac=98f96e00d3139d6d9ab22b5f2877253da8156389303e9267605d22b0668156af"
+  },
+  {
+    "id": 3102419,
+    "artist": "Robbie Williams",
+    "title": "Rock DJ",
+    "url": "https://cdnt-preview.dzcdn.net/api/1/1/c/9/a/0/c9a822e24ebde082cf91a7fe7ca966a2.mp3?hdnea=exp=1773055501~acl=/api/1/1/c/9/a/0/c9a822e24ebde082cf91a7fe7ca966a2.mp3*~data=user_id=0,application_id=42~hmac=3b23f30ed53234aab0b33e19ac4ca431caf98b66fad647128590e94e7c508662"
+  },
+  {
+    "id": 3098218,
+    "artist": "Robbie Williams",
+    "title": "Something Beautiful",
+    "url": "https://cdnt-preview.dzcdn.net/api/1/1/5/4/a/0/54a4893382bc6a166c6d432c13e7fd91.mp3?hdnea=exp=1773055501~acl=/api/1/1/5/4/a/0/54a4893382bc6a166c6d432c13e7fd91.mp3*~data=user_id=0,application_id=42~hmac=ea9dcd979c080e40dc6c62e539a8c626a45b0af24aa5d6e5e31f6f3a2a5acf54"
+  },
+  {
+    "id": 17880924,
+    "artist": "Train",
+    "title": "Drive By",
+    "url": "https://cdnt-preview.dzcdn.net/api/1/1/1/f/2/0/1f2c80b3cbbf8ad052a3fa42cd981588.mp3?hdnea=exp=1773055501~acl=/api/1/1/1/f/2/0/1f2c80b3cbbf8ad052a3fa42cd981588.mp3*~data=user_id=0,application_id=42~hmac=6462c3e4b3ced2fc8615ebbbf5037be43dcbba8224265752029100d8742a3fc1"
+  },
+  {
+    "id": 532349,
+    "artist": "Bonnie Tyler",
+    "title": "Total Eclipse of the Heart",
+    "url": "https://cdnt-preview.dzcdn.net/api/1/1/4/e/d/0/4ed3a7fbb98730781ae3c6d85ca75fab.mp3?hdnea=exp=1773055501~acl=/api/1/1/4/e/d/0/4ed3a7fbb98730781ae3c6d85ca75fab.mp3*~data=user_id=0,application_id=42~hmac=f7534d312582b6c32e919f5f51abdd51feeeab16de67a9d75c029ab8945c208c"
+  },
+  {
+    "id": 409751822,
+    "artist": "Nena",
+    "title": "Irgendwie, irgendwo, irgendwann",
+    "url": "https://cdnt-preview.dzcdn.net/api/1/1/f/8/4/0/f84e1d8a119a891156bdd1836908a7ba.mp3?hdnea=exp=1773055501~acl=/api/1/1/f/8/4/0/f84e1d8a119a891156bdd1836908a7ba.mp3*~data=user_id=0,application_id=42~hmac=d84125fe595544d9f14fc4d53907d0787e28a205fa3bd7fc5aae2582bb23dcf8"
+  },
+  {
+    "id": 7718640,
+    "artist": "Tokio Hotel",
+    "title": "Durch den Monsun (Radio Mix)",
+    "url": "https://cdnt-preview.dzcdn.net/api/1/1/0/8/2/0/0826165d8d690738718dac3acaf669ba.mp3?hdnea=exp=1773055501~acl=/api/1/1/0/8/2/0/0826165d8d690738718dac3acaf669ba.mp3*~data=user_id=0,application_id=42~hmac=c0679da684091b31f72e59cad8e29ab431f5be4406ff68e98a56bf98cc1a8607"
+  },
+  {
+    "id": 6812359,
+    "artist": "Katy Perry",
+    "title": "Last Friday Night (T.G.I.F.)",
+    "url": "https://cdnt-preview.dzcdn.net/api/1/1/5/e/d/0/5edb44ec9dec7d37935ef2170cef0957.mp3?hdnea=exp=1773055501~acl=/api/1/1/5/e/d/0/5edb44ec9dec7d37935ef2170cef0957.mp3*~data=user_id=0,application_id=42~hmac=dd73bc944c62f407e40c38b3f347c2caeef27148986e205d73bc9b1a99c77436"
+  },
+  {
+    "id": 14638202,
+    "artist": "Genesis",
+    "title": "No Son of Mine",
+    "url": "https://cdnt-preview.dzcdn.net/api/1/1/e/9/0/0/e908962a30e0f2bd6931db1cf711f3cf.mp3?hdnea=exp=1773055501~acl=/api/1/1/e/9/0/0/e908962a30e0f2bd6931db1cf711f3cf.mp3*~data=user_id=0,application_id=42~hmac=0984c072b58aeea2dd2e0b0cf0400044671b093a772be3f8e34c2fef18dad4a4"
+  },
+  {
+    "id": 13128250,
+    "artist": "Bill Medley",
+    "title": "(I've Had) The Time Of My Life (From \"Dirty Dancing\" Soundtrack)",
+    "url": "https://cdnt-preview.dzcdn.net/api/1/1/7/f/3/0/7f397fb764da99ef77dfcf22d9eac6db.mp3?hdnea=exp=1773055501~acl=/api/1/1/7/f/3/0/7f397fb764da99ef77dfcf22d9eac6db.mp3*~data=user_id=0,application_id=42~hmac=eaa9a146b79fb999a58ba0ba5642c504ce7011786f57129f92013fe334679866"
+  },
+  {
+    "id": 106339332,
+    "artist": "Enrico Caruso",
+    "title": "La donna e mobile",
+    "url": "https://cdnt-preview.dzcdn.net/api/1/1/f/5/5/0/f55371cabfb3f65119436d470160c90c.mp3?hdnea=exp=1773055501~acl=/api/1/1/f/5/5/0/f55371cabfb3f65119436d470160c90c.mp3*~data=user_id=0,application_id=42~hmac=39ca7c2d195aca400869d2966c8da723dabf66d38dda27dc5e7ee3139d991972"
+  },
+  {
+    "id": 13205914,
+    "artist": "Sam Cooke",
+    "title": "(What A) Wonderful World",
+    "url": "https://cdnt-preview.dzcdn.net/api/1/1/7/3/0/0/7302705a36ce8d4875a84ea16e1a5019.mp3?hdnea=exp=1773055501~acl=/api/1/1/7/3/0/0/7302705a36ce8d4875a84ea16e1a5019.mp3*~data=user_id=0,application_id=42~hmac=cfdf0ecf8d6ff19a4a38b6bf3f0bdef6670bf9c8665aafe9766b7b4eb608b525"
+  },
+  {
+    "id": 352938501,
+    "artist": "Ben E. King",
+    "title": "Stand By Me",
+    "url": "https://cdnt-preview.dzcdn.net/api/1/1/e/8/d/0/e8dfce8cc667df57951453f48a859148.mp3?hdnea=exp=1773055501~acl=/api/1/1/e/8/d/0/e8dfce8cc667df57951453f48a859148.mp3*~data=user_id=0,application_id=42~hmac=e6d7b0ba5e897ce80f7ed45be3904a61497f4f895d290fb28458201d4e9a4342"
+  },
+  {
+    "id": 568121002,
+    "artist": "Queen",
+    "title": "Crazy Little Thing Called Love",
+    "url": "https://cdnt-preview.dzcdn.net/api/1/1/e/8/4/0/e84ca26dc530e3f1170d17a5bdd5afef.mp3?hdnea=exp=1773055501~acl=/api/1/1/e/8/4/0/e84ca26dc530e3f1170d17a5bdd5afef.mp3*~data=user_id=0,application_id=42~hmac=eeff802aef84911008a125b4174abaf268b106db941cccc678538aa38956b008"
+  },
+  {
+    "id": 14062602,
+    "artist": "The Ronettes",
+    "title": "Be My Baby",
+    "url": "https://cdnt-preview.dzcdn.net/api/1/1/d/e/e/0/dee817003b3439183415664b2ee83752.mp3?hdnea=exp=1773055501~acl=/api/1/1/d/e/e/0/dee817003b3439183415664b2ee83752.mp3*~data=user_id=0,application_id=42~hmac=452ecc91d8920d2b9d55b5a79f58df8af00e717662cc52f0fe5d8064615fb04b"
+  },
+  {
+    "id": 71154320,
+    "artist": "Bob Dylan",
+    "title": "Knockin' On Heaven's Door",
+    "url": "https://cdnt-preview.dzcdn.net/api/1/1/8/2/3/0/823282247561f435d42bfbc87fdfdfe2.mp3?hdnea=exp=1773055501~acl=/api/1/1/8/2/3/0/823282247561f435d42bfbc87fdfdfe2.mp3*~data=user_id=0,application_id=42~hmac=f29174a3edc68d58b5508109419e1b3cd27124202790d11009ff6970124dac48"
+  },
+  {
+    "id": 549405542,
+    "artist": "Marvin Gaye",
+    "title": "Ain't No Mountain High Enough",
+    "url": "https://cdnt-preview.dzcdn.net/api/1/1/1/a/f/0/1afbc16446697e66afecb75556524261.mp3?hdnea=exp=1773055501~acl=/api/1/1/1/a/f/0/1afbc16446697e66afecb75556524261.mp3*~data=user_id=0,application_id=42~hmac=9abe1dec46a5a66c7ba1535ae5237dfed8a50c824bca34b749ff6c3c8dc33a7c"
+  },
+  {
+    "id": 2627099232,
+    "artist": "Solomon Burke",
+    "title": "Cry To Me",
+    "url": "https://cdnt-preview.dzcdn.net/api/1/1/a/5/4/0/a541dd57004d1f5ab04821188f81d10d.mp3?hdnea=exp=1773055501~acl=/api/1/1/a/5/4/0/a541dd57004d1f5ab04821188f81d10d.mp3*~data=user_id=0,application_id=42~hmac=6185c438233366eabff4e8ae1ba6bf7c9a0b6a2f8b8cf522a7f44cd07802eac3"
+  },
+  {
+    "id": 86391911,
+    "artist": "Creedence Clearwater Revival",
+    "title": "Have You Ever Seen The Rain",
+    "url": "https://cdnt-preview.dzcdn.net/api/1/1/8/e/0/0/8e0d40fbd9538b910806d0505843efae.mp3?hdnea=exp=1773055501~acl=/api/1/1/8/e/0/0/8e0d40fbd9538b910806d0505843efae.mp3*~data=user_id=0,application_id=42~hmac=568d5b45957ceddbd16ce039b6bc6717e3cdb16677daf4a89610ab9e44ebec2f"
+  },
+  {
+    "id": 625643,
+    "artist": "Journey",
+    "title": "Don't Stop Believin'",
+    "url": "https://cdnt-preview.dzcdn.net/api/1/1/d/2/0/0/d2075fdf5e55ef0a8f8383cefd6fc51b.mp3?hdnea=exp=1773055501~acl=/api/1/1/d/2/0/0/d2075fdf5e55ef0a8f8383cefd6fc51b.mp3*~data=user_id=0,application_id=42~hmac=35316de766fba5b398b19d0ec6f1bd1120dec69e3f2478962f15ad4e2fbae00b"
+  },
+  {
+    "id": 3296911,
+    "artist": "Reinhard Mey",
+    "title": "Gute Nacht, Freunde",
+    "url": "https://cdnt-preview.dzcdn.net/api/1/1/6/a/8/0/6a8391b2c70ae6511c06f3117c368805.mp3?hdnea=exp=1773055501~acl=/api/1/1/6/a/8/0/6a8391b2c70ae6511c06f3117c368805.mp3*~data=user_id=0,application_id=42~hmac=9e6d2e26c21604e63789ff73a328e685a0f08c1afbe407cf132d113d1e2a0c37"
+  },
+  {
+    "id": 2840803502,
+    "artist": "Zartmann",
+    "title": "eehhhyyy",
+    "url": "https://cdnt-preview.dzcdn.net/api/1/1/3/1/e/0/31e73cd2cdc9590af479f8b6a96167d7.mp3?hdnea=exp=1773055501~acl=/api/1/1/3/1/e/0/31e73cd2cdc9590af479f8b6a96167d7.mp3*~data=user_id=0,application_id=42~hmac=386c8ce7006ef70046633ef98acc89f626694a5e8fb20447ac6f09620e95c909"
+  },
+  {
+    "id": 1158944,
+    "artist": "Bloodhound Gang",
+    "title": "Fire Water Burn",
+    "url": "https://cdnt-preview.dzcdn.net/api/1/1/c/4/9/0/c499530a92cd73f547ea3b6539e3ec8b.mp3?hdnea=exp=1773055501~acl=/api/1/1/c/4/9/0/c499530a92cd73f547ea3b6539e3ec8b.mp3*~data=user_id=0,application_id=42~hmac=481404d5d70a5f8647037e28cdf9956693c9b7cbd861823e3d94e12ce46aeff2"
+  },
+  {
+    "id": 3146418,
+    "artist": "Dion",
+    "title": "Runaround Sue",
+    "url": "https://cdnt-preview.dzcdn.net/api/1/1/a/4/1/0/a415433d9f38f2e5bceb273800e11dab.mp3?hdnea=exp=1773055501~acl=/api/1/1/a/4/1/0/a415433d9f38f2e5bceb273800e11dab.mp3*~data=user_id=0,application_id=42~hmac=b7e61dcdc293feacabaf78136249fccb3e2ffe6b8a1e493b0e08b4be08aaad56"
+  },
+  {
+    "id": 347865751,
+    "artist": "Rudi Carrell",
+    "title": "Wann wird's mal wieder richtig Sommer (Original Mix)",
+    "url": "https://cdnt-preview.dzcdn.net/api/1/1/0/f/f/0/0ffff9752faa08a63f7bbb7fa7fdf862.mp3?hdnea=exp=1773055501~acl=/api/1/1/0/f/f/0/0ffff9752faa08a63f7bbb7fa7fdf862.mp3*~data=user_id=0,application_id=42~hmac=27f1e9d62db71d3a00fdb71e366f466839d4c0db5db85a278fa2a8f818817fa2"
+  },
+  {
+    "id": 3138729,
+    "artist": "Robbie Williams",
+    "title": "Angels",
+    "url": "https://cdnt-preview.dzcdn.net/api/1/1/d/c/1/0/dc1c0d9c34526b53cfc9ce549cbf7e23.mp3?hdnea=exp=1773055501~acl=/api/1/1/d/c/1/0/dc1c0d9c34526b53cfc9ce549cbf7e23.mp3*~data=user_id=0,application_id=42~hmac=7c05cbee087df5c836d9b02e900c52e52f1249a98aa00c671aa125df3fb999ce"
+  },
+  {
+    "id": 15531170,
+    "artist": "Kings of Leon",
+    "title": "Sex on Fire",
+    "url": "https://cdnt-preview.dzcdn.net/api/1/1/6/2/c/0/62cc28a50d49b82faedacb7752ad8891.mp3?hdnea=exp=1773055501~acl=/api/1/1/6/2/c/0/62cc28a50d49b82faedacb7752ad8891.mp3*~data=user_id=0,application_id=42~hmac=fe0129af65452d43228004a97cda37abeca54578ac3968a8f1a2e01f254c7fba"
+  },
+  {
+    "id": 15654849,
+    "artist": "Gitte Hænning",
+    "title": "Ich will 'nen Cowboy als Mann",
+    "url": "https://cdnt-preview.dzcdn.net/api/1/1/2/f/3/0/2f37de406b636ca922c589c62a184b73.mp3?hdnea=exp=1773055501~acl=/api/1/1/2/f/3/0/2f37de406b636ca922c589c62a184b73.mp3*~data=user_id=0,application_id=42~hmac=fcebfab2f638e98040125db365e05909eb351e2e2f8bafa3cf13acc2ba2d4652"
+  },
+  {
+    "id": 616417,
+    "artist": "Udo Jürgens",
+    "title": "Siebzehn Jahr, blondes Haar",
+    "url": "https://cdnt-preview.dzcdn.net/api/1/1/9/9/4/0/9942bcd3216101523e5259a7428b6369.mp3?hdnea=exp=1773055501~acl=/api/1/1/9/9/4/0/9942bcd3216101523e5259a7428b6369.mp3*~data=user_id=0,application_id=42~hmac=85ca0d84b90aa45f579bd854c270884ab7ef8d9f5026ad9c3de5a6d7fa01819f"
+  },
+  {
+    "id": 786717,
+    "artist": "Cher",
+    "title": "Believe",
+    "url": "https://cdnt-preview.dzcdn.net/api/1/1/c/f/e/0/cfe5600eb3b0f8b50ff351ae46129e07.mp3?hdnea=exp=1773055501~acl=/api/1/1/c/f/e/0/cfe5600eb3b0f8b50ff351ae46129e07.mp3*~data=user_id=0,application_id=42~hmac=43a4394b0ccf330d8baa3aed7009391b216ac711b11bd2c92da3539a655f267a"
+  },
+  {
+    "id": 987947,
+    "artist": "Karat",
+    "title": "Über sieben Brücken musst du gehn",
+    "url": "https://cdnt-preview.dzcdn.net/api/1/1/f/b/0/0/fb0ecc5127f704318f7373bdefe33964.mp3?hdnea=exp=1773055501~acl=/api/1/1/f/b/0/0/fb0ecc5127f704318f7373bdefe33964.mp3*~data=user_id=0,application_id=42~hmac=28c478da2e9b30c7590b01e98ae3a79dba283e27c65a06ecc182f01dfc0b028d"
+  },
+  {
+    "id": 972035,
+    "artist": "Peter Maffay",
+    "title": "Über sieben Brücken musst du geh'n",
+    "url": "https://cdnt-preview.dzcdn.net/api/1/1/9/a/0/0/9a03f9da259bad1f9973030b6ff019fb.mp3?hdnea=exp=1773055501~acl=/api/1/1/9/a/0/0/9a03f9da259bad1f9973030b6ff019fb.mp3*~data=user_id=0,application_id=42~hmac=894e20528f021c2d4c3e02aa10ef1e308bedf2787a4d1a3611ab52a3a3ee59fb"
+  },
+  {
+    "id": 514405832,
+    "artist": "Fats Domino",
+    "title": "Ain't That A Shame",
+    "url": "https://cdnt-preview.dzcdn.net/api/1/1/9/d/2/0/9d25cf4ef2beb74ce68ea68b3a091db2.mp3?hdnea=exp=1773055501~acl=/api/1/1/9/d/2/0/9d25cf4ef2beb74ce68ea68b3a091db2.mp3*~data=user_id=0,application_id=42~hmac=991a81546af07b1b3eb7f49da7820e794af761d5499b056e29e8aca422fcdf20"
+  },
+  {
+    "id": 3155135,
+    "artist": "The Animals",
+    "title": "House of the Rising Sun",
+    "url": "https://cdnt-preview.dzcdn.net/api/1/1/9/5/c/0/95c89d5e2a98cd0742a8991027a97ea2.mp3?hdnea=exp=1773055501~acl=/api/1/1/9/5/c/0/95c89d5e2a98cd0742a8991027a97ea2.mp3*~data=user_id=0,application_id=42~hmac=c4172bfa51e3c6574411356d833b6b7768507adf5610378a146881a96fe8c489"
+  },
+  {
+    "id": 1079668,
+    "artist": "Toto",
+    "title": "Africa",
+    "url": "https://cdnt-preview.dzcdn.net/api/1/1/d/4/6/0/d46762f2025f13175f2fd2c062b46182.mp3?hdnea=exp=1773055501~acl=/api/1/1/d/4/6/0/d46762f2025f13175f2fd2c062b46182.mp3*~data=user_id=0,application_id=42~hmac=f675585a284e3bcd89af312f0a3842b40a62fa4766b05d065a7c1389aef15ff5"
+  },
+  {
+    "id": 426703682,
+    "artist": "Eagles",
+    "title": "Hotel California (2013 Remaster)",
+    "url": "https://cdnt-preview.dzcdn.net/api/1/1/d/e/0/0/de0b52925103149e94a7123d0c0cb6c4.mp3?hdnea=exp=1773055501~acl=/api/1/1/d/e/0/0/de0b52925103149e94a7123d0c0cb6c4.mp3*~data=user_id=0,application_id=42~hmac=39546c218719df7fdf74a7118cc3faae7050f741e1b6158a87d4b5007ee49626"
+  },
+  {
+    "id": 1025659,
+    "artist": "Billy Joel",
+    "title": "Uptown Girl",
+    "url": "https://cdnt-preview.dzcdn.net/api/1/1/7/f/a/0/7fa78b96031968e12d31af61bcc5d361.mp3?hdnea=exp=1773055501~acl=/api/1/1/7/f/a/0/7fa78b96031968e12d31af61bcc5d361.mp3*~data=user_id=0,application_id=42~hmac=4a4237cda0fc62b90dc9cae9a9d899c30eab21f6e9a79d7fbf02966fbaa6be70"
+  },
+  {
+    "id": 2801132,
+    "artist": "Rupert Holmes",
+    "title": "Escape (The Pina Colada Song) (Single Version)",
+    "url": "https://cdnt-preview.dzcdn.net/api/1/1/9/5/3/0/953506b47797c161825ca1e9a44f7a9e.mp3?hdnea=exp=1773055501~acl=/api/1/1/9/5/3/0/953506b47797c161825ca1e9a44f7a9e.mp3*~data=user_id=0,application_id=42~hmac=058f4bb6a80b5add98f742221d3853b2c2f099fdbd726439606b3c9b807a92e0"
+  },
+  {
+    "id": 14299463,
+    "artist": "Scorpions",
+    "title": "Still Loving You",
+    "url": "https://cdnt-preview.dzcdn.net/api/1/1/9/e/b/0/9eb27893c982aac41cef769f45aae8e7.mp3?hdnea=exp=1773055501~acl=/api/1/1/9/e/b/0/9eb27893c982aac41cef769f45aae8e7.mp3*~data=user_id=0,application_id=42~hmac=83c6a03d625e0f46b445fb5177f071ab748dd6beee6e257d877a2a6e75d31b68"
+  },
+  {
+    "id": 10392072,
+    "artist": "George Michael",
+    "title": "Careless Whisper",
+    "url": "https://cdnt-preview.dzcdn.net/api/1/1/0/d/3/0/0d3f3811d395d542796b226921015c71.mp3?hdnea=exp=1773055501~acl=/api/1/1/0/d/3/0/0d3f3811d395d542796b226921015c71.mp3*~data=user_id=0,application_id=42~hmac=503be759b95514a45bfff68faed88f17014b24967e8566f9ed76cf4f2c9f426b"
+  },
+  {
+    "id": 1460933522,
+    "artist": "Metallica",
+    "title": "Nothing Else Matters (Remastered)",
+    "url": "https://cdnt-preview.dzcdn.net/api/1/1/2/c/b/0/2cbd035598a05854b7c2a014e424183e.mp3?hdnea=exp=1773055501~acl=/api/1/1/2/c/b/0/2cbd035598a05854b7c2a014e424183e.mp3*~data=user_id=0,application_id=42~hmac=e122c6fa8f08f388f275668a3751fd30020148ffbb8ee814a39a079ae46f0260"
+  },
+  {
+    "id": 17615568,
+    "artist": "Of Monsters And Men",
+    "title": "Little Talks",
+    "url": "https://cdnt-preview.dzcdn.net/api/1/1/b/f/6/0/bf6c6c9357af965de4ef5669feb31fbf.mp3?hdnea=exp=1773055501~acl=/api/1/1/b/f/6/0/bf6c6c9357af965de4ef5669feb31fbf.mp3*~data=user_id=0,application_id=42~hmac=e67dac5325a66073943dd3a45a24646d830d94152e47774429a1c6a74432dbe7"
+  },
+  {
+    "id": 70835066,
+    "artist": "Frank Sinatra",
+    "title": "My Way",
+    "url": "https://cdnt-preview.dzcdn.net/api/1/1/1/8/d/0/18d336e276b5cd321494bba213dbc8d1.mp3?hdnea=exp=1773055501~acl=/api/1/1/1/8/d/0/18d336e276b5cd321494bba213dbc8d1.mp3*~data=user_id=0,application_id=42~hmac=2891db53b61c58e481b1b788d60fed2982e19926f5498b0ecc61cdd9aaf716c2"
+  },
+  {
+    "id": 89077547,
+    "artist": "Taylor Swift",
+    "title": "Blank Space",
+    "url": "https://cdnt-preview.dzcdn.net/api/1/1/b/b/7/0/bb7f65683e286ea3014c0fbd26bfaa5b.mp3?hdnea=exp=1773055501~acl=/api/1/1/b/b/7/0/bb7f65683e286ea3014c0fbd26bfaa5b.mp3*~data=user_id=0,application_id=42~hmac=05597016b164b26e3041e656846dadb0f1714eba8f3c92fb66844e382929ac9b"
+  },
+  {
+    "id": 16501727,
+    "artist": "fun.",
+    "title": "Some Nights",
+    "url": "https://cdnt-preview.dzcdn.net/api/1/1/2/7/1/0/271a3d702d46a40e9717918c52053860.mp3?hdnea=exp=1773055501~acl=/api/1/1/2/7/1/0/271a3d702d46a40e9717918c52053860.mp3*~data=user_id=0,application_id=42~hmac=9ceb5e6190c46cd54b77c04995f7cbea52e11c71f52a3bde1c74f62c4a8d99ed"
+  },
+  {
+    "id": 3445820,
+    "artist": "David Guetta",
+    "title": "When Love Takes Over (feat. Kelly Rowland)",
+    "url": "https://cdnt-preview.dzcdn.net/api/1/1/0/6/1/0/061de66a4031b34cf4ab44f7ab2f4b71.mp3?hdnea=exp=1773055501~acl=/api/1/1/0/6/1/0/061de66a4031b34cf4ab44f7ab2f4b71.mp3*~data=user_id=0,application_id=42~hmac=f19b6dbb816c2404096f5ad50d6657b19aadb19433643bfd792d2beb3a9008a2"
+  },
+  {
+    "id": 4621947,
+    "artist": "Enigma",
+    "title": "Sadeness (Pt. 1 / Radio Edit)",
+    "url": "https://cdnt-preview.dzcdn.net/api/1/1/e/d/5/0/ed526c1d402b1e3de14f3f55a5f746c4.mp3?hdnea=exp=1773055501~acl=/api/1/1/e/d/5/0/ed526c1d402b1e3de14f3f55a5f746c4.mp3*~data=user_id=0,application_id=42~hmac=ffe917ab09c5d97c0b285456af0919982cecd58b85b66504d657402d1f471a92"
+  },
+  {
+    "id": 72208034,
+    "artist": "The Jacksons",
+    "title": "Blame It on the Boogie",
+    "url": "https://cdnt-preview.dzcdn.net/api/1/1/d/c/b/0/dcbb9c00fe13911eb42317d0fda267d3.mp3?hdnea=exp=1773055501~acl=/api/1/1/d/c/b/0/dcbb9c00fe13911eb42317d0fda267d3.mp3*~data=user_id=0,application_id=42~hmac=c9c73aaaf400702e77bdb00ea77d85c3c805dcde796b7f7146a7ae9d077a9abd"
+  },
+  {
+    "id": 1583148,
+    "artist": "Bob Marley & The Wailers",
+    "title": "No Woman No Cry",
+    "url": "https://cdnt-preview.dzcdn.net/api/1/1/0/3/f/0/03fa045b2b840d0417675d20c0954358.mp3?hdnea=exp=1773055501~acl=/api/1/1/0/3/f/0/03fa045b2b840d0417675d20c0954358.mp3*~data=user_id=0,application_id=42~hmac=b33b46b8d3c829614fe425ba1bd149d292ce8d689f2d6c59790d1fcedb33a772"
+  },
+  {
+    "id": 133577580,
+    "artist": "Crowded House",
+    "title": "Don't Dream It's Over",
+    "url": "https://cdnt-preview.dzcdn.net/api/1/1/9/e/c/0/9ec277814e39b8aa7ad9dbe58d4c05e1.mp3?hdnea=exp=1773055501~acl=/api/1/1/9/e/c/0/9ec277814e39b8aa7ad9dbe58d4c05e1.mp3*~data=user_id=0,application_id=42~hmac=6e41c6b4d57e146ac23589fcb429ed2f231f211b301a670eef175c48ead6c459"
+  },
+  {
+    "id": 428690122,
+    "artist": "Bronski Beat",
+    "title": "Smalltown Boy",
+    "url": "https://cdnt-preview.dzcdn.net/api/1/1/0/b/d/0/0bd67a2e97f0fd8a55101393279e8276.mp3?hdnea=exp=1773055501~acl=/api/1/1/0/b/d/0/0bd67a2e97f0fd8a55101393279e8276.mp3*~data=user_id=0,application_id=42~hmac=c06cbc89e0368945fb213618b43e2639ed157e8b8f014a4c051e9dba9e86f778"
+  },
+  {
+    "id": 5093918,
+    "artist": "The Monkees",
+    "title": "I'm a Believer",
+    "url": "https://cdnt-preview.dzcdn.net/api/1/1/7/8/e/0/78e4c232c513297f2991b1e433ceffd8.mp3?hdnea=exp=1773055501~acl=/api/1/1/7/8/e/0/78e4c232c513297f2991b1e433ceffd8.mp3*~data=user_id=0,application_id=42~hmac=991d440c7360cfaaa401bb8a4cacba23f7629f22e19eb436482adc12d1ac0c64"
+  },
+  {
+    "id": 908742,
+    "artist": "Bill Haley & His Comets",
+    "title": "See You Later, Alligator",
+    "url": "https://cdnt-preview.dzcdn.net/api/1/1/7/1/a/0/71a6930bed7a2f5a742f3bd53896f383.mp3?hdnea=exp=1773055501~acl=/api/1/1/7/1/a/0/71a6930bed7a2f5a742f3bd53896f383.mp3*~data=user_id=0,application_id=42~hmac=6180e90583dd2445db35444182340722fdf456ee8b5010c7cbcea4307509374b"
+  },
+  {
+    "id": 3055769,
+    "artist": "Connie Francis",
+    "title": "Schöner fremder Mann",
+    "url": "https://cdnt-preview.dzcdn.net/api/1/1/b/b/3/0/bb3f3d39d99b721be54d8b0f8414ae29.mp3?hdnea=exp=1773055501~acl=/api/1/1/b/b/3/0/bb3f3d39d99b721be54d8b0f8414ae29.mp3*~data=user_id=0,application_id=42~hmac=e61c184f6d69f9ea7b33a91fdb2714688b201c012bf739dbe8818e0a99f83df4"
+  },
+  {
+    "id": 29794781,
+    "artist": "Culture Beat",
+    "title": "Mr. Vain",
+    "url": "https://cdnt-preview.dzcdn.net/api/1/1/8/d/9/0/8d9db81a051394cc02a2c8be44a2dce8.mp3?hdnea=exp=1773055501~acl=/api/1/1/8/d/9/0/8d9db81a051394cc02a2c8be44a2dce8.mp3*~data=user_id=0,application_id=42~hmac=438bf758ce741af8f52322c89d7a2d0a16f023a0320fa9dc413af44fb900aac4"
+  },
+  {
+    "id": 118190312,
+    "artist": "Rihanna",
+    "title": "Love On The Brain",
+    "url": "https://cdnt-preview.dzcdn.net/api/1/1/a/0/b/0/a0b84aef4a24a40fff4a01c56fb93496.mp3?hdnea=exp=1773055501~acl=/api/1/1/a/0/b/0/a0b84aef4a24a40fff4a01c56fb93496.mp3*~data=user_id=0,application_id=42~hmac=2f9384b4458e0249ae32dabd53b6ffab15eefe65896d6e62df667a092ce607f2"
+  },
+  {
+    "id": 3196460531,
+    "artist": "Tate McRae",
+    "title": "Sports car",
+    "url": "https://cdnt-preview.dzcdn.net/api/1/1/f/3/e/0/f3e5caa86999c6256b781ade2fa6b776.mp3?hdnea=exp=1773055501~acl=/api/1/1/f/3/e/0/f3e5caa86999c6256b781ade2fa6b776.mp3*~data=user_id=0,application_id=42~hmac=7d07244062f5397e1caaaff89ddc801372776228a8c84188072132a94702b445"
+  },
+  {
+    "id": 3240044361,
+    "artist": "Tate McRae",
+    "title": "Revolving door",
+    "url": "https://cdnt-preview.dzcdn.net/api/1/1/8/d/3/0/8d30f342c27d1c8ce38d08c5054d7adf.mp3?hdnea=exp=1773055501~acl=/api/1/1/8/d/3/0/8d30f342c27d1c8ce38d08c5054d7adf.mp3*~data=user_id=0,application_id=42~hmac=a15f9980f0b63074a1045c6ff4a9dcf0e372e44f8d4ae8502d9cd0cf71cd7f15"
+  },
+  {
+    "id": 16501728,
+    "artist": "fun.",
+    "title": "We Are Young (feat. Janelle Monáe)",
+    "url": "https://cdnt-preview.dzcdn.net/api/1/1/8/2/c/0/82c08ccf615f63cca82adfe5d7110dd4.mp3?hdnea=exp=1773055501~acl=/api/1/1/8/2/c/0/82c08ccf615f63cca82adfe5d7110dd4.mp3*~data=user_id=0,application_id=42~hmac=ec2b2e57aaf38faebaecf3940f253fbb0744a5756195ac1215cd5c20a22ea071"
+  },
+  {
+    "id": 137233982,
+    "artist": "The Offspring",
+    "title": "Pretty Fly (For A White Guy)",
+    "url": "https://cdnt-preview.dzcdn.net/api/1/1/2/8/8/0/288206f008130dfe972fce5af914e585.mp3?hdnea=exp=1773055501~acl=/api/1/1/2/8/8/0/288206f008130dfe972fce5af914e585.mp3*~data=user_id=0,application_id=42~hmac=db85aec55fe9314bb50e6191183f80ed272df4afd8bbdfb2a36bf73af8bc2ded"
+  },
+  {
+    "id": 70079770,
+    "artist": "John Legend",
+    "title": "All of Me",
+    "url": "https://cdnt-preview.dzcdn.net/api/1/1/9/3/6/0/936b5a2ef3600442446277b9b9969df9.mp3?hdnea=exp=1773055501~acl=/api/1/1/9/3/6/0/936b5a2ef3600442446277b9b9969df9.mp3*~data=user_id=0,application_id=42~hmac=39947e2c03eca2ea9cb12e38312d319a41affbd60eeb840f838b2bd76e8188eb"
+  }
+]

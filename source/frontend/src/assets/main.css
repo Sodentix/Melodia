@@ -1,4 +1,5 @@
 @import './base.css';
+@import './global.css';
 
 :root {
     --accent-pink: #ff00c8;
@@ -11,6 +12,14 @@
     --text: rgba(255,255,255,0.78);
     --card: rgba(255,255,255,0.03);
     --the-background-color: rgb(39, 39, 39);
+}
+
+[data-theme="light"] {
+    --bg: #f0f4f8;
+    --glass: rgba(0,0,0,0.04);
+    --stroke: rgba(0,0,0,0.1);
+    --text: rgba(30,40,55,0.9);
+    --card: rgba(255,255,255,0.85);
 }
 
 ::-webkit-scrollbar {

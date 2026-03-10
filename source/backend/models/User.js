@@ -51,10 +51,12 @@ const userSchema = new mongoose.Schema(
     passwordHash: {
       type: String,
       required: true,
+      select: false,
     },
     salt: {
       type: String,
       required: true,
+      select: false,
     },
     passwordHistory: {
       type: [
@@ -65,6 +67,7 @@ const userSchema = new mongoose.Schema(
         },
       ],
       default: [],
+      select: false,
     },
     emailVerified: {
       type: Boolean,
@@ -73,10 +76,38 @@ const userSchema = new mongoose.Schema(
     emailVerificationToken: {
       type: String,
       required: false,
+      select: false,
     },
     emailVerificationExpires: {
       type: Date,
       required: false,
+      select: false,
+    },
+    passwordResetToken: {
+      type: String,
+      required: false,
+      select: false,
+    },
+    passwordResetExpires: {
+      type: Date,
+      required: false,
+      select: false,
+    },
+    pendingEmail: {
+      type: String,
+      required: false,
+      lowercase: true,
+      trim: true,
+    },
+    pendingEmailToken: {
+      type: String,
+      required: false,
+      select: false,
+    },
+    pendingEmailExpires: {
+      type: Date,
+      required: false,
+      select: false,
     },
     avatarUrl: {
       type: String,
@@ -97,11 +128,65 @@ const userSchema = new mongoose.Schema(
         },
       ],
       default: [],
+      select: false,
     },
     stats: { type: mongoose.Schema.Types.ObjectId, ref: 'Stats', index: true },
+    settings: {
+      type: mongoose.Schema.Types.Mixed,
+      default: () => ({
+        theme: 'dark',
+        language: 'de',
+        soundEnabled: true,
+        musicVolume: 80,
+        sfxVolume: 80,
+        notifications: true,
+        showStatsOnHome: true,
+        reducedMotion: false,
+      }),
+    },
+    deletedAt: {
+      type: Date,
+      required: false,
+      default: null,
+      index: true,
+    },
+    deletedEmail: {
+      type: String,
+      required: false,
+      lowercase: true,
+      trim: true,
+    },
+    deletedUsername: {
+      type: String,
+      required: false,
+      trim: true,
+    },
   },
   { timestamps: true }
 );
+
+/** Filter to exclude soft-deleted users. Use with find/findOne. */
+userSchema.statics.notDeletedFilter = function () {
+  return { $or: [{ deletedAt: null }, { deletedAt: { $exists: false } }] };
+};
+
+/** Find users excluding soft-deleted. Merges conditions with notDeletedFilter. */
+userSchema.statics.findNotDeleted = function (conditions = {}) {
+  const notDeleted = this.notDeletedFilter();
+  const cond = Object.keys(conditions).length === 0 ? notDeleted : { $and: [conditions, notDeleted] };
+  return this.find(cond);
+};
+
+/** Find one user excluding soft-deleted. */
+userSchema.statics.findOneNotDeleted = function (conditions) {
+  const notDeleted = this.notDeletedFilter();
+  return this.findOne({ $and: [conditions, notDeleted] });
+};
+
+/** Find by id excluding soft-deleted. */
+userSchema.statics.findByIdNotDeleted = function (id) {
+  return this.findOneNotDeleted({ _id: id });
+};
 
 userSchema.pre('validate', function ensureUsernameLower(next) {
   if (typeof this.username === 'string' && this.username.trim()) {

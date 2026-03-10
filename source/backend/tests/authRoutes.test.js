@@ -76,7 +76,7 @@ describe('Auth routes', () => {
       }),
     });
 
-    const persistedUser = await User.findOne({ email: baseUserPayload.email });
+    const persistedUser = await User.findOne({ email: baseUserPayload.email }).select('+emailVerificationToken');
     expect(persistedUser).not.toBeNull();
     expect(persistedUser.emailVerificationToken).toBe('test-verification-token');
     expect(emailService.sendVerificationEmail).toHaveBeenCalledWith(
@@ -315,5 +315,44 @@ describe('Auth routes', () => {
     expect(response.body).toMatchObject({
       message: 'Email is already registered.',
     });
+  });
+
+  test('GET /auth/verify-email with valid token verifies the user', async () => {
+    await signUpUser({
+      email: 'verifyme@example.com',
+      username: 'verifyme1',
+    });
+
+    const res = await request(app).get('/auth/verify-email?token=test-verification-token');
+    expect(res.status).toBe(200);
+    expect(res.body).toMatchObject({ message: 'Email verified successfully.' });
+
+    const user = await User.findOne({ email: 'verifyme@example.com' });
+    expect(user.emailVerified).toBe(true);
+    expect(user.emailVerificationToken).toBeUndefined();
+  });
+
+  test('GET /auth/verify-email with missing token returns 400', async () => {
+    const res = await request(app).get('/auth/verify-email');
+    expect(res.status).toBe(400);
+    expect(res.body).toMatchObject({ message: 'Verification token is required.' });
+  });
+
+  test('POST /auth/resend-verification sends new token', async () => {
+    await signUpUser({
+      email: 'resendme@example.com',
+      username: 'resendme1',
+    });
+
+    const res = await request(app).post('/auth/resend-verification').send({ email: 'resendme@example.com' });
+    expect(res.status).toBe(200);
+    expect(res.body).toMatchObject({ message: 'Verification email sent.' });
+    expect(emailService.sendVerificationEmail).toHaveBeenCalledWith('resendme@example.com', 'test-verification-token');
+  });
+
+  test('POST /auth/resend-verification with missing email returns 400', async () => {
+    const res = await request(app).post('/auth/resend-verification').send({});
+    expect(res.status).toBe(400);
+    expect(res.body).toMatchObject({ message: 'Email is required.' });
   });
 });

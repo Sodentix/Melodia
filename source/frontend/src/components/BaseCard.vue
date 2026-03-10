@@ -90,15 +90,15 @@ const cardStyle = computed(() => ({
   justify-content: space-between;
   align-items: center;
   
-  background-color: var(--card);
+  background: rgba(10, 12, 28, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.06);
   border-radius: 1.5rem;
   padding: 1.5rem;
   overflow: hidden;
   cursor: pointer;
-  
-  /* Basis-Transition */
+  backdrop-filter: blur(16px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(255, 79, 219, 0.04);
   transition: transform 0.28s ease, box-shadow 0.28s ease, filter 0.28s ease;
-  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
 }
 
 /* --- Hintergrund Icon --- */

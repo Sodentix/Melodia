@@ -1,32 +1,33 @@
 <script>
 import { defineComponent } from 'vue'
 import BaseCard from '@/components/BaseCard.vue'
-import LeaderboardComponent from '@/components/LeaderboardComponent.vue';
-import SecondBaseCard from '@/components/SecondBaseCard.vue';
+import LeaderboardComponent from '@/components/LeaderboardComponent.vue'
+import SecondBaseCard from '@/components/SecondBaseCard.vue'
+import FooterComponent from '@/components/FooterComponent.vue'
 
 export default defineComponent({
   components: {
     BaseCard,
     SecondBaseCard,
-    LeaderboardComponent
+    LeaderboardComponent,
+    FooterComponent
   },
 })
 </script>
 
 <template>
   <div class="main">
+    <div class="page-bg"></div>
     <div class="topSection">
       <div class="topLeft">
-        <h1>Kannst du den Song erraten?</h1>
-        <h2>Teste dein Musikwissen. Spiel' gegen die Zeit. Erklimme das Leaderboard.</h2>
+        <h1>{{ $t('home.headline') }}</h1>
+        <h2>{{ $t('home.subheadline') }}</h2>
       
         <div class="gamemodeDiv">
-          <!-- Parameter sind title, description, icon, iconColor, iconWidth, iconHeight, cardWidth, cardHeight-->
-          <!-- Icons werden je nach Icon-Collection unterschiedlich angegeben - in der Doku nachlesen!-->
           <BaseCard
             class="gamemodeCard"
-            title="Start Your Game"
-            description="Wähle deinen Modus und Rate drauf los"
+            :title="$t('home.startGame')"
+            :description="$t('home.startGameDesc')"
             icon="mdi:music"
             iconColor="purple"
             cardWidth="100%"
@@ -40,13 +41,13 @@ export default defineComponent({
       </div>
     </div>
     <div class="bottomSection">
-      <h1 id="howtoplay">How to play</h1>
-      <h2>Drei einfache Schritte zwischen dir und dem Sieg. Höre, erkenne, und dominiere die Charts.</h2>
+      <h1 id="howtoplay">{{ $t('home.howToPlayTitle') }}</h1>
+      <h2>{{ $t('home.howToPlaySub') }}</h2>
       <div class="explanationDiv">
         <SecondBaseCard
           class="explanationCard"
-          title="1. Listen"
-          description="Ein kurzer Song-Ausschnitt startet. Lausche genau auf Melodie und Rhythmus."
+          :title="$t('home.step1Title')"
+          :description="$t('home.step1Desc')"
           icon="fa6-solid:headphones"
           iconColor="#b3b300"
           cardWidth="100%"
@@ -54,8 +55,8 @@ export default defineComponent({
         />
         <SecondBaseCard
           class="explanationCard"
-          title="2. Guess"
-          description="Tippe den Titel oder Künstler ein - je schneller du rätst, desto mehr Punkte gibt's!"
+          :title="$t('home.step2Title')"
+          :description="$t('home.step2Desc')"
           icon="mdi:lightbulb-on-outline"
           iconColor="#b3b300"
           cardWidth="100%"
@@ -63,8 +64,8 @@ export default defineComponent({
         />
         <SecondBaseCard
           class="explanationCard"
-          title="3. Score"
-          description="Verdiene Punkte, steige im Ranking auf und werde der ultimative Beat-Master."
+          :title="$t('home.step3Title')"
+          :description="$t('home.step3Desc')"
           icon="mdi:star-shooting-outline"
           iconColor="#b3b300"
           cardWidth="100%"
@@ -72,6 +73,7 @@ export default defineComponent({
         />
       </div>
     </div>
+    <FooterComponent />
   </div>
 </template>
 
@@ -157,6 +159,7 @@ p, h2 {
   padding: 0 3rem 2.5rem;
   width: 100%;
   max-width: 1920px; /* Prevent extreme stretching on ultra-wide */
+  position: relative;
 }
 
 @media (max-width: 1000px) {

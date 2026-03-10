@@ -9,6 +9,13 @@ let lastMtime = 0;
 const DEBUG_GAME = String(process.env.DEBUG_GAME || '').toLowerCase() === 'true';
 const CATEGORY_TRACK_SUFFIX = '.tracks.json';
 
+// Safe category id for file paths: alphanumeric, underscore, hyphen, dot only (no path traversal)
+const SAFE_CATEGORY_ID = /^[a-zA-Z0-9_.-]{1,64}$/;
+
+function isSafeCategoryId(categoryId) {
+  return typeof categoryId === 'string' && SAFE_CATEGORY_ID.test(categoryId);
+}
+
 function logDebug(message, extra) {
   if (!DEBUG_GAME) return;
   const payload = { ts: new Date().toISOString(), area: 'clips', message };
@@ -38,10 +45,12 @@ function readTracksFile() {
 }
 
 function readCategoryTracksFile(categoryId) {
-  if (!categoryId) return [];
+  if (!isSafeCategoryId(categoryId)) {
+    logDebug('category_id_invalid', { categoryId });
+    return [];
+  }
   const assetsDir = getAssetsPath();
 
-  // Map category IDs to filenames in assets/songData/
   // Map category IDs to filenames in assets/songData/
   // User requested category names to be file names.
   // We expect {categoryId}.json to exist.
@@ -276,4 +285,5 @@ module.exports = {
   listClips,
   searchClips,
   listTracksByCategory,
+  isSafeCategoryId,
 };

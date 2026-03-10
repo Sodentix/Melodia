@@ -1,46 +1,58 @@
-import { reactive } from 'vue';
+import { reactive } from 'vue'
+import { clearSession, getApiBase, getToken, getAuthHeaders } from '@/api/client'
 
 export const userStore = reactive({
   user: null,
-  avatarTimestamp: Date.now(), // Trick gegen Browser-Caching
+  avatarTimestamp: Date.now(),
 
-  // Passiert beim App-Start
+  async deleteAvatarPath() {
+    const base = getApiBase()
+    const token = getToken()
+    if (!base || !token) return
+    const res = await fetch(`${base}/users/me/avatar`, {
+      method: 'DELETE',
+      headers: getAuthHeaders(),
+    })
+    if (!res.ok) throw new Error('Failed to delete avatar')
+    if (this.user) {
+      this.user.avatarUrl = null
+      this.avatarTimestamp = Date.now()
+      this.saveToStorage()
+    }
+  },
+
   init() {
-    const stored = localStorage.getItem('melodia_user');
+    const stored = localStorage.getItem('melodia_user')
     if (stored) {
       try {
-        this.user = JSON.parse(stored);
-      } catch (e) {
-        console.error('Fehler beim Laden des Users', e);
-        this.user = null;
+        this.user = JSON.parse(stored)
+      } catch {
+        this.user = null
       }
     }
   },
 
-  // User setzen
   setUser(userData) {
-    this.user = userData;
-    this.saveToStorage();
+    this.user = userData
+    this.saveToStorage()
   },
 
   setAvatarUrl(url) {
     if (this.user) {
-      this.user.avatarUrl = url;
-      // WICHTIG: Timestamp ändern -> Weil erst dann laden die Comp. neu
-      this.avatarTimestamp = Date.now(); 
-      this.saveToStorage();
+      this.user.avatarUrl = url
+      this.avatarTimestamp = Date.now()
+      this.saveToStorage()
     }
   },
 
   clearUser() {
-    this.user = null;
-    localStorage.removeItem('melodia_user');
-    localStorage.removeItem('melodia_token'); 
+    this.user = null
+    clearSession()
   },
 
   saveToStorage() {
     if (this.user) {
-      localStorage.setItem('melodia_user', JSON.stringify(this.user));
+      localStorage.setItem('melodia_user', JSON.stringify(this.user))
     }
   }
-});
+})

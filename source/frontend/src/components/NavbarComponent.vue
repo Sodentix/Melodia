@@ -1,33 +1,24 @@
 <script setup>
-import { onMounted, onBeforeUnmount, ref, computed } from 'vue'; // computed importieren
-// axios brauchen wir hier nicht mehr zwingend, wenn wir nur den Store lesen
-import ProfilePicture from '@/components/ProfilePicture.vue';
-import { userStore } from '@/stores/userStore';
-import { useRouter } from 'vue-router'; // Router für Logout
+import { onMounted, onBeforeUnmount, ref, computed } from 'vue'
+import { useI18n } from 'vue-i18n'
+import ProfilePicture from '@/components/ProfilePicture.vue'
+import { userStore } from '@/stores/userStore'
+import { useRouter } from 'vue-router'
+import { clearSession } from '@/api/client'
 
-const router = useRouter();
-const canvasRef = ref(null);
-const isMenuOpen = ref(false);
+const router = useRouter()
+const canvasRef = ref(null)
+const isMenuOpen = ref(false)
+const isProfileMenuOpen = ref(false)
 
-// --- 1. AUTHENTIFIZIERUNG ÜBER STORE ---
-// Statt einer lokalen ref und einem API Call, hören wir direkt auf den Store.
-// Sobald App.vue den User geladen hat, wird das hier true.
-const isAuthenticated = computed(() => {
-  return !!userStore.user; 
-});
+const isAuthenticated = computed(() => !!userStore.user)
+const currentUser = computed(() => userStore.user)
 
-// Optional: Falls du auf den User zugreifen musst
-const currentUser = computed(() => userStore.user);
-
-// --- 2. LOGOUT LOGIK ---
 function logout() {
-  localStorage.removeItem("melodia_token");
-  localStorage.removeItem("melodia_user"); // Auch User Daten löschen
-  
-  userStore.clearUser(); // Store leeren -> isAuthenticated wird sofort false
-  
-  closePopover();
-  router.push({ name: 'auth' }); // Zurück zum Login/Home
+  clearSession()
+  userStore.clearUser()
+  closePopover()
+  router.push({ name: 'auth' })
 }
 
 function toggleMenu() {
@@ -38,106 +29,112 @@ function closeMenu() {
   isMenuOpen.value = false;
 }
 
-function closePopover() {
-  const popoverElement = document.getElementById("profileMenu");
-  if (popoverElement?.hidePopover) popoverElement.hidePopover();
+function toggleProfileMenu() {
+  isProfileMenuOpen.value = !isProfileMenuOpen.value
 }
 
-// --- 3. ANIMATION (unverändert) ---
-let animationId;
-let resizeObserver;
-let canvas;
-let ctx;
-let pixelRatio = 1;
+function closePopover() {
+  isProfileMenuOpen.value = false
+}
+
+function handleClickOutside(event) {
+  if (!event.target.closest('.profile-dropdown-wrapper')) {
+    isProfileMenuOpen.value = false
+  }
+}
+
+let animationId
+let resizeObserver
+let canvas
+let ctx
+let pixelRatio = 1
 
 function resizeCanvas() {
-  if (!canvas || !ctx) return;
-
-  pixelRatio = window.devicePixelRatio || 1;
-  const parent = canvas.parentElement;
-  const targetWidth = parent?.offsetWidth || window.innerWidth || 800;
-  const targetHeight = parent?.offsetHeight || 160;
-
-  canvas.width = targetWidth * pixelRatio;
-  canvas.height = targetHeight * pixelRatio;
-  canvas.style.width = `${targetWidth}px`;
-  canvas.style.height = `${targetHeight}px`;
-
-  ctx.setTransform(1, 0, 0, 1, 0, 0);
-  ctx.scale(pixelRatio, pixelRatio);
+  if (!canvas || !ctx) return
+  pixelRatio = window.devicePixelRatio || 1
+  const parent = canvas.parentElement
+  const targetWidth = parent?.offsetWidth || window.innerWidth || 800
+  const targetHeight = parent?.offsetHeight || 160
+  canvas.width = targetWidth * pixelRatio
+  canvas.height = targetHeight * pixelRatio
+  canvas.style.width = `${targetWidth}px`
+  canvas.style.height = `${targetHeight}px`
+  ctx.setTransform(1, 0, 0, 1, 0, 0)
+  ctx.scale(pixelRatio, pixelRatio)
 }
 
 function cleanupCanvasListeners() {
   if (resizeObserver) {
-    resizeObserver.disconnect();
-    resizeObserver = null;
+    resizeObserver.disconnect()
+    resizeObserver = null
   }
-  window.removeEventListener('resize', resizeCanvas);
+  window.removeEventListener('resize', resizeCanvas)
 }
 
 onMounted(() => {
-  // KEIN validateSession() mehr hier! Das macht App.vue.
-  
-  canvas = canvasRef.value;
-  if (!canvas) return;
-  
-  ctx = canvas.getContext('2d');
-  if (canvas) {
-    resizeCanvas();
+  document.addEventListener('click', handleClickOutside)
+
+  canvas = canvasRef.value
+  if (!canvas) return
+
+  ctx = canvas.getContext('2d')
+  if (ctx) {
+    resizeCanvas()
     if (window.ResizeObserver) {
-      resizeObserver = new ResizeObserver(resizeCanvas);
-      resizeObserver.observe(canvas.parentElement || canvas);
+      resizeObserver = new ResizeObserver(resizeCanvas)
+      resizeObserver.observe(canvas.parentElement || canvas)
     } else {
-      window.addEventListener('resize', resizeCanvas);
+      window.addEventListener('resize', resizeCanvas)
     }
   }
 
   const colors = [
-    'rgba(255,0,200,0.6)',
-    'rgba(0,236,255,0.5)',
-    'rgba(61,255,140,0.45)',
-    'rgba(255,255,255,0.35)'
-  ];
-  const lineWidths = [3.1, 2.8, 2.5, 2.3];
-  let time = 0;
+    'rgba(255, 79, 219, 0.5)',
+    'rgba(5, 217, 255, 0.45)',
+    'rgba(61, 255, 140, 0.4)',
+    'rgba(255, 255, 255, 0.3)'
+  ]
+  const lineWidths = [3.1, 2.8, 2.5, 2.3]
+  let time = 0
 
   function mapWave(value, min, max) {
-    return min + ((value + 1) / 2) * (max - min);
+    return min + ((value + 1) / 2) * (max - min)
   }
 
   function draw() {
-    if (!canvas || !ctx) return;
-    time += 0.018;
-    const width = canvas.width / pixelRatio;
-    const height = canvas.height / pixelRatio;
-    ctx.clearRect(0, 0, width, height);
+    if (!canvas || !ctx) return
+    time += 0.018
+    const width = canvas.width / pixelRatio
+    const height = canvas.height / pixelRatio
+    ctx.clearRect(0, 0, width, height)
 
-    const topLimit = 20;
-    const bottomLimit = height - 20;
+    const topLimit = 20
+    const bottomLimit = height - 20
 
     for (let i = 0; i < colors.length; i++) {
-      ctx.beginPath();
+      ctx.beginPath()
       for (let x = 0; x <= width; x += 6) {
-        const primary = Math.sin((x * 0.018) + time * (1 + i * 0.6));
-        const secondary = Math.sin(time * (0.6 + i * 0.18));
-        const combined = primary * secondary * (1.1 - i * 0.12);
-        const y = mapWave(combined, topLimit, bottomLimit);
-        if (x === 0) ctx.moveTo(x, y);
-        else ctx.lineTo(x, y);
+        const primary = Math.sin((x * 0.018) + time * (1 + i * 0.6))
+        const secondary = Math.sin(time * (0.6 + i * 0.18))
+        const combined = primary * secondary * (1.1 - i * 0.12)
+        const y = mapWave(combined, topLimit, bottomLimit)
+        if (x === 0) ctx.moveTo(x, y)
+        else ctx.lineTo(x, y)
       }
-      ctx.strokeStyle = colors[i];
-      ctx.lineWidth = lineWidths[i];
-      ctx.stroke();
+      ctx.strokeStyle = colors[i]
+      ctx.lineWidth = lineWidths[i]
+      ctx.stroke()
     }
-    animationId = requestAnimationFrame(draw);
+    animationId = requestAnimationFrame(draw)
   }
-  animationId = requestAnimationFrame(draw);
-});
+  animationId = requestAnimationFrame(draw)
+})
 
 onBeforeUnmount(() => {
-  cleanupCanvasListeners();
-  if (animationId) cancelAnimationFrame(animationId);
-});
+  document.removeEventListener('click', handleClickOutside)
+  cleanupCanvasListeners()
+  if (animationId) cancelAnimationFrame(animationId)
+})
 </script>
 
 <template>
@@ -146,7 +143,7 @@ onBeforeUnmount(() => {
       <canvas ref="canvasRef" />
     </div>
     <div class="nav-inner">
-      <div id="logo">Melodia - Feel The Rythm.</div>
+      <div id="logo">{{ $t('nav.logo') }}</div>
       
       <button
         type="button"
@@ -154,7 +151,7 @@ onBeforeUnmount(() => {
         :aria-expanded="isMenuOpen"
         aria-controls="primary-nav"
         @click="toggleMenu"
-        aria-label="Navigation öffnen oder schließen"
+        :aria-label="$t('nav.navToggle')"
       >
         <span /><span /><span />
       </button>
@@ -163,7 +160,7 @@ onBeforeUnmount(() => {
         <ul class="nav-list">
           <li>
             <router-link class="nav-link" :to="{ name: 'home' }" @click="closeMenu">
-              Home
+              {{ $t('nav.home') }}
             </router-link>
           </li>
           <li>
@@ -172,33 +169,37 @@ onBeforeUnmount(() => {
               :to="{ path: '/home', hash: '#howtoplay' }"
               @click="closeMenu"
             >
-              How to play
+              {{ $t('nav.howToPlay') }}
             </router-link>
           </li>
         </ul>
 
         <div class="nav-actions">
           <router-link
-            class="btn primary"
+            class="btn btn--primary"
             v-if="!isAuthenticated"
             :to="{ name: 'auth' }"
             @click="closeMenu"
           >
-            Sign Up
+            {{ $t('nav.signUp') }}
           </router-link>
 
-          <button v-if="isAuthenticated" popovertarget="profileMenu" class="profile-orb" id="profile-orb">
-            <ProfilePicture 
-                :can-toggle="false" 
-                :is-editable="false" 
-                :size="42" 
-            />
-          </button>
+          <div v-if="isAuthenticated" class="profile-dropdown-wrapper">
+            <button class="profile-orb" id="profile-orb" @click="toggleProfileMenu" type="button">
+              <ProfilePicture 
+                  :can-toggle="false" 
+                  :is-editable="false" 
+                  :size="42" 
+              />
+            </button>
 
-          <div id="profileMenu" popover class="profile-popover" anchor="profile-orb">
-            <div class="popover-arrow"></div> 
-            <router-link :to="{ name: 'profile' }" class="dropdownOption" @click="closePopover()">Profil</router-link>
-            <p class="dropdownOption" @click="logout">Abmelden</p>
+            <div v-show="isProfileMenuOpen" class="profile-popover" role="menu">
+            <div class="popover-arrow"></div>
+            <router-link :to="{ name: 'profile' }" class="dropdownOption" @click="closePopover()">{{ $t('nav.profile') }}</router-link>
+            <router-link :to="{ name: 'settings' }" class="dropdownOption" @click="closePopover()">{{ $t('nav.settings') }}</router-link>
+            <router-link v-if="currentUser?.userRole === 'admin'" :to="{ name: 'admin' }" class="dropdownOption" @click="closePopover()">{{ $t('nav.admin') }}</router-link>
+            <p class="dropdownOption dropdownOption--danger" @click="logout">{{ $t('nav.logout') }}</p>
+            </div>
           </div>
         </div>
       </nav>
@@ -211,7 +212,11 @@ onBeforeUnmount(() => {
 #navbar {
     display: flex;
     position: relative;
-    background-color: black;
+    background: rgba(10, 12, 28, 0.85);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    box-shadow: 0 1px 0 0 rgba(255, 79, 219, 0.04);
     min-height: 5rem;
     z-index: 999;
     padding: 0 1.5rem;
@@ -244,11 +249,10 @@ onBeforeUnmount(() => {
     font-weight: 700;
     letter-spacing: 0.08em;
     text-transform: uppercase;
-    background: linear-gradient(120deg, var(--accent-pink), var(--accent-cyan), var(--accent-green));
+    background: linear-gradient(135deg, #ff4fdb, #05d9ff);
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
-    text-shadow: 0 0 22px rgba(0, 236, 255, 0.2);
 }
 
 
@@ -276,6 +280,11 @@ onBeforeUnmount(() => {
     position: relative;
 }
 
+.profile-dropdown-wrapper {
+    position: relative;
+    display: inline-flex;
+}
+
 :deep(.router-link-exact-active[href="/home"])::after {
     transform: scaleX(1);
 }
@@ -288,7 +297,7 @@ onBeforeUnmount(() => {
     bottom: -10px;
     height: 2px;
     border-radius: 999px;
-    background: var(--gradient-accent);
+    background: linear-gradient(135deg, #ff4fdb, #05d9ff);
     transform: scaleX(0);
     transform-origin: left;
     transition: transform 0.25s ease;
@@ -318,12 +327,18 @@ onBeforeUnmount(() => {
 .menu-toggle span {
     width: 26px;
     height: 3px;
-    background: linear-gradient(120deg, var(--accent-pink), var(--accent-cyan));
+    background: linear-gradient(135deg, #ff4fdb, #05d9ff);
     display: block;
 }
 
+/* Wave animation */
+.wave-layer {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+}
 
-/* Wellenanimation / Canvas */
 canvas {
   position: absolute;
   inset: 0;
@@ -332,15 +347,6 @@ canvas {
   opacity: 0.5;
   filter: blur(0.2px) brightness(1.2);
 }
-
-.wave-layer {
-    position: absolute;
-    inset: 0;
-    z-index: -1;
-    pointer-events: none;
-}
-
-
 
 /* Allgemeine Styles */
 .btn {
@@ -358,20 +364,13 @@ canvas {
     transition: all 0.24s ease;
     text-decoration: none;
 }
-.btn.primary {
-    border: none;
-    background: var(--gradient-accent);
-    box-shadow: 0 10px 32px rgba(255,0,200,0.18);
-    color: #050505;
-}
-.btn.primary:hover { transform: translateY(-2px); }
 .btn.ghost:hover {
     border-color: rgba(255,255,255,0.24);
     background: rgba(255,255,255,0.08);
 }
 
 
-/* Account */
+/* Account - aligned with auth gradient */
 .profile-orb {
     width: 42px;
     height: 42px;
@@ -380,73 +379,77 @@ canvas {
     align-items: center;
     justify-content: center;
     cursor: pointer;
-
-    /* Neon-Gradient passend zu deinem Wave-Design */
-    background: radial-gradient(
-        circle at 30% 30%,
-        rgba(255, 0, 200, 0.55),
-        rgba(0, 236, 255, 0.50),
-        rgba(61, 255, 140, 0.45)
-    );
-
-    /* Outer Glow */
-    box-shadow:
-        0 0 14px rgba(255, 0, 200, 0.55),
-        0 0 28px rgba(0, 236, 255, 0.45),
-        0 0 42px rgba(61, 255, 140, 0.35);
-
-    backdrop-filter: blur(4px);
+    background: linear-gradient(135deg, rgba(255, 79, 219, 0.4), rgba(5, 217, 255, 0.35));
+    box-shadow: 0 4px 16px rgba(5, 217, 255, 0.25);
+    backdrop-filter: blur(8px);
     border: 1px solid rgba(255, 255, 255, 0.12);
-
-    transition:
-        transform 0.22s ease,
-        box-shadow 0.24s ease;
+    transition: transform 0.22s ease, box-shadow 0.24s ease;
 }
 
 .profile-orb:hover {
     transform: translateY(-2px);
-    box-shadow:
-        0 0 20px rgba(255, 0, 200, 0.75),
-        0 0 32px rgba(0, 236, 255, 0.60),
-        0 0 50px rgba(61, 255, 140, 0.50);
+    box-shadow: 0 8px 24px rgba(5, 217, 255, 0.35);
 }
 
-/* Popover */
+/* Popover - glass card style */
 .profile-popover {
+    position: absolute;
+    top: calc(100% + 0.5rem);
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    border-radius: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    background: rgba(10, 12, 28, 0.95);
+    backdrop-filter: blur(20px);
     color: var(--text);
-    position: relative; 
-    border: 1px solid rgba(255, 255, 255, 0.03);
-    border-radius: 12px;
-    background-color: var(--card);
-    color: var(--text);
-    margin-left: auto;
-    padding: 0.5rem;
-    overflow: visible; 
-    margin-top: 5.5rem;
-    margin-right: 1.5rem;
+    padding: 0.5rem 0.4rem;
+    min-width: 9.5rem;
+    z-index: 1000;
+    box-shadow: 0 24px 48px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255, 79, 219, 0.06);
 }
 
 .popover-arrow {
     position: absolute;
-    top: -12px;
-    right: 8px;
-    width: 24px;
-    height: 12px;
-    background-color: var(--card); 
+    top: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 22px;
+    height: 10px;
+    background: rgba(10, 12, 28, 0.95);
     clip-path: polygon(0% 100%, 50% 0%, 100% 100%);
-    border: 1px solid rgba(255, 255, 255, 0.03); 
-    filter: brightness(150%);
+    border-left: 1px solid rgba(255, 255, 255, 0.06);
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+    border-right: 1px solid rgba(255, 255, 255, 0.06);
     z-index: 10;
 }
 
 .dropdownOption {
+    display: block;
+    padding: 0.35rem 0.9rem;
     color: var(--text);
     text-decoration: none;
     cursor: pointer;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    white-space: nowrap;
 }
 
 .dropdownOption:hover {
     color: #ffffff;
+    background: rgba(255, 255, 255, 0.06);
+}
+
+.dropdownOption--danger {
+    color: #ff4f83;
+    font-weight: 600;
+}
+
+.dropdownOption--danger:hover {
+    color: #ff6b8a;
+    background: rgba(255, 79, 131, 0.2);
 }
 
 /* Iconify-Icon */
@@ -485,14 +488,14 @@ canvas {
         transform: translateY(-8px) rotate(-45deg);
     }
 
-    /* Full Screen Overlay */
+    /* Full Screen Overlay - glass design */
     #primary-nav {
         position: fixed;
         inset: 0;
         width: 100vw;
         height: 100vh;
-        background: rgba(5, 5, 5, 0.95);
-        backdrop-filter: blur(12px);
+        background: rgba(10, 12, 28, 0.92);
+        backdrop-filter: blur(20px);
         flex-direction: column;
         align-items: center;
         justify-content: center;

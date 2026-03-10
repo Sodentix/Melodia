@@ -1,16 +1,28 @@
 const express = require('express');
+const mongoose = require('mongoose');
 const cors = require('cors');
 const helmet = require('helmet');
+const rateLimit = require('express-rate-limit');
 const authRoutes = require('./routes/authRoutes');
 const statsRoutes = require('./routes/statsRoutes');
 const gameRoutes = require('./routes/gameRoutes');
 const userRoutes = require('./routes/userRoutes');
+const adminRoutes = require('./routes/adminRoutes');
 const libraryRoutes = require('./routes/libraryRoutes');
 const createLogger = require('./middleware/logger');
 const path = require('path');
 const appLogger = require('./utils/logger');
 
 const app = express();
+
+const globalLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 500,
+  message: { message: 'Too many requests, please try again later.' },
+  standardHeaders: true,
+  legacyHeaders: false,
+  skip: () => process.env.NODE_ENV === 'test',
+});
 
 // CORS configuration from env (needed before helmet for static files)
 const corsOriginEnv = process.env.CORS_ORIGIN || '';
@@ -36,13 +48,19 @@ app.use(createLogger());
 
 app.use(
   cors({
-    origin: allowedOrigins.length > 0 ? allowedOrigins : true, // Allow all origins in dev if not configured
+    origin: allowedOrigins.length > 0 ? allowedOrigins : true,
     credentials: true,
     exposedHeaders: ['Content-Range', 'Accept-Ranges'],
   })
 );
 
-app.use(express.json());
+app.use(globalLimiter);
+app.use(express.json({ limit: '100kb' }));
+
+// Health check for load balancers and monitoring
+app.get('/health', (_req, res) => {
+  res.json({ status: 'ok', timestamp: new Date().toISOString() });
+});
 
 // Static clips (fallback audio) served at /clips
 // Must handle CORS and range requests for audio streaming
@@ -125,6 +143,7 @@ app.use('/stats', statsRoutes);
 app.use('/game', gameRoutes);
 app.use('/library', libraryRoutes);
 app.use('/users', userRoutes);
+app.use('/admin', adminRoutes);
 
 // Global error handler (ensure all unhandled route errors are logged)
 // Must be after routes

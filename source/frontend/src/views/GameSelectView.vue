@@ -2,12 +2,11 @@
 import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import axios from 'axios'
+import { getApiBase, getToken, clearSessionAndRedirect } from '@/api/client'
 
 const router = useRouter()
 
-const apiRoot = import.meta.env.VITE_API_URL
-  ? import.meta.env.VITE_API_URL.replace(/\/$/, '')
-  : ''
+const apiRoot = getApiBase()
 const gameBase = apiRoot.endsWith('/game') ? apiRoot : `${apiRoot}/game`
 
 const modeOptions = [
@@ -33,7 +32,7 @@ const errorMessage = ref('')
 
 const canStart = computed(() => Boolean(selectedCategory.value))
 
-const token = localStorage.getItem('melodia_token') || localStorage.getItem('token') || ''
+const token = getToken()
 
 async function fetchCategories() {
   if (!gameBase) {
@@ -65,7 +64,10 @@ async function fetchCategories() {
       selectedCategory.value = categories.value[0]
     }
   } catch (error) {
-    console.error('Kategorie-Liste fehlgeschlagen:', error)
+    if (error.response?.status === 401) {
+      clearSessionAndRedirect()
+      return
+    }
     errorMessage.value = 'Kategorien konnten nicht geladen werden.'
   } finally {
     loading.value = false
@@ -117,8 +119,8 @@ onMounted(() => {
     <div class="background-glow"></div>
     
     <header class="page-header">
-      <h1>Choose Your Path</h1>
-      <p class="subtitle">Select a mode and category to start your journey.</p>
+      <h1>{{ $t('gameSelect.title') }}</h1>
+      <p class="subtitle">{{ $t('gameSelect.subtitle') }}</p>
     </header>
 
     <main class="content-wrapper">
@@ -184,10 +186,10 @@ onMounted(() => {
 
     <footer class="actions-bar">
       <div class="actions-container">
-        <button type="button" class="btn secondary" @click="router.push('/home')">
+        <button type="button" class="btn btn--secondary" @click="router.push('/home')">
           Back
         </button>
-        <button type="button" class="btn primary" :disabled="!canStart" @click="startGame">
+        <button type="button" class="btn btn--primary" :disabled="!canStart" @click="startGame">
           Start Game
           <span class="arrow">→</span>
         </button>
@@ -213,9 +215,10 @@ onMounted(() => {
   left: 0;
   width: 100%;
   height: 100%;
-  background: 
-    radial-gradient(circle at 15% 20%, rgba(255, 0, 200, 0.08), transparent 40%),
-    radial-gradient(circle at 85% 80%, rgba(0, 236, 255, 0.08), transparent 40%);
+  background:
+    radial-gradient(ellipse 70% 60% at 15% 30%, rgba(255, 79, 219, 0.15), transparent 50%),
+    radial-gradient(ellipse 50% 50% at 85% 70%, rgba(5, 217, 255, 0.12), transparent 50%),
+    linear-gradient(180deg, #05060c 0%, #080a14 40%, #060818 100%);
   z-index: -1;
   pointer-events: none;
 }
@@ -435,31 +438,6 @@ h1 {
   display: flex;
   align-items: center;
   gap: 0.8rem;
-}
-
-.btn.primary {
-  background: white;
-  color: black;
-}
-
-.btn.primary:hover:not(:disabled) {
-  transform: translateY(-2px);
-  box-shadow: 0 5px 20px rgba(255, 255, 255, 0.2);
-}
-
-.btn.primary:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-.btn.secondary {
-  background: transparent;
-  color: white;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-}
-
-.btn.secondary:hover {
-  background: rgba(255, 255, 255, 0.1);
 }
 
 .refresh-btn {

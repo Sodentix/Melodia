@@ -1,64 +1,29 @@
 /*
  * Service to fetch song previews from Deezer API and save them as JSON files.
- * Runs on startup and then every 5 minutes.
+ * Reads categories from categories.json. Runs on startup and every 5 minutes.
  */
 
 const axios = require('axios');
 const fs = require('fs');
 const path = require('path');
 const cron = require('node-cron');
+const { listCategories } = require('./categoryService');
 
-const categories = {
-  pop: {
-    playlistIds: [1282483245, 8282573142, 2159765062, 8074581462],
-    name: "Pop",
-    description: "Pop music for good mood",
-    difficulty: "easy",
-    accent: "#FF4FD8"
-  },
-  holiday: {
-    playlistIds: [8454338222],
-    name: "Holiday Vibes",
-    description: "Festive tunes for the season",
-    difficulty: "easy",
-    accent: "#00FF55"
-  },
-  masterplaylist: {
-    playlistIds: [14800694023],
-    name: "Master Playlist",
-    description: "A mix of all available songs",
-    difficulty: "medium",
-    accent: "#FF0055"
-  },
-  newAlternative: {
-    playlistIds: [1402845615],
-    name: "New Alternative",
-    description: "A mix of all available songs",
-    difficulty: "hard",
-    accent: "#06ffda"
-  },
-  hiphop: {
-    playlistIds: [14800693283],
-    name: "Hip-Hop",
-    description: "A mix of all available songs",
-    difficulty: "really hard",
-    accent: "#FF0675"
-  },
-  eightiesNineties: {
-    playlistIds: [13785202001],
-    name: "80s & 90s",
-    description: "80s and 90s groove for everyone",
-    difficulty: "easy",
-    accent: "#00f7ffff"
-  }
-};
-
-
-// Output directories
 const outputDir = path.join(__dirname, '../assets/songData');
 const categoriesDir = path.join(__dirname, '../assets/categories');
 
-// Ensure output directories exist
+// Legacy default mapping for categories that don't yet have playlistIds/trackIds
+// in categories.json. This keeps existing categories working until you update
+// them via the admin UI.
+const LEGACY_CATEGORY_SOURCES = {
+  pop: { playlistIds: [1282483245, 8282573142, 2159765062, 8074581462] },
+  holiday: { playlistIds: [8454338222] },
+  masterplaylist: { playlistIds: [14800694023] },
+  newAlternative: { playlistIds: [1402845615] },
+  hiphop: { playlistIds: [14800693283] },
+  eightiesNineties: { playlistIds: [13785202001] },
+};
+
 if (!fs.existsSync(outputDir)) {
   fs.mkdirSync(outputDir, { recursive: true });
 }
@@ -66,14 +31,13 @@ if (!fs.existsSync(categoriesDir)) {
   fs.mkdirSync(categoriesDir, { recursive: true });
 }
 
-// Fetch tracks from a single playlist (with pagination)
 async function fetchPlaylistPreviews(playlistId, minRank = 0) {
   try {
     const allTracks = [];
     let index = 0;
-    const limit = 100; // Maximum allowed by Deezer API per request
+    const limit = 100;
     let totalTracks = null;
-    let totalFetched = 0; // Track total number of tracks fetched (including those without previews)
+    let totalFetched = 0;
 
     while (true) {
       const url = `https://api.deezer.com/playlist/${playlistId}/tracks?limit=${limit}&index=${index}`;
@@ -83,45 +47,32 @@ async function fetchPlaylistPreviews(playlistId, minRank = 0) {
         break;
       }
 
-      // Get total count from first response
       if (totalTracks === null && response.data.total !== undefined) {
         totalTracks = response.data.total;
       }
 
       const tracks = response.data.data;
-      totalFetched += tracks.length; // Count all tracks fetched, not just valid ones
-      
-      // Filter and map tracks
+      totalFetched += tracks.length;
+
       const validTracks = tracks
-        .filter(t => t.preview && t.rank >= minRank)
-        .map(t => ({
+        .filter((t) => t.preview && t.rank >= minRank)
+        .map((t) => ({
           id: t.id,
           artist: t.artist ? t.artist.name : 'Unknown Artist',
           title: t.title,
-          url: t.preview
+          url: t.preview,
         }));
 
       allTracks.push(...validTracks);
 
-      // Check if we've fetched all tracks from the API (compare totalFetched to totalTracks)
-      if (totalTracks !== null && totalFetched >= totalTracks) {
-        break;
-      }
+      if (totalTracks !== null && totalFetched >= totalTracks) break;
+      if (tracks.length < limit) break;
 
-      // If we got fewer tracks than the limit, we're done
-      if (tracks.length < limit) {
-        break;
-      }
-
-      // Move to next page
       index += limit;
-
-      // Add a small delay to avoid rate limiting
-      await new Promise(resolve => setTimeout(resolve, 200));
+      await new Promise((resolve) => setTimeout(resolve, 200));
     }
 
-    const totalInfo = totalTracks !== null ? ` (total: ${totalTracks}, fetched: ${totalFetched}, with preview: ${allTracks.length})` : '';
-    console.log(`✅ Fetched ${allTracks.length} tracks from playlist ${playlistId}${totalInfo}`);
+    console.log(`✅ Fetched ${allTracks.length} tracks from playlist ${playlistId}`);
     return allTracks;
   } catch (error) {
     console.error(`❌ Error fetching playlist ${playlistId}:`, error.message);
@@ -129,84 +80,116 @@ async function fetchPlaylistPreviews(playlistId, minRank = 0) {
   }
 }
 
-// Gather data for all categories
+async function fetchTrackPreviews(trackIds) {
+  const results = [];
+  for (const trackId of trackIds) {
+    try {
+      const url = `https://api.deezer.com/track/${trackId}`;
+      const response = await axios.get(url);
+      const t = response.data;
+      if (t && t.preview) {
+        results.push({
+          id: t.id,
+          artist: t.artist ? t.artist.name : 'Unknown Artist',
+          title: t.title,
+          url: t.preview,
+        });
+      }
+      await new Promise((resolve) => setTimeout(resolve, 100));
+    } catch (err) {
+      console.error(`❌ Error fetching track ${trackId}:`, err.message);
+    }
+  }
+  return results;
+}
+
+async function gatherCategoryData(category) {
+  const legacy = LEGACY_CATEGORY_SOURCES[category.id] || {};
+  const playlistIdsFromCat = Array.isArray(category.playlistIds) ? category.playlistIds : [];
+  const trackIdsFromCat = Array.isArray(category.trackIds) ? category.trackIds : [];
+
+  // Use explicit values from categories.json when present; otherwise fall back
+  // to the legacy hard-coded mapping.
+  const playlistIds =
+    playlistIdsFromCat.length > 0 ? playlistIdsFromCat : Array.isArray(legacy.playlistIds) ? legacy.playlistIds : [];
+  const trackIds =
+    trackIdsFromCat.length > 0 ? trackIdsFromCat : Array.isArray(legacy.trackIds) ? legacy.trackIds : [];
+  const allTracks = [];
+
+  for (const pid of playlistIds) {
+    const tracks = await fetchPlaylistPreviews(pid);
+    allTracks.push(...tracks);
+  }
+
+  if (trackIds.length > 0) {
+    const tracks = await fetchTrackPreviews(trackIds);
+    allTracks.push(...tracks);
+  }
+
+  return Array.from(new Map(allTracks.map((t) => [t.id, t])).values());
+}
+
 async function gatherAllCategoryData() {
+  const categories = listCategories();
   const collected = {};
 
-  for (const [category, data] of Object.entries(categories)) {
-    collected[category] = [];
-
-    for (const playlistId of data.playlistIds) {
-      const tracks = await fetchPlaylistPreviews(playlistId);
-      collected[category].push(...tracks);
-    }
-
-    // Remove duplicates based on Track ID
-    const uniqueTracks = Array.from(
-      new Map(collected[category].map(t => [t.id, t])).values()
-    );
-
-    collected[category] = uniqueTracks;
+  for (const cat of categories) {
+    const tracks = await gatherCategoryData(cat);
+    if (!tracks || tracks.length === 0) continue;
+    collected[cat.id] = tracks;
   }
 
   return collected;
 }
 
-// Write data to JSON files
 function writeCategoryFiles(data) {
-  for (const [category, tracks] of Object.entries(data)) {
-    const outputFile = path.join(outputDir, `${category}.json`);
+  for (const [categoryId, tracks] of Object.entries(data)) {
+    const outputFile = path.join(outputDir, `${categoryId}.json`);
     try {
       fs.writeFileSync(outputFile, JSON.stringify(tracks, null, 2));
-      console.log(`📁 ${category}: ${tracks.length} tracks saved to ${outputFile}`);
+      console.log(`📁 ${categoryId}: ${tracks.length} tracks saved`);
     } catch (err) {
-      console.error(`❌ Error writing file ${outputFile}:`, err.message);
+      console.error(`❌ Error writing ${outputFile}:`, err.message);
     }
   }
 }
 
-// Generate categories.json file
-function generateCategoriesFile() {
-  const categoryList = Object.entries(categories).map(([id, data]) => ({
-    id: id,
-    name: data.name,
-    description: data.description,
-    difficulty: data.difficulty,
-    accent: data.accent
-  }));
-
-  const outputFile = path.join(categoriesDir, 'categories.json');
-  try {
-    fs.writeFileSync(outputFile, JSON.stringify(categoryList, null, 2));
-    console.log(`📁 Categories metadata saved to ${outputFile}`);
-  } catch (err) {
-    console.error(`❌ Error writing categories file:`, err.message);
-  }
-}
-
-// Main update function
 async function updateAllCategories() {
-  console.log("🔄 [SongService] Starting playlist update...", new Date().toLocaleTimeString());
-
+  console.log('🔄 [SongService] Starting playlist update...', new Date().toLocaleTimeString());
   try {
     const allData = await gatherAllCategoryData();
     writeCategoryFiles(allData);
-    generateCategoriesFile(); // Generate categories.json
-    console.log("✅ [SongService] Playlist update completed.\n");
+    console.log('✅ [SongService] Playlist update completed.\n');
   } catch (err) {
-    console.error("❌ [SongService] Update failed:", err);
+    console.error('❌ [SongService] Update failed:', err);
   }
 }
 
-// Service entry point
-function startSongGenerationService() {
-  // Run immediately on start
-  updateAllCategories();
+async function updateCategoryById(categoryId) {
+  const categories = listCategories();
+  const cat = categories.find((c) => String(c.id).toLowerCase() === String(categoryId).toLowerCase());
+  if (!cat) {
+    throw new Error(`Category "${categoryId}" not found`);
+  }
+  const tracks = await gatherCategoryData(cat);
+  if (!tracks || tracks.length === 0) {
+    throw new Error(`Category "${categoryId}" has no usable playlist or track IDs`);
+  }
+  const outputFile = path.join(outputDir, `${cat.id}.json`);
+  fs.writeFileSync(outputFile, JSON.stringify(tracks, null, 2));
+  console.log(`📁 ${cat.id}: ${tracks.length} tracks saved (manual refresh)`);
+  return tracks;
+}
 
-  // Schedule cron job (every 5 minutes)
+function startSongGenerationService() {
+  updateAllCategories();
   cron.schedule('*/5 * * * *', () => {
     updateAllCategories();
   });
 }
 
-module.exports = { startSongGenerationService };
+module.exports = {
+  startSongGenerationService,
+  updateAllCategories,
+  updateCategoryById,
+};
